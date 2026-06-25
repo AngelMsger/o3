@@ -75,30 +75,20 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
     onInsertField,
   } = props;
 
-  // Collapsed strip — design lines 281-289
-  if (collapsed) {
-    return (
-      <div className={styles.strip}>
-        <button
-          className={styles.stripBtn}
-          onClick={onToggleCollapse}
-          title="Expand fields"
-        >
-          »
-        </button>
-        <div className={styles.stripLabel}>Stream &amp; fields</div>
-      </div>
-    );
-  }
-
   // Filter fields by fieldFilter (case-insensitive substring)
   const filtered = fieldFilter
     ? fields.filter((f) => f.name.toLowerCase().includes(fieldFilter.toLowerCase()))
     : fields;
   const fieldCount = String(filtered.length);
 
-  // Expanded panel — design lines 233-280
+  // Animated collapse: the expanded panel and the collapsed strip are BOTH
+  // mounted inside a width-animating shell and crossfade. (design lines 233-289)
   return (
+    <div className={`${styles.shell} ${collapsed ? styles.shellCollapsed : styles.shellExpanded}`}>
+      <div
+        className={`${styles.panelLayer} ${collapsed ? styles.layerHidden : styles.layerShown}`}
+        aria-hidden={collapsed}
+      >
     <div className={styles.panel}>
       {/* stream selector — design lines 234-270 */}
       <div className={styles.streamSection}>
@@ -181,6 +171,25 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
             <span className={styles.fieldType}>{f.type}</span>
           </div>
         ))}
+      </div>
+    </div>
+      </div>
+
+      {/* collapsed strip layer — design lines 281-289 */}
+      <div
+        className={`${styles.stripLayer} ${collapsed ? styles.layerShown : styles.layerHidden}`}
+        aria-hidden={!collapsed}
+      >
+        <div className={styles.strip}>
+          <button
+            className={styles.stripBtn}
+            onClick={onToggleCollapse}
+            title="Expand fields"
+          >
+            »
+          </button>
+          <div className={styles.stripLabel}>Stream &amp; fields</div>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 /* TitleBar styles — design/Observe.dc.html lines 41–58 */
 
-/* line 41 — left padding clears the native macOS traffic lights (inset) */
+/* line 41 — height matches the macOS inset toolbar zone so the native traffic
+   lights are vertically centered; left padding clears them horizontally. */
 .bar {
-  height: 42px;
+  height: 52px;
   flex: none;
   display: flex;
   align-items: center;

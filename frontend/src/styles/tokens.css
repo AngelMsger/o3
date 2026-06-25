@@ -2,6 +2,22 @@
 
 :root {
   --accent: #2dd4bf;
+
+  /* Motion design system — "Balanced". Every animated surface uses these. */
+  --motion-fast: 120ms; /* micro-interactions: toggles, hovers, tab close */
+  --motion-base: 180ms; /* panels, drawers, dropdowns, popovers, modals */
+  --motion-slow: 240ms; /* full-screen surfaces: setup wizard */
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1); /* standard / enter (decelerate) */
+  --motion-ease-in: cubic-bezier(0.4, 0, 1, 1); /* exit (accelerate) */
+}
+
+/* Accessibility: honor the OS "reduce motion" setting by collapsing durations. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-slow: 0ms;
+  }
 }
 
 * {

@@ -1,8 +1,50 @@
 /* FieldsPanel — design lines 233–289 */
 
+/* Width-animating shell: holds both the panel and strip layers, animates the
+   sidebar width so the workspace reflow eases instead of snapping. */
+.shell {
+  position: relative;
+  flex: none;
+  height: 100%;
+  overflow: hidden;
+  transition: width var(--motion-base) var(--motion-ease);
+}
+.shellExpanded {
+  width: 244px;
+}
+.shellCollapsed {
+  width: 34px;
+}
+
+/* Each state is an absolutely-positioned layer that crossfades. Fixed widths
+   keep their content from reflowing while the shell width animates. */
+.panelLayer,
+.stripLayer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  transition: opacity var(--motion-base) var(--motion-ease);
+}
+.panelLayer {
+  width: 244px;
+}
+.stripLayer {
+  width: 34px;
+}
+.layerShown {
+  opacity: 1;
+  pointer-events: auto;
+}
+.layerHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Expanded panel — design line 233 */
 .panel {
-  width: 244px;
+  width: 100%;
+  height: 100%;
   flex: none;
   background: #090b0f;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -202,7 +244,8 @@
 
 /* Collapsed strip — design lines 281-289 */
 .strip {
-  width: 34px;
+  width: 100%;
+  height: 100%;
   flex: none;
   background: #090b0f;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
