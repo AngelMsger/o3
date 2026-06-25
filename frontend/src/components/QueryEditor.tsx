@@ -20,6 +20,7 @@ export interface QueryEditorProps {
   timePicker?: ReactNode;
   historyPanel?: ReactNode;
   autocomplete?: ReactNode;
+  caretHint?: string;
 }
 
 export function QueryEditor(props: QueryEditorProps): ReactElement {
@@ -39,6 +40,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     timePicker,
     historyPanel,
     autocomplete,
+    caretHint,
   } = props;
 
   /* line-number gutter — design line 163 */
@@ -156,6 +158,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
           <span><b className={styles.hintKey}>⌘↵</b> run</span>
           <span><b className={styles.hintKey}>Tab</b> accept</span>
           <span><b className={styles.hintKey}>↑↓</b> navigate</span>
+          <span style={{ color: 'var(--accent,#2dd4bf)' }}>{caretHint ?? ''}</span>
           {/* flex spacer */}
           <span style={{ flex: 1 }} />
 
