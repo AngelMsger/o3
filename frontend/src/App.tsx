@@ -28,7 +28,7 @@ function App() {
   const [selfSigned, setSelfSigned] = useState(false);
   const [accent, setAccent] = useState<string>('#2dd4bf');
   const [mcpOn, setMcpOn] = useState<boolean>(false);
-  const [conn, setConn] = useState<{ url: string; org: string; email?: string }>({
+  const [conn, setConn] = useState<{ url: string; org: string; email?: string; password?: string; token?: string }>({
     url: 'https://observe.example.internal',
     org: 'default',
     email: 'ops@example.com',

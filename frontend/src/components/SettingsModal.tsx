@@ -11,7 +11,7 @@ interface SettingsModalProps {
   density: Density;
   mcpOn: boolean;
   showHistogram: boolean;
-  conn: { url: string; org: string; email?: string };
+  conn: { url: string; org: string; email?: string; password?: string; token?: string };
   onClose: () => void;
   onTab: (t: SettingsTab) => void;
   onPickAccent: (c: string) => void;
@@ -72,7 +72,9 @@ export function SettingsModal({
   // Agent leash mode local state — design line 1235
   const [agentMode, setAgentMode] = useState<string>('observe');
 
-  // Auth tab: static default for this task (design shows 'password' as default).
+  // Auth tab: M1-static — mode is fixed at 'password' and not user-switchable in this milestone.
+  // The tabs render as visual affordances only (no onClick handler). authMode will be lifted to
+  // App.tsx state in a future milestone when the Settings connection tab becomes fully interactive.
   // Declared as useState so TypeScript does not narrow away the token/sso branches.
   const [authMode] = useState<'password' | 'token' | 'sso'>('password');
 

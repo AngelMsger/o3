@@ -3,7 +3,7 @@ import styles from './SetupWizard.module.css';
 
 interface SetupWizardProps {
   open: boolean;
-  conn: { url: string; org: string; email?: string };
+  conn: { url: string; org: string; email?: string; password?: string; token?: string };
   authTab: 'password' | 'token' | 'sso';
   tested: boolean;
   selfSigned: boolean;
@@ -148,8 +148,8 @@ export function SetupWizard({
                 <input
                   type="password"
                   className={styles.fieldInput}
-                  value=""
-                  onChange={() => {}}
+                  value={conn.password ?? ''}
+                  onChange={(e) => onField('password', e.target.value)}
                 />
               </div>
             </div>
@@ -161,8 +161,8 @@ export function SetupWizard({
               <div className={styles.fieldLabel}>Service-account token</div>
               <input
                 className={styles.fieldInput}
-                value=""
-                onChange={() => {}}
+                value={conn.token ?? ''}
+                onChange={(e) => onField('token', e.target.value)}
                 placeholder="oo_sa_…"
               />
             </div>
