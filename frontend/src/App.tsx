@@ -8,6 +8,7 @@ import { TimeRangePicker } from './components/TimeRangePicker';
 import { HistoryDropdown } from './components/HistoryDropdown';
 import { Autocomplete } from './components/Autocomplete';
 import { FieldsPanel } from './components/FieldsPanel';
+import { Histogram } from './components/Histogram';
 import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab } from './types';
@@ -149,6 +150,11 @@ function App() {
                 onFieldFilter={setFieldFilter}
                 onInsertField={() => {}}
               />
+
+              {/* center column — design line 290 */}
+              <div className={styles.centerCol}>
+                <Histogram show={showHistogram} />
+              </div>
             </div>
           </div>
         </div>

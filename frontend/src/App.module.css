@@ -44,3 +44,12 @@
   display: flex;
   position: relative;
 }
+
+/* center column — design line 290 */
+.centerCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
