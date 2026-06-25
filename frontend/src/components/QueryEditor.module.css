@@ -1,0 +1,291 @@
+/* QueryEditor styles — design/Observe.dc.html lines 93–207 */
+
+/* design line 94 — outer wrapper (query editor section) */
+.editorRow {
+  flex: none;
+  padding: 11px 12px;
+  background: linear-gradient(#0c0e13, #0a0c11);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  z-index: 30;
+}
+
+/* design line 96 — control row */
+.controlRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+/* design lines 97–100 — SQL/search segmented toggle container */
+.modeToggle {
+  flex: none;
+  display: flex;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 2px;
+}
+
+/* design lines 98–99 — mode pill base */
+.modePill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5b6371;
+  padding: 5px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  user-select: none;
+}
+
+.modePill:hover {
+  color: #aeb6c4;
+}
+
+/* design line 98 — active mode pill */
+.modeActive {
+  font-weight: 700;
+  color: #06181a;
+  background: var(--accent, #2dd4bf);
+}
+
+.modeActive:hover {
+  color: #06181a;
+}
+
+/* design lines 102–105 — histogram group */
+.histoGroup {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: #5b6371;
+}
+
+/* design line 104 — toggle button (off state) */
+.toggle {
+  width: 30px;
+  height: 16px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  background: #1c2230;
+  transition: background 0.12s;
+}
+
+/* design line 104 / line 1192 — toggle button (on state) */
+.toggleOn {
+  background: var(--accent, #2dd4bf);
+}
+
+/* design line 1193 — knob (off state) */
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #5b6371;
+  transition: left 0.12s;
+}
+
+/* design line 1193 — knob (on state) */
+.knobOn {
+  left: 16px;
+  background: #06181a;
+}
+
+/* design line 106 — vertical divider */
+.divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* design lines 107–113 — time range button wrapper */
+.timeWrap {
+  position: relative;
+}
+
+/* design line 108 — time range button */
+.timeBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 11px;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #c3cad7;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s;
+}
+
+.timeBtn:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* design lines 152–156 / line 1189 — run button */
+.runBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--accent, #2dd4bf);
+  color: #06181a;
+  box-shadow: 0 4px 14px -4px rgba(45, 212, 191, 0.6);
+  transition: opacity 0.12s;
+}
+
+.runBtn:hover {
+  opacity: 0.88;
+}
+
+/* design line 153 — spinner */
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(6, 24, 26, 0.4);
+  border-top-color: #06181a;
+  border-radius: 50%;
+  display: inline-block;
+  animation: ooPulse 0.8s linear infinite;
+}
+
+/* design line 160 — editor area outer wrapper */
+.editorWrap {
+  position: relative;
+}
+
+/* design line 161 — editor inner container */
+.editorInner {
+  position: relative;
+  background: #0e1116;
+  border: 1px solid var(--editborder, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+}
+
+/* design line 162 — line-number gutter */
+.gutter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 34px;
+  background: #0b0d12;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 19px;
+  color: #3a4150;
+}
+
+/* design line 163 — individual line number */
+.lineNo {
+  padding-right: 9px;
+}
+
+/* design line 165 — highlighted pre */
+.pre {
+  margin: 0;
+  padding: 10px 12px 10px 44px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 19px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #cfd6e4;
+  min-height: 76px;
+  pointer-events: none;
+}
+
+/* design line 166 — transparent overlaid textarea */
+.textarea {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 10px 12px 10px 44px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 19px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--accent, #2dd4bf);
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+}
+
+/* design lines 168–169 — hint line */
+.hintLine {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: #4b5362;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* design lines 170–172 — keyboard hint bold labels */
+.hintKey {
+  color: #6b7282;
+}
+
+/* design lines 175–204 — history button wrapper */
+.historyWrap {
+  position: relative;
+}
+
+/* design lines 176, 205 — hint action buttons */
+.hintBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #99a2b2;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.hintBtn:hover {
+  background: #141821;
+  color: #d7dce6;
+  border-color: var(--accent, #2dd4bf);
+}
+
+/* design line 205 — the "?" in the guide button */
+.guideQ {
+  color: var(--accent, #2dd4bf);
+  font-weight: 700;
+}
