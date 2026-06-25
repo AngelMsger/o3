@@ -30,7 +30,7 @@ const SET_TABS: [SettingsTab, string][] = [
 ];
 
 // Accent swatches — design line 1221
-const ACCENT_SWATCHES = ['#2dd4bf', '#7c83ff', '#f5a86a', '#5b9dff'];
+const ACCENT_SWATCHES = ['#2dd4bf', '#7c83ff', '#f5a86a', '#5b9dff', '#f4685f'];
 
 // Density options — design line 1226
 const DENSITY_OPTS: [Density, string][] = [
@@ -70,11 +70,11 @@ export function SettingsModal({
   // Agent leash mode local state — design line 1235
   const [agentMode, setAgentMode] = useState<string>('observe');
 
-  if (!open) return null;
-
   // Auth tab: static default for this task (design shows 'password' as default).
   // Declared as useState so TypeScript does not narrow away the token/sso branches.
   const [authMode] = useState<'password' | 'token' | 'sso'>('password');
+
+  if (!open) return null;
 
   return (
     /* Overlay backdrop — design line 381 */
@@ -231,7 +231,7 @@ export function SettingsModal({
                   {/* Credentials note — design line 449 */}
                   <div className={styles.credNote}>
                     <span className={styles.credNoteIcon}>🔒</span>
-                    <span>Credentials are stored in your OS keychain through Tauri — never written to disk in plaintext.</span>
+                    <span>Credentials are stored in your OS keychain through Wails — never written to disk in plaintext.</span>
                   </div>
 
                   {/* Action buttons — design line 454 */}

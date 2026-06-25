@@ -108,7 +108,7 @@
 }
 
 .tabActive:hover {
-  background: rgba(45, 212, 191, 0.18);
+  background: color-mix(in srgb, var(--accent, #2dd4bf) 18%, transparent);
   color: var(--accent, #2dd4bf);
 }
 
