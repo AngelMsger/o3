@@ -9,9 +9,11 @@ import { HistoryDropdown } from './components/HistoryDropdown';
 import { Autocomplete } from './components/Autocomplete';
 import { FieldsPanel } from './components/FieldsPanel';
 import { Histogram } from './components/Histogram';
-import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS } from './data/mock';
+import { ResultsHeader } from './components/ResultsHeader';
+import { ResultsTable } from './components/ResultsTable';
+import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS } from './data/mock';
 import { computeSuggestions } from './lib/format';
-import type { QueryMode, TimeTab } from './types';
+import type { QueryMode, TimeTab, Density } from './types';
 
 function App() {
   const [activeNav, setActiveNav] = useState<string>('Logs');
@@ -35,6 +37,10 @@ function App() {
   const currentWord = 'co';
   const suggestions = computeSuggestions(currentWord);
   const [timeOpen, setTimeOpen] = useState<boolean>(false);
+
+  /* ResultsTable state — task 10 */
+  const [selectedRow, setSelectedRow] = useState<string | null>(null);
+  const [density] = useState<Density>('ultra');
 
   /* FieldsPanel state — task 8 */
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -154,6 +160,20 @@ function App() {
               {/* center column — design line 290 */}
               <div className={styles.centerCol}>
                 <Histogram show={showHistogram} />
+                {/* Results header + table — task 10 */}
+                <ResultsHeader
+                  shownCount={50}
+                  totalEvents="402,170"
+                  queryMs={247}
+                />
+                <ResultsTable
+                  rows={LOGS}
+                  selectedId={selectedRow}
+                  density={density}
+                  onSelectRow={setSelectedRow}
+                  onLevelCtx={() => {}}
+                  onServiceCtx={() => {}}
+                />
               </div>
             </div>
           </div>

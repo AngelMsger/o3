@@ -1,0 +1,95 @@
+/* ResultsHeader — design lines 306–322 */
+
+/* Outer bar — design line 307 */
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 16px;
+  background: #090b0f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+}
+
+/* "Showing 1–N of total events" — design line 308 */
+.showing {
+  color: #99a2b2;
+}
+
+/* Bold count numbers — design line 308 */
+.showingNum {
+  color: #dde3ee;
+}
+
+/* Separator dots — design lines 309, 311 */
+.sep {
+  color: #3a4150;
+}
+
+/* Query ms — design line 310: var(--accent, #2dd4bf) */
+.queryMs {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent, #2dd4bf);
+}
+
+/* Scan size — design line 312 */
+.scan {
+  font-family: 'JetBrains Mono', monospace;
+  color: #6b7282;
+}
+
+/* Flex spacer — design line 313 */
+.spacer {
+  flex: 1;
+}
+
+/* Timezone — design line 314 */
+.tz {
+  font-family: 'JetBrains Mono', monospace;
+  color: #4b5362;
+  font-size: 10px;
+}
+
+/* Pagination container — design line 315 */
+.pages {
+  display: flex;
+  gap: 2px;
+}
+
+/* Prev/next arrow buttons — design lines 316, 320 */
+.pageBtn {
+  width: 24px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0e1116;
+  color: #6b7282;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Active page pill — design line 317: accent bg, dark text */
+.pageActive {
+  display: flex;
+  align-items: center;
+  padding: 0 9px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: var(--accent, #2dd4bf);
+  border-radius: 5px;
+  color: #06181a;
+  font-weight: 700;
+}
+
+/* Inactive page buttons — design lines 318, 319 */
+.pageInactive {
+  width: 24px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0e1116;
+  color: #99a2b2;
+  cursor: pointer;
+  font-family: inherit;
+}

@@ -1,0 +1,143 @@
+/* ResultsTable — design lines 324–346 */
+
+/* Column header — design line 325 */
+.colHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 16px;
+  background: #0b0d11;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #4b5362;
+}
+
+/* Column header cells */
+/* Chevron spacer — design line 326: width 14px */
+.colChevron {
+  width: 14px;
+  flex: none;
+}
+
+/* Timestamp col — design line 327: width 168px */
+.colTime {
+  width: 168px;
+  flex: none;
+}
+
+/* Level col — design line 328: width 52px */
+.colLevel {
+  width: 52px;
+  flex: none;
+}
+
+/* Service col — design line 329: width 118px */
+.colService {
+  width: 118px;
+  flex: none;
+}
+
+/* Message col — design line 330: flex 1 */
+.colMessage {
+  flex: 1;
+}
+
+/* Rows scrollable container — design line 334: oo-scroll, flex 1, overflow-y auto */
+.rows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Row wrapper — design line 336: border-bottom */
+.rowWrapper {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.035);
+}
+
+/* Row inner — design line 337: flex, align-items center, gap 10px, cursor pointer */
+/* padding and background are set inline (data-driven) */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.08s;
+}
+
+.row:hover {
+  background: #0d1017 !important;
+}
+
+/* Chevron icon — design line 338: width 14px, color #4b5362, font-size 10px, center */
+.chevron {
+  width: 14px;
+  flex: none;
+  color: #4b5362;
+  font-size: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Timestamp — design line 339: JetBrains Mono 11px, color #7c8696, no-wrap, width 168px */
+.time {
+  width: 168px;
+  flex: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #7c8696;
+  white-space: nowrap;
+}
+
+/* Level badge cell — design line 340: width 52px */
+.levelCell {
+  width: 52px;
+  flex: none;
+}
+
+/* Level badge hover — design line 340: style-hover="filter:brightness(1.35)" */
+.levelBadge:hover {
+  filter: brightness(1.35);
+}
+
+/* Service cell — design line 341: width 118px, min-width 0 */
+.serviceCell {
+  width: 118px;
+  flex: none;
+  min-width: 0;
+}
+
+/* Service text — design line 341: JetBrains Mono 11px, color #99a2b2, no-wrap, cursor pointer */
+.service {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #99a2b2;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+/* Service hover — design line 341: style-hover="background:#11141a;color:#dde3ee;text-decoration:underline;..." */
+.service:hover {
+  background: #11141a;
+  color: #dde3ee;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+/* Message — design line 342: flex 1, JetBrains Mono 11px, color #c3cad7, ellipsis */
+.message {
+  flex: 1;
+  min-width: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #c3cad7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
