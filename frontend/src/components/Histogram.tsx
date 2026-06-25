@@ -5,14 +5,12 @@ import { histogramBars, hexA } from '../lib/format';
 // X-axis labels — design script line 908
 const AXIS_LABELS = ['13:44', '13:46', '13:48', '13:50', '13:52', '13:54', '13:56', '13:58'];
 
-// Accent color — design line 916: var(--accent, #2dd4bf)
-const ACCENT = '#2dd4bf';
-
 interface HistogramProps {
   show: boolean;
+  accent: string;
 }
 
-export function Histogram({ show }: HistogramProps): ReactElement | null {
+export function Histogram({ show, accent }: HistogramProps): ReactElement | null {
   if (!show) return null;
 
   const bars = histogramBars();
@@ -39,7 +37,7 @@ export function Histogram({ show }: HistogramProps): ReactElement | null {
             title={`${Math.round(bar.h * 7323)} events`}
             style={{
               height: `${bar.h * 100}%`,
-              background: `linear-gradient(180deg, ${ACCENT}, ${hexA(ACCENT, 0.32)})`,
+              background: `linear-gradient(180deg, ${accent}, ${hexA(accent, 0.32)})`,
             }}
           />
         ))}

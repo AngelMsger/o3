@@ -13,12 +13,11 @@ const LEVEL_COLOR: Record<string, string> = {
   trace: '#b58bff',
 };
 
-const ACCENT = '#2dd4bf';
-
 interface ResultsTableProps {
   rows: LogRow[];
   selectedId: string | null;
   density: Density;
+  accent: string;
   onSelectRow: (id: string) => void;
   onLevelCtx: (field: string, value: string, e: React.MouseEvent) => void;
   onServiceCtx: (field: string, value: string, e: React.MouseEvent) => void;
@@ -28,6 +27,7 @@ export function ResultsTable({
   rows,
   selectedId,
   density,
+  accent,
   onSelectRow,
   onLevelCtx,
   onServiceCtx,
@@ -55,7 +55,7 @@ export function ResultsTable({
           const isSel = selectedId === row.id;
           const c = LEVEL_COLOR[row.level] ?? '#7c8696';
           // rowStyle — design line 1157
-          const rowBg = isSel ? hexA(ACCENT, 0.07) : 'transparent';
+          const rowBg = isSel ? hexA(accent, 0.07) : 'transparent';
           // levelStyle — design line 1158
           const levelStyle: React.CSSProperties = {
             display: 'inline-block',

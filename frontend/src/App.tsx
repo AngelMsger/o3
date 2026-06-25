@@ -179,7 +179,7 @@ function App() {
 
               {/* center column — design line 290 */}
               <div className={styles.centerCol}>
-                <Histogram show={showHistogram} />
+                <Histogram show={showHistogram} accent={accent} />
                 {/* Results header + table — task 10 */}
                 <ResultsHeader
                   shownCount={50}
@@ -190,6 +190,7 @@ function App() {
                   rows={LOGS}
                   selectedId={selectedRow}
                   density={density}
+                  accent={accent}
                   onSelectRow={(id) => setSelectedRow((prev) => (prev === id ? null : id))}
                   onLevelCtx={() => {}}
                   onServiceCtx={() => {}}
