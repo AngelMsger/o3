@@ -1,12 +1,13 @@
-import type { HistoBar } from '../types';
+import type { HistoBar, Suggestion } from '../types';
+import { KEYWORDS, FUNCS, FIELDS } from '../data/mock';
 
 // Keywords and functions mirrored from the design script (lines 694-699) for the highlight tokenizer.
-const KEYWORDS = new Set([
+const KW_SET = new Set([
   'select','from','where','and','or','not','in','like','ilike','order','by','group',
   'limit','offset','as','on','join','left','inner','having','distinct','asc','desc',
   'between','is','null','case','when','then','else','end','union','match_all'
 ]);
-const FUNCS = new Set([
+const FN_SET = new Set([
   'count','histogram','approx_count_distinct','min','max','avg','sum',
   'str_match','re_match','date_bin','to_timestamp','coalesce','lower','upper'
 ]);
@@ -55,8 +56,8 @@ export function highlight(sql: string): { txt: string; color: string }[] {
     } else if (m[3]) {
       const lw = m[3].toLowerCase();
       const rest = sql.slice(re.lastIndex).match(/^\s*\(/);
-      if (KEYWORDS.has(lw)) color = '#ff7b9c';
-      else if (FUNCS.has(lw) && rest) color = '#7dd3fc';
+      if (KW_SET.has(lw)) color = '#ff7b9c';
+      else if (FN_SET.has(lw) && rest) color = '#7dd3fc';
       else color = '#cfd6e4';
     } else if (m[5]) {
       color = '#7b8496';
@@ -73,4 +74,28 @@ export function highlight(sql: string): { txt: string; color: string }[] {
  */
 export function fmtAbs(s: string): string {
   return (s || '').slice(5, 16);
+}
+
+/**
+ * Compute autocomplete suggestions for a given word prefix.
+ * Ported from design lines 868-877.
+ * Returns up to 8 matches across keywords (K/#ff7b9c), functions (ƒ/#7dd3fc), fields (·/#a3e08c).
+ */
+export function computeSuggestions(word: string): Suggestion[] {
+  const w = word.toLowerCase();
+  if (!w) return [];
+  const out: Suggestion[] = [];
+  KEYWORDS.forEach(k => {
+    if (k.toLowerCase().startsWith(w))
+      out.push({ label: k, kind: 'keyword', tag: 'K', detail: 'keyword', color: '#ff7b9c' });
+  });
+  FUNCS.forEach(f => {
+    if (f[0].startsWith(w))
+      out.push({ label: f[0], kind: 'function', tag: 'ƒ', detail: f[1], color: '#7dd3fc' });
+  });
+  FIELDS.forEach(f => {
+    if (f.name.startsWith(w))
+      out.push({ label: f.name, kind: 'field', tag: '·', detail: f.type, color: '#a3e08c' });
+  });
+  return out.slice(0, 8);
 }

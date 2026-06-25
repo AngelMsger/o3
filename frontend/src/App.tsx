@@ -5,7 +5,10 @@ import { NavRail } from './components/NavRail';
 import { QueryTabs } from './components/QueryTabs';
 import { QueryEditor } from './components/QueryEditor';
 import { TimeRangePicker } from './components/TimeRangePicker';
-import { TABS, QUICK_RANGES } from './data/mock';
+import { HistoryDropdown } from './components/HistoryDropdown';
+import { Autocomplete } from './components/Autocomplete';
+import { TABS, QUICK_RANGES, HISTORY } from './data/mock';
+import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab } from './types';
 
 function App() {
@@ -23,7 +26,12 @@ function App() {
   const [timeRange, setTimeRange] = useState<string>('Past 15 Minutes');
   const [historyOpen, setHistoryOpen] = useState<boolean>(false);
   const [suggestOpen, setSuggestOpen] = useState<boolean>(false);
+  const [suggestIndex] = useState<number>(0);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
+
+  /* static autocomplete — derive currentWord from seeded query first line */
+  const currentWord = 'co';
+  const suggestions = computeSuggestions(currentWord);
   const [timeOpen, setTimeOpen] = useState<boolean>(false);
 
   /* TimeRangePicker state — task 6 */
@@ -33,9 +41,6 @@ function App() {
   const [absFrom, setAbsFrom] = useState<string>('');
   const [absTo, setAbsTo] = useState<string>('');
 
-  /* suppress unused-var warnings for open/close booleans that Tasks 7 will consume */
-  void historyOpen;
-  void suggestOpen;
   void guideOpen;
 
   return (
@@ -102,8 +107,24 @@ function App() {
                   }}
                 />
               }
-              historyPanel={undefined}
-              autocomplete={undefined}
+              historyPanel={
+                <HistoryDropdown
+                  open={historyOpen}
+                  items={HISTORY}
+                  onPick={(item) => { setQuery(item.q); setHistoryOpen(false); }}
+                  onClose={() => setHistoryOpen(false)}
+                />
+              }
+              autocomplete={
+                <Autocomplete
+                  open={suggestOpen}
+                  currentWord={currentWord}
+                  suggestions={suggestions}
+                  activeIndex={suggestIndex}
+                  onSelect={() => setSuggestOpen(false)}
+                  onHover={() => {}}
+                />
+              }
             />
           </div>
         </div>
