@@ -7,6 +7,7 @@ interface SetupWizardProps {
   authTab: 'password' | 'token' | 'sso';
   tested: boolean;
   selfSigned: boolean;
+  error?: string | null;
   onAuthTab: (t: 'password' | 'token' | 'sso') => void;
   onField: (key: string, value: string) => void;
   onToggleSelfSigned: () => void;
@@ -27,6 +28,7 @@ export function SetupWizard({
   authTab,
   tested,
   selfSigned,
+  error,
   onAuthTab,
   onField,
   onToggleSelfSigned,
@@ -201,6 +203,7 @@ export function SetupWizard({
               <span className={styles.testedLabel}>✓ reachable · 6 streams · v0.14.1</span>
             )}
           </div>
+          {error && <div className={styles.testError}>{error}</div>}
 
           {/* Action buttons — design lines 624–627 */}
           <div className={styles.actions}>

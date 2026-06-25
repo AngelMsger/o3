@@ -18,9 +18,6 @@
     --motion-base: 0ms;
     --motion-slow: 0ms;
   }
-  .spinner {
-    animation: none;
-  }
 }
 
 * {

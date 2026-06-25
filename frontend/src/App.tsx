@@ -138,6 +138,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [queryError, setQueryError] = useState<{ message: string; hint: string } | null>(null);
   const [configured, setConfigured] = useState<boolean>(true);
+  const [wizardError, setWizardError] = useState<string | null>(null);
 
   /* Step 3: Load connection on startup; auto-open wizard when unconfigured */
   useEffect(() => {
@@ -208,6 +209,7 @@ function App() {
 
   /* Step 8: Test and Save connection handlers */
   const handleTest = async () => {
+    setWizardError(null);
     try {
       const scheme = authTab === 'token' ? 'token' : 'basic';
       await TestConnection({
@@ -218,7 +220,7 @@ function App() {
       setTested(true);
     } catch (e: any) {
       setTested(false);
-      setQueryError({ message: e?.message ?? String(e), hint: e?.hint ?? '' });
+      setWizardError(e?.message ?? String(e));
     }
   };
 
@@ -445,11 +447,12 @@ function App() {
             authTab={authTab}
             tested={tested}
             selfSigned={selfSigned}
+            error={wizardError}
             onAuthTab={setAuthTab}
             onField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
             onToggleSelfSigned={() => setSelfSigned((v) => !v)}
             onTest={handleTest}
-            onClose={() => setSetupOpen(false)}
+            onClose={() => { setSetupOpen(false); setWizardError(null); }}
             onSave={handleSaveConnection}
           />
         )}
