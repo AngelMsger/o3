@@ -49,3 +49,19 @@
   flex-direction: column;
   min-height: 0;
 }
+
+/* Histogram animated wrapper — collapses height + fades when hidden */
+.histoWrap {
+  overflow: hidden;
+  transition: max-height var(--motion-base) var(--motion-ease), opacity var(--motion-base) var(--motion-ease);
+}
+
+.histoWrapShown {
+  max-height: 160px;
+  opacity: 1;
+}
+
+.histoWrapHidden {
+  max-height: 0;
+  opacity: 0;
+}

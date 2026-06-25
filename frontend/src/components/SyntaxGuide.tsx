@@ -4,23 +4,21 @@ import type { GuideSection } from '../types';
 import styles from './SyntaxGuide.module.css';
 
 interface SyntaxGuideProps {
-  open: boolean;
+  visible: boolean;
   sections: GuideSection[];
   onClose: () => void;
   onUse: (code: string) => void;
 }
 
 export function SyntaxGuide({
-  open,
+  visible,
   sections,
   onClose,
   onUse,
-}: SyntaxGuideProps): ReactElement | null {
-  if (!open) return null;
-
+}: SyntaxGuideProps): ReactElement {
   return (
     /* Overlay backdrop — design line 655 */
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`} onClick={onClose}>
       {/* Inner panel — design line 656, stops propagation so backdrop click doesn't close on panel */}
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
         {/* Panel header — design line 657 */}

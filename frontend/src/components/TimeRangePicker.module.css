@@ -13,7 +13,7 @@
   overflow: hidden;
   z-index: 60;
   display: flex;
-  animation: ooFade 0.1s ease;
+  animation: ooFade var(--motion-base) var(--motion-ease);
 }
 
 /* design line 115 — quick-ranges left column */

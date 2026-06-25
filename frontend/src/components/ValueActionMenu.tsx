@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import styles from './ValueActionMenu.module.css';
 
 interface ValueActionMenuProps {
-  open: boolean;
+  visible: boolean;
   field: string;
   value: string;
   x: number;
@@ -14,7 +14,7 @@ interface ValueActionMenuProps {
 }
 
 export function ValueActionMenu({
-  open,
+  visible,
   field,
   value,
   x,
@@ -22,16 +22,17 @@ export function ValueActionMenu({
   items,
   onPick,
   onClose,
-}: ValueActionMenuProps): ReactElement | null {
-  if (!open) return null;
-
+}: ValueActionMenuProps): ReactElement {
   return (
     <>
       {/* Fixed full-screen backdrop — design line 636 */}
       <div className={styles.backdrop} onClick={onClose} />
 
       {/* Positioned menu panel — design line 637 */}
-      <div className={styles.menu} style={{ left: x, top: y }}>
+      <div
+        className={`${styles.menu} ${visible ? styles.menuShown : styles.menuHidden}`}
+        style={{ left: x, top: y }}
+      >
         {/* Header — design line 638 */}
         <div className={styles.header}>
           <div className={styles.field}>{field}</div>

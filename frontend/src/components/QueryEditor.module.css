@@ -73,7 +73,7 @@
   cursor: pointer;
   position: relative;
   background: #1c2230;
-  transition: background 0.12s;
+  transition: background var(--motion-fast) var(--motion-ease);
 }
 
 /* design line 104 / line 1192 — toggle button (on state) */
@@ -90,7 +90,7 @@
   height: 12px;
   border-radius: 50%;
   background: #5b6371;
-  transition: left 0.12s;
+  transition: left var(--motion-fast) var(--motion-ease);
 }
 
 /* design line 1193 — knob (on state) */

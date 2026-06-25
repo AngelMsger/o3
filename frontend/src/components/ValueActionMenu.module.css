@@ -17,7 +17,18 @@
   box-shadow: 0 22px 54px -12px rgba(0, 0, 0, 0.85);
   z-index: 96;
   overflow: hidden;
-  animation: ooFade 0.1s ease;
+  transition: opacity var(--motion-base) var(--motion-ease), transform var(--motion-base) var(--motion-ease);
+  transform-origin: top left;
+}
+
+.menuShown {
+  opacity: 1;
+  transform: none;
+}
+
+.menuHidden {
+  opacity: 0;
+  transform: scale(0.96);
 }
 
 /* Header section — design line 638 */

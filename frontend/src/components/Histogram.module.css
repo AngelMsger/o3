@@ -62,7 +62,7 @@
   min-height: 3px;
   border-radius: 2px 2px 0 0;
   cursor: pointer;
-  transition: opacity 0.12s;
+  transition: opacity var(--motion-fast) var(--motion-ease);
 }
 
 /* X-axis labels — design script lines 921-922 */

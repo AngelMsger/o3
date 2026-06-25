@@ -7,6 +7,23 @@
   z-index: 100;
   display: flex;
   background: #070809;
+  transition: opacity var(--motion-slow) var(--motion-ease);
+}
+
+.shown {
+  opacity: 1;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.hidden .right {
+  transform: translateY(6px);
+}
+
+.shown .right {
+  transform: none;
 }
 
 /* ===== Left brand panel ===== */
@@ -148,6 +165,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
+  transition: transform var(--motion-slow) var(--motion-ease);
 }
 
 .rightInner {
@@ -293,7 +311,7 @@
   position: relative;
   flex: none;
   padding: 0;
-  transition: background 0.2s;
+  transition: background var(--motion-fast) var(--motion-ease);
 }
 
 .toggleOn {
@@ -309,7 +327,7 @@
   height: 14px;
   border-radius: 50%;
   background: #fff;
-  transition: transform 0.2s;
+  transition: transform var(--motion-fast) var(--motion-ease);
 }
 
 /* Test connection row */

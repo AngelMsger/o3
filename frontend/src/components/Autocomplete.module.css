@@ -12,7 +12,7 @@
   box-shadow: 0 20px 50px -12px rgba(0,0,0,.8);
   overflow: hidden;
   z-index: 60;
-  animation: ooFade .1s ease;
+  animation: ooFade var(--motion-base) var(--motion-ease);
 }
 
 /* header — design lines 210–212 */

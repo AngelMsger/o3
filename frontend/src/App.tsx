@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useDelayedUnmount } from './lib/useDelayedUnmount';
 import styles from './App.module.css';
 import { TitleBar } from './components/TitleBar';
 import { NavRail } from './components/NavRail';
@@ -51,8 +52,17 @@ function App() {
   const [suggestIndex] = useState<number>(0);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
 
+  /* Delayed-unmount hooks for animated overlays */
+  const settingsT = useDelayedUnmount(settingsOpen);
+  const setupT = useDelayedUnmount(setupOpen, 260);
+  const guideT = useDelayedUnmount(guideOpen);
+
   /* Value-action context menu state — task 14 */
   const [ctxMenu, setCtxMenu] = useState<{ open: boolean; field: string; value: string; x: number; y: number } | null>(null);
+  const ctxT = useDelayedUnmount(!!ctxMenu?.open, 160);
+
+  /* Histogram delayed-unmount */
+  const histoT = useDelayedUnmount(showHistogram);
 
   /* ctxItems — design lines 1173–1179, verbatim icons + labels */
   const ctxItems = [
@@ -238,7 +248,11 @@ function App() {
 
               {/* center column — design line 290 */}
               <div className={styles.centerCol}>
-                <Histogram show={showHistogram} accent={accent} />
+                {histoT.mounted && (
+                  <div className={`${styles.histoWrap} ${histoT.visible ? styles.histoWrapShown : styles.histoWrapHidden}`}>
+                    <Histogram accent={accent} />
+                  </div>
+                )}
                 {/* Results header + table — task 10 */}
                 <ResultsHeader
                   shownCount={50}
@@ -271,57 +285,65 @@ function App() {
         </div>
 
         {/* SettingsModal — task 12: absolute overlay inside .card (position:relative) */}
-        <SettingsModal
-          open={settingsOpen}
-          tab={settingsTab}
-          accent={accent}
-          density={density}
-          mcpOn={mcpOn}
-          showHistogram={showHistogram}
-          conn={conn}
-          onClose={() => setSettingsOpen(false)}
-          onTab={setSettingsTab}
-          onPickAccent={handlePickAccent}
-          onPickDensity={setDensity}
-          onToggleHisto={() => setShowHistogram((v) => !v)}
-          onToggleMcp={() => setMcpOn((v) => !v)}
-          onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
-          onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
-        />
+        {settingsT.mounted && (
+          <SettingsModal
+            visible={settingsT.visible}
+            tab={settingsTab}
+            accent={accent}
+            density={density}
+            mcpOn={mcpOn}
+            showHistogram={showHistogram}
+            conn={conn}
+            onClose={() => setSettingsOpen(false)}
+            onTab={setSettingsTab}
+            onPickAccent={handlePickAccent}
+            onPickDensity={setDensity}
+            onToggleHisto={() => setShowHistogram((v) => !v)}
+            onToggleMcp={() => setMcpOn((v) => !v)}
+            onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
+            onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
+          />
+        )}
 
         {/* SetupWizard — task 13: full-screen first-launch overlay */}
-        <SetupWizard
-          open={setupOpen}
-          conn={conn}
-          authTab={authTab}
-          tested={tested}
-          selfSigned={selfSigned}
-          onAuthTab={setAuthTab}
-          onField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
-          onToggleSelfSigned={() => setSelfSigned((v) => !v)}
-          onTest={() => setTested(true)}
-          onClose={() => setSetupOpen(false)}
-        />
+        {setupT.mounted && (
+          <SetupWizard
+            visible={setupT.visible}
+            conn={conn}
+            authTab={authTab}
+            tested={tested}
+            selfSigned={selfSigned}
+            onAuthTab={setAuthTab}
+            onField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
+            onToggleSelfSigned={() => setSelfSigned((v) => !v)}
+            onTest={() => setTested(true)}
+            onClose={() => setSetupOpen(false)}
+          />
+        )}
 
         {/* ValueActionMenu — task 14: Graylog-style value action menu */}
-        <ValueActionMenu
-          open={!!ctxMenu?.open}
-          field={ctxMenu?.field ?? ''}
-          value={ctxMenu?.value ?? ''}
-          x={ctxMenu?.x ?? 0}
-          y={ctxMenu?.y ?? 0}
-          items={ctxItems}
-          onPick={() => setCtxMenu(null)}
-          onClose={() => setCtxMenu(null)}
-        />
+        {ctxT.mounted && ctxMenu && (
+          <ValueActionMenu
+            visible={ctxT.visible}
+            field={ctxMenu.field}
+            value={ctxMenu.value}
+            x={ctxMenu.x}
+            y={ctxMenu.y}
+            items={ctxItems}
+            onPick={() => setCtxMenu((m) => (m ? { ...m, open: false } : m))}
+            onClose={() => setCtxMenu((m) => (m ? { ...m, open: false } : m))}
+          />
+        )}
 
         {/* SyntaxGuide — task 14: SQL syntax guide overlay */}
-        <SyntaxGuide
-          open={guideOpen}
-          sections={GUIDE}
-          onClose={() => setGuideOpen(false)}
-          onUse={() => setGuideOpen(false)}
-        />
+        {guideT.mounted && (
+          <SyntaxGuide
+            visible={guideT.visible}
+            sections={GUIDE}
+            onClose={() => setGuideOpen(false)}
+            onUse={() => setGuideOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

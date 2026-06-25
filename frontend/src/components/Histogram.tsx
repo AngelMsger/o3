@@ -6,13 +6,10 @@ import { histogramBars, hexA } from '../lib/format';
 const AXIS_LABELS = ['13:44', '13:46', '13:48', '13:50', '13:52', '13:54', '13:56', '13:58'];
 
 interface HistogramProps {
-  show: boolean;
   accent: string;
 }
 
-export function Histogram({ show, accent }: HistogramProps): ReactElement | null {
-  if (!show) return null;
-
+export function Histogram({ accent }: HistogramProps): ReactElement {
   const bars = histogramBars();
 
   return (

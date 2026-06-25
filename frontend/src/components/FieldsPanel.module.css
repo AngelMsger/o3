@@ -136,7 +136,7 @@
   overflow: hidden;
   z-index: 50;
   padding: 4px;
-  animation: ooFade 0.1s ease;
+  animation: ooFade var(--motion-base) var(--motion-ease);
 }
 
 .dropdownItem {

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import styles from './SetupWizard.module.css';
 
 interface SetupWizardProps {
-  open: boolean;
+  visible: boolean;
   conn: { url: string; org: string; email?: string; password?: string; token?: string };
   authTab: 'password' | 'token' | 'sso';
   tested: boolean;
@@ -21,7 +21,7 @@ const AUTH_TABS: Array<{ id: 'password' | 'token' | 'sso'; label: string }> = [
 ];
 
 export function SetupWizard({
-  open,
+  visible,
   conn,
   authTab,
   tested,
@@ -31,11 +31,9 @@ export function SetupWizard({
   onToggleSelfSigned,
   onTest,
   onClose,
-}: SetupWizardProps): ReactElement | null {
-  if (!open) return null;
-
+}: SetupWizardProps): ReactElement {
   return (
-    <div className={styles.overlay}>
+    <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
       {/* ===== Left brand panel — design line 563 ===== */}
       <div className={styles.left}>
         {/* Traffic lights — design line 564 */}

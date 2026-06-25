@@ -5,7 +5,7 @@ import { hexA } from '../lib/format';
 import styles from './SettingsModal.module.css';
 
 interface SettingsModalProps {
-  open: boolean;
+  visible: boolean;
   tab: SettingsTab;
   accent: string;
   density: Density;
@@ -53,7 +53,7 @@ const AGENT_DESC: Record<string, string> = {
 };
 
 export function SettingsModal({
-  open,
+  visible,
   tab,
   accent,
   density,
@@ -68,7 +68,7 @@ export function SettingsModal({
   onToggleMcp,
   onConnField,
   onOpenSetup,
-}: SettingsModalProps): ReactElement | null {
+}: SettingsModalProps): ReactElement {
   // Agent leash mode local state — design line 1235
   const [agentMode, setAgentMode] = useState<string>('observe');
 
@@ -78,11 +78,9 @@ export function SettingsModal({
   // Declared as useState so TypeScript does not narrow away the token/sso branches.
   const [authMode] = useState<'password' | 'token' | 'sso'>('password');
 
-  if (!open) return null;
-
   return (
     /* Overlay backdrop — design line 381 */
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`} onClick={onClose}>
       {/* Inner panel — design line 382 */}
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
 
