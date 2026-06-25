@@ -1,6 +1,6 @@
 /* FieldsPanel — design lines 233–289 */
 
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { Field, StreamInfo } from '../types';
 import styles from './FieldsPanel.module.css';
 
@@ -32,7 +32,7 @@ const TYPE_COLOR: Record<string, string> = {
   bool: '#5b9dff',
 };
 
-function glyphStyle(type: string): React.CSSProperties {
+function glyphStyle(type: string): CSSProperties {
   const color = TYPE_COLOR[type] ?? '#7c8696';
   return {
     width: '18px',
