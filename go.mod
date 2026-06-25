@@ -2,6 +2,10 @@ module github.com/angelmsger/openobserve-desktop
 
 go 1.24.0
 
+require github.com/angelmsger/openobserve-cli v0.0.0-00010101000000-000000000000
+
+replace github.com/angelmsger/openobserve-cli => ../oa-cli/src/openobserve-cli
+
 require github.com/wailsapp/wails/v2 v2.12.0
 
 require (
