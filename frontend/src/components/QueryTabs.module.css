@@ -55,6 +55,11 @@
   /* background and box-shadow set inline (data-driven from stream color) */
 }
 
+/* design lines 85-87 — tab name (static, editing deferred) */
+.name {
+  white-space: nowrap;
+}
+
 /* design line 90 — new tab button */
 .newBtn {
   align-self: center;

@@ -17,7 +17,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew }: {
 }): ReactElement {
   return (
     /* design line 78 — saved-query tabs container */
-    <div className={styles.strip}>
+    <div className={`${styles.strip} oo-scroll`}>
       {tabs.map((t): ReactElement => {
         const color = STREAM_COLORS[t.stream] ?? '#5b6371';
         const active = activeId === t.id;
@@ -36,7 +36,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew }: {
               style={{ background: color, boxShadow: `0 0 6px -1px ${color}` }}
             />
             {/* design lines 85-87 — tab name (static, editing deferred) */}
-            <span style={{ whiteSpace: 'nowrap' }}>{t.name}</span>
+            <span className={styles.name}>{t.name}</span>
           </div>
         );
       })}
