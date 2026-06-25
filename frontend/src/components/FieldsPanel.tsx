@@ -107,7 +107,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
   const filtered = fieldFilter
     ? fields.filter((f) => f.name.toLowerCase().includes(fieldFilter.toLowerCase()))
     : fields;
-  const fieldCount = `${filtered.length}/${fields.length}`;
+  const fieldCount = String(filtered.length);
 
   // Expanded panel — design lines 233-280
   return (
@@ -145,7 +145,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
             {streams.map((s) => (
               <div
                 key={s.name}
-                className={styles.dropdownItem}
+                className={`${styles.dropdownItem} ${s.name === stream ? styles.dropdownItemActive : ''}`}
                 onClick={() => onPickStream(s.name)}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
