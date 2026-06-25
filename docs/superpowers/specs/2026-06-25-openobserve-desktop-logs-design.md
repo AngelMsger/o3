@@ -118,8 +118,7 @@ App
 │  │  │  ├─ Histogram      "Event volume · 30s buckets" · seeded bar chart · peak label
 │  │  │  ├─ ResultsHeader  showing 1–N of total · query ms · scan · tz · pagination
 │  │  │  └─ ResultsTable   column header + rows (chevron, time, level badge, service, message)
-│  │  │                     └─ InlineInspector  (Split layout: JSON under the row)
-│  │  └─ DrawerInspector  (Workbench/Focus layout: right-side log-record JSON drawer)
+│  │  └─ DrawerInspector  right-side log-record JSON drawer (opens on row select)
 ├─ SettingsModal          left tabs + panels: Connection · Appearance · Agent·MCP · About
 ├─ SetupWizard            first-launch: brand panel + connect form (URL/org/auth tabs/self-signed)
 ├─ ValueActionMenu        Graylog-style context menu on field values (add filter, group by, …)
@@ -127,8 +126,8 @@ App
 ```
 
 ### Visual fidelity reference
-The decoded comp is the source of truth for exact values (kept at
-`scratchpad/Observe.dc.html` during build; not committed). Key tokens:
+The decoded comp is the source of truth for exact values, committed to the repo at
+`design/Observe.dc.html` (latest revision, layout-switcher removed). Key tokens:
 
 - Fonts: `IBM Plex Sans` (UI), `JetBrains Mono` (code/data).
 - Accent: CSS var `--accent`, default `#2dd4bf`; swatches `#2dd4bf #7c83ff #f5a86a #5b9dff`.
@@ -137,11 +136,13 @@ The decoded comp is the source of truth for exact values (kept at
   formula are taken verbatim from the comp's script block.
 - Keyframes: `ooPulse`, `ooDrawer`, `ooFade`; `.oo-scroll` custom scrollbar.
 
-### Layout modes (Appearance → defaultLayout)
-The comp supports three result-inspection layouts; M1 reproduces their visual states:
-- **workbench** / **focus** → right-side `DrawerInspector`.
-- **split** → `InlineInspector` expands beneath the selected row.
-- **density** (ultra/comfortable) adjusts row padding/line-height.
+### Inspector & density
+The earlier three-layout switcher (workbench/split/focus) was **removed** from the
+design. There is now a single result-inspection style:
+- Selecting a row opens the right-side `DrawerInspector` (`drawerOpen = !!selectedRow`).
+  There is no inline/split inspector.
+- **Row density** (ultra / comfortable) remains, configured in Appearance settings;
+  it adjusts row padding/line-height via a `dense` flag.
 
 ## 6. Local UI state (App.tsx)
 
@@ -149,9 +150,9 @@ Static, in-memory only. Representative fields:
 `activeNav`, `tabs[]` + `activeTab` + `renamingTab`, `query` + `caret`,
 `queryMode` (sql/search), `showHistogram`, `timeOpen` + `timeTab` (rel/abs) +
 `relAmount`/`relUnit`/`absFrom`/`absTo`, `historyOpen`, `suggestOpen`,
-`stream` + `streamOpen`, `fieldFilter`, `sidebarCollapsed`, `selectedRow` +
-`inlineOpen`/`drawerOpen`, `settingsOpen` + `settingsTab`, `setupOpen`,
-`guideOpen`, `ctxMenu` (open/field/value/position), `accent`, `layout`, `density`,
+`stream` + `streamOpen`, `fieldFilter`, `sidebarCollapsed`, `selectedRow`
+(drives `drawerOpen`), `settingsOpen` + `settingsTab`, `setupOpen`,
+`guideOpen`, `ctxMenu` (open/field/value/position), `accent`, `density`,
 `mcpOn`. Handlers mutate this state; none perform I/O.
 
 ## 7. Testing & verification (M1)
@@ -159,10 +160,10 @@ Static, in-memory only. Representative fields:
 Static UI, so verification is visual + structural rather than behavioral:
 - `wails dev` / `wails build` compiles and launches a frameless window rendering the
   Logs screen.
-- The screen matches the comp at the default state (workbench layout, teal accent,
-  histogram on) and each toggle/overlay (time picker, history, autocomplete, stream
-  dropdown, drawer, inline inspector, settings tabs, setup wizard, value menu,
-  syntax guide) opens to its designed visual state.
+- The screen matches the comp at the default state (teal accent, histogram on,
+  ultra density) and each toggle/overlay (time picker, history, autocomplete, stream
+  dropdown, drawer inspector, settings tabs, setup wizard, value menu, syntax guide)
+  opens to its designed visual state.
 - TypeScript compiles with no errors; components are isolated (each owns its markup +
   `*.module.css`, communicates via typed props).
 - No automated DOM tests in M1 (low value for static layout); revisit when behavior
