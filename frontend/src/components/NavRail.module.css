@@ -1,0 +1,89 @@
+/* NavRail styles — design/Observe.dc.html lines 63–72, active computed style line 1068 */
+
+/* line 64 — rail container */
+.rail {
+  width: 52px;
+  flex: none;
+  background: #08090d;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 3px;
+}
+
+/* base nav button — line 66 (common style from computed nav style line 1068) */
+.btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #5b6371;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.btn:hover {
+  background: #11141a;
+  color: #aeb6c4;
+}
+
+/* active state — design line 1068: hexA(accent,0.14) bg + accent color */
+.active {
+  background: rgba(45, 212, 191, 0.14);
+  color: var(--accent, #2dd4bf);
+}
+
+.active:hover {
+  background: rgba(45, 212, 191, 0.2);
+  color: var(--accent, #2dd4bf);
+}
+
+/* soon items — muted, non-interactive */
+.soon {
+  color: #3a4150;
+  cursor: default;
+}
+
+.soon:hover {
+  background: transparent;
+  color: #3a4150;
+}
+
+/* small dot for soon items — design line 66 inner sc-if span */
+.dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #39404d;
+}
+
+/* settings gear button — design line 69 */
+.gear {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #4b5362;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+/* style-hover from design line 69 */
+.gear:hover {
+  background: #11141a;
+  color: #aeb6c4;
+}
