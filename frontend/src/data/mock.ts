@@ -169,7 +169,7 @@ function buildLogs(): LogRow[] {
       { k: 'service_env',                   v: '"production"',                                  kind: 'str' },
       { k: 'service_name',                  v: '"' + svc + '"',                                 kind: 'str' },
       { k: 'service_version',               v: '"11.3.6"',                                      kind: 'str' },
-      { k: 'severity',                      v: '"' + level + '"',                               kind: 'str' },
+      { k: 'severity',                      v: '"' + level + '"',                               kind: 'lvl' },
     ];
     return { id: String(i), time, level, service: svc, body, ltype, trace, json };
   });

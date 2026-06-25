@@ -8,7 +8,7 @@ export interface StreamInfo { name: string; size: string; color: string; }
 export interface LogRow {
   id: string; time: string; level: string;       // INFO|WARN|ERROR|DEBUG
   service: string; body: string; ltype: string; trace: string;
-  json: { k: string; v: string; kind: 'str' | 'num' }[];
+  json: { k: string; v: string; kind: 'str' | 'num' | 'lvl' }[];
 }
 export interface HistoryItem { q: string; preview: string; stream: string; meta: string; ago: string; }
 export interface Suggestion { label: string; kind: 'keyword'|'function'|'field'; tag: string; detail: string; color: string; }

@@ -13,6 +13,7 @@ const LEVEL_COLOR: Record<string, string> = {
 };
 
 // kv kind → color — design line 927: { str: '#a3e08c', num: '#f6c177' }
+// 'lvl' uses the row-level color (resolved at render time via LEVEL_COLOR)
 const KIND_COLOR: Record<'str' | 'num', string> = {
   str: '#a3e08c',
   num: '#f6c177',
@@ -67,7 +68,7 @@ export function DrawerInspector({ row, onClose, onKvCtx }: DrawerInspectorProps)
             >
               <span className={styles.kvKey}>{kv.k}</span>
               <span className={styles.kvColon}>:</span>
-              <span style={{ color: KIND_COLOR[kv.kind], minWidth: 0, wordBreak: 'break-all' }}>
+              <span style={{ color: kv.kind === 'lvl' ? (LEVEL_COLOR[row.level] ?? '#7c8696') : KIND_COLOR[kv.kind], minWidth: 0, wordBreak: 'break-all' }}>
                 {kv.v}
               </span>
             </div>
