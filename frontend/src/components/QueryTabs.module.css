@@ -1,0 +1,79 @@
+/* QueryTabs styles — design/Observe.dc.html lines 77–91, computed styles lines 1083–1084 */
+
+/* design line 78 — tab strip container */
+.strip {
+  height: 34px;
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  padding: 0 10px;
+  background: #090b0f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* design line 80 — individual tab base style (computed tabStyle line 1084) */
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  height: 34px;
+  font-size: 11.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: none;
+  border-bottom: 2px solid transparent;
+  color: #7c8696;
+  background: transparent;
+  transition: color 0.12s;
+}
+
+.tab:hover {
+  color: #aeb6c4;
+}
+
+/* active state — computed tabStyle line 1084 */
+.active {
+  border-bottom-color: var(--accent, #2dd4bf);
+  color: #e6eaf2;
+  background: #0c0e13;
+}
+
+.active:hover {
+  color: #e6eaf2;
+}
+
+/* design line 81 — stream dot base (computed dotStyle line 1083) */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  /* background and box-shadow set inline (data-driven from stream color) */
+}
+
+/* design line 90 — new tab button */
+.newBtn {
+  align-self: center;
+  margin-left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #5b6371;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  flex: none;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+/* style-hover from design line 90 */
+.newBtn:hover {
+  color: #d7dce6;
+  border-color: rgba(255, 255, 255, 0.3);
+}
