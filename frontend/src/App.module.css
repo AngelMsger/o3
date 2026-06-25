@@ -36,3 +36,11 @@
   flex-direction: column;
   background: #0a0c11;
 }
+
+/* workspace — design line ~230 */
+.workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}

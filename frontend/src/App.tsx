@@ -7,7 +7,8 @@ import { QueryEditor } from './components/QueryEditor';
 import { TimeRangePicker } from './components/TimeRangePicker';
 import { HistoryDropdown } from './components/HistoryDropdown';
 import { Autocomplete } from './components/Autocomplete';
-import { TABS, QUICK_RANGES, HISTORY } from './data/mock';
+import { FieldsPanel } from './components/FieldsPanel';
+import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab } from './types';
 
@@ -33,6 +34,12 @@ function App() {
   const currentWord = 'co';
   const suggestions = computeSuggestions(currentWord);
   const [timeOpen, setTimeOpen] = useState<boolean>(false);
+
+  /* FieldsPanel state — task 8 */
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [stream, setStream] = useState<string>('demo_logs');
+  const [streamOpen, setStreamOpen] = useState<boolean>(false);
+  const [fieldFilter, setFieldFilter] = useState<string>('');
 
   /* TimeRangePicker state — task 6 */
   const [timeTab, setTimeTab] = useState<TimeTab>('relative');
@@ -126,6 +133,23 @@ function App() {
                 />
               }
             />
+
+            {/* workspace — design line ~230 */}
+            <div className={styles.workspace}>
+              <FieldsPanel
+                collapsed={sidebarCollapsed}
+                stream={stream}
+                streamOpen={streamOpen}
+                streams={STREAMS}
+                fields={FIELDS}
+                fieldFilter={fieldFilter}
+                onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+                onToggleStream={() => setStreamOpen((v) => !v)}
+                onPickStream={(name) => { setStream(name); setStreamOpen(false); }}
+                onFieldFilter={setFieldFilter}
+                onInsertField={() => {}}
+              />
+            </div>
           </div>
         </div>
       </div>
