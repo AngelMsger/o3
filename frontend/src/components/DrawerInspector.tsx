@@ -21,11 +21,13 @@ const KIND_COLOR: Record<'str' | 'num', string> = {
 
 interface DrawerInspectorProps {
   row: LogRow;
+  /** drives the open/close transition (width + slide + fade) */
+  visible: boolean;
   onClose: () => void;
   onKvCtx: (field: string, value: string, e: React.MouseEvent) => void;
 }
 
-export function DrawerInspector({ row, onClose, onKvCtx }: DrawerInspectorProps): ReactElement {
+export function DrawerInspector({ row, visible, onClose, onKvCtx }: DrawerInspectorProps): ReactElement {
   // drawerLevelStyle — design line 1168
   const dc = LEVEL_COLOR[row.level] ?? '#7c8696';
   const levelStyle: React.CSSProperties = {
@@ -42,38 +44,42 @@ export function DrawerInspector({ row, onClose, onKvCtx }: DrawerInspectorProps)
   };
 
   return (
-    /* drawer — design lines 351–373 */
-    <div className={styles.drawer}>
-      {/* header — design line 352 */}
-      <div className={styles.header}>
-        <span style={levelStyle}>{row.level}</span>
-        <span className={styles.title}>Log record</span>
-        <span className={styles.spacer} />
-        <button className={styles.copyBtn}>⧉ copy</button>
-        <button className={styles.closeBtn} onClick={onClose}>✕</button>
-      </div>
+    /* drawer — design lines 351–373.
+       Outer wrapper animates width (eases the workspace reflow); inner holds the
+       fixed-width content and slides/fades. Driven by `visible`. */
+    <div className={`${styles.drawer} ${visible ? styles.open : styles.closed}`}>
+      <div className={styles.inner}>
+        {/* header — design line 352 */}
+        <div className={styles.header}>
+          <span style={levelStyle}>{row.level}</span>
+          <span className={styles.title}>Log record</span>
+          <span className={styles.spacer} />
+          <button className={styles.copyBtn}>⧉ copy</button>
+          <button className={styles.closeBtn} onClick={onClose}>✕</button>
+        </div>
 
-      {/* timestamp — design line 359 */}
-      <div className={styles.timestamp}>{row.time} · Asia/Shanghai</div>
+        {/* timestamp — design line 359 */}
+        <div className={styles.timestamp}>{row.time} · Asia/Shanghai</div>
 
-      {/* scrollable kv body — design line 360: oo-scroll */}
-      <div className={`oo-scroll ${styles.body}`}>
-        <div className={styles.json}>
-          <span className={styles.brace}>{'{'}</span>
-          {row.json.map((kv) => (
-            <div
-              key={kv.k}
-              className={styles.kvRow}
-              onClick={(e) => onKvCtx(kv.k, kv.v, e)}
-            >
-              <span className={styles.kvKey}>{kv.k}</span>
-              <span className={styles.kvColon}>:</span>
-              <span style={{ color: kv.kind === 'lvl' ? (LEVEL_COLOR[row.level] ?? '#7c8696') : KIND_COLOR[kv.kind], minWidth: 0, wordBreak: 'break-all' }}>
-                {kv.v}
-              </span>
-            </div>
-          ))}
-          <span className={styles.brace}>{'}'}</span>
+        {/* scrollable kv body — design line 360: oo-scroll */}
+        <div className={`oo-scroll ${styles.body}`}>
+          <div className={styles.json}>
+            <span className={styles.brace}>{'{'}</span>
+            {row.json.map((kv) => (
+              <div
+                key={kv.k}
+                className={styles.kvRow}
+                onClick={(e) => onKvCtx(kv.k, kv.v, e)}
+              >
+                <span className={styles.kvKey}>{kv.k}</span>
+                <span className={styles.kvColon}>:</span>
+                <span style={{ color: kv.kind === 'lvl' ? (LEVEL_COLOR[row.level] ?? '#7c8696') : KIND_COLOR[kv.kind], minWidth: 0, wordBreak: 'break-all' }}>
+                  {kv.v}
+                </span>
+              </div>
+            ))}
+            <span className={styles.brace}>{'}'}</span>
+          </div>
         </div>
       </div>
     </div>

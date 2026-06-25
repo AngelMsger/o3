@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './App.module.css';
 import { TitleBar } from './components/TitleBar';
 import { NavRail } from './components/NavRail';
@@ -78,6 +78,22 @@ function App() {
   /* ResultsTable state — task 10 */
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
   const [density, setDensity] = useState<Density>('ultra');
+
+  /* DrawerInspector open/close animation: keep the drawer mounted through the
+     close transition (delayed unmount), and flip `drawerVisible` on the next
+     frame so the open transition runs from the closed state. */
+  const [drawerRowId, setDrawerRowId] = useState<string | null>(null);
+  const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
+  useEffect(() => {
+    if (selectedRow) {
+      setDrawerRowId(selectedRow);
+      const raf = requestAnimationFrame(() => setDrawerVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setDrawerVisible(false);
+    const t = setTimeout(() => setDrawerRowId(null), 200);
+    return () => clearTimeout(t);
+  }, [selectedRow]);
 
   /* FieldsPanel state — task 8 */
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -220,10 +236,12 @@ function App() {
                 />
               </div>
 
-              {/* DrawerInspector — task 11: right column, shown when a row is selected */}
-              {selectedRow && (
+              {/* DrawerInspector — task 11: right column; stays mounted through the
+                  close transition via drawerRowId (see delayed-unmount effect). */}
+              {drawerRowId && (
                 <DrawerInspector
-                  row={LOGS.find((r) => r.id === selectedRow)!}
+                  row={LOGS.find((r) => r.id === drawerRowId)!}
+                  visible={drawerVisible}
                   onClose={() => setSelectedRow(null)}
                   onKvCtx={openCtx}
                 />

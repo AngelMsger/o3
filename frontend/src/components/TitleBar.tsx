@@ -1,14 +1,11 @@
-/* TitleBar — design/Observe.dc.html lines 41–58 */
+/* TitleBar — design/Observe.dc.html lines 41–58.
+   Native macOS traffic lights are provided by the OS (mac.TitleBarHiddenInset);
+   the bar is left-padded to clear them, and the bar is the window drag region. */
 import styles from './TitleBar.module.css';
 
 export function TitleBar() {
   return (
     <div className={`${styles.bar} oo-drag`}>
-      <div className={styles.lights}>
-        <span className={styles.red} />
-        <span className={styles.yellow} />
-        <span className={styles.green} />
-      </div>
       <div className={styles.brand}>
         <span className={`${styles.logo} oo-no-drag`}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">

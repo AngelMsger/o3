@@ -18,12 +18,18 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "o3",
-		Width:     1280,
-		Height:    832,
-		Frameless: true,
+		Title:    "o3",
+		Width:    1280,
+		Height:   832,
+		MinWidth: 920,
+		// Native macOS chrome: real traffic lights, inset over full-size content,
+		// rounded window corners (no frameless black border). The title bar is made
+		// draggable via the CSS property below (see .oo-drag in tokens.css).
+		CSSDragProperty: "--wails-draggable",
+		CSSDragValue:    "drag",
 		Mac: &mac.Options{
 			TitleBar:             mac.TitleBarHiddenInset(),
+			Appearance:           mac.NSAppearanceNameDarkAqua,
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 		},

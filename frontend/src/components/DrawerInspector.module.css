@@ -1,15 +1,39 @@
 /* DrawerInspector — design lines 349–377 */
 
-/* Outer drawer — design line 351 */
+/* Outer wrapper — animates width so the workspace reflow eases instead of snapping. */
 .drawer {
+  flex: none;
+  overflow: hidden;
+  align-self: stretch;
+  transition: width 0.18s ease;
+}
+.open {
   width: 432px;
+}
+.closed {
+  width: 0;
+}
+
+/* Inner — fixed-width content (so it doesn't reflow while the wrapper width
+   animates); slides + fades on open/close. Design line 351 visuals live here. */
+.inner {
+  width: 432px;
+  height: 100%;
   flex: none;
   background: #0b0e13;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   min-height: 0;
-  animation: ooDrawer 0.16s ease;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.open .inner {
+  opacity: 1;
+  transform: translateX(0);
+}
+.closed .inner {
+  opacity: 0;
+  transform: translateX(14px);
 }
 
 /* Header row — design line 352 */
