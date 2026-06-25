@@ -112,7 +112,7 @@
   margin-bottom: 2px;
   background: transparent;
   color: #99a2b2;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .tab:hover {
@@ -270,7 +270,7 @@
   font-family: inherit;
   background: transparent;
   color: #8b93a3;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .authTab:hover {
@@ -456,7 +456,7 @@
   font-family: inherit;
   background: transparent;
   color: #8b93a3;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .densityTab:hover {
@@ -647,7 +647,7 @@
   font-family: inherit;
   background: transparent;
   color: #8b93a3;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .agentTab:hover {

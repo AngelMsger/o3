@@ -126,7 +126,7 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.12s;
+  transition: border-color var(--motion-fast) var(--motion-ease);
 }
 
 .timeBtn:hover {
@@ -148,7 +148,7 @@
   background: var(--accent, #2dd4bf);
   color: #06181a;
   box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--accent, #2dd4bf) 60%, transparent);
-  transition: opacity 0.12s;
+  transition: opacity var(--motion-fast) var(--motion-ease);
 }
 
 .runBtn:hover {
@@ -275,7 +275,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease), border-color var(--motion-fast) var(--motion-ease);
 }
 
 .hintBtn:hover {

@@ -26,7 +26,7 @@
   background: transparent;
   color: #5b6371;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .btn:hover {
@@ -79,7 +79,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 /* style-hover from design line 69 */

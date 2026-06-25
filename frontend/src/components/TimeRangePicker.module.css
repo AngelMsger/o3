@@ -43,7 +43,7 @@
   padding: 6px 8px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .quickItem:hover {
@@ -80,7 +80,7 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
   font-family: inherit;
 }
 
@@ -136,7 +136,7 @@
   outline: none;
   text-align: center;
   box-sizing: border-box;
-  transition: border-color 0.12s;
+  transition: border-color var(--motion-fast) var(--motion-ease);
 }
 
 .amountInput:focus {
@@ -165,7 +165,7 @@
   padding: 6px 4px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
   font-family: inherit;
   white-space: nowrap;
 }
@@ -199,7 +199,7 @@
   outline: none;
   box-sizing: border-box;
   margin-bottom: 11px;
-  transition: border-color 0.12s;
+  transition: border-color var(--motion-fast) var(--motion-ease);
 }
 
 /* design line 143 — To input (smaller bottom gap before hint) */
@@ -231,7 +231,7 @@
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: opacity 0.12s;
+  transition: opacity var(--motion-fast) var(--motion-ease);
 }
 
 .applyBtn:hover {

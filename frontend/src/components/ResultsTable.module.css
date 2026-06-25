@@ -65,7 +65,7 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  transition: background 0.08s;
+  transition: background var(--motion-fast) var(--motion-ease);
 }
 
 .row:hover {
