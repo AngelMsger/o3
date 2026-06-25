@@ -19,6 +19,7 @@ interface SettingsModalProps {
   onToggleHisto: () => void;
   onToggleMcp: () => void;
   onConnField: (key: string, value: string) => void;
+  onOpenSetup?: () => void;
 }
 
 // Left tab list — design line 1210
@@ -66,6 +67,7 @@ export function SettingsModal({
   onToggleHisto,
   onToggleMcp,
   onConnField,
+  onOpenSetup,
 }: SettingsModalProps): ReactElement | null {
   // Agent leash mode local state — design line 1235
   const [agentMode, setAgentMode] = useState<string>('observe');
@@ -237,7 +239,7 @@ export function SettingsModal({
                   {/* Action buttons — design line 454 */}
                   <div className={styles.actions}>
                     <button className={styles.btnPrimary}>Test &amp; save</button>
-                    <button className={styles.btnSecondary}>Re-run setup wizard…</button>
+                    <button className={styles.btnSecondary} onClick={onOpenSetup}>Re-run setup wizard…</button>
                   </div>
                 </div>
               )}

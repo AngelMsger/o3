@@ -1,0 +1,405 @@
+/* SetupWizard.module.css — full-screen first-launch overlay */
+
+/* ===== Overlay shell ===== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  background: #070809;
+}
+
+/* ===== Left brand panel ===== */
+.left {
+  width: 38%;
+  max-width: 400px;
+  flex: none;
+  background: linear-gradient(165deg, #0e2320 0%, #08120f 45%, #070809 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 30px 34px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Traffic lights */
+.trafficLights {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 44px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dotRed {
+  background: #ff5f57;
+}
+
+.dotYellow {
+  background: #febc2e;
+}
+
+.dotGreen {
+  background: #28c840;
+}
+
+/* Logo icon */
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--accent, #2dd4bf);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 26px -4px var(--accent, #2dd4bf);
+  margin-bottom: 22px;
+}
+
+/* Brand heading */
+.welcomeTitle {
+  font-size: 26px;
+  font-weight: 700;
+  color: #f0f3f8;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.welcomeTagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent, #2dd4bf);
+  margin-bottom: 14px;
+}
+
+.welcomeDesc {
+  font-size: 13px;
+  color: #8b9a96;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* Steps list */
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stepRow {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+}
+
+.stepNum {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.stepNumActive {
+  background: var(--accent, #2dd4bf);
+  color: #06181a;
+}
+
+.stepNumInactive {
+  background: #14181f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #6b7282;
+}
+
+.stepLabelActive {
+  font-size: 13px;
+  color: #dde3ee;
+}
+
+.stepLabelInactive {
+  font-size: 13px;
+  color: #6b7282;
+}
+
+/* Spacer */
+.spacer {
+  flex: 1;
+}
+
+/* Footer */
+.leftFooter {
+  font-size: 11px;
+  color: #4b5b57;
+}
+
+/* ===== Right pane ===== */
+.right {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.rightInner {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* Heading */
+.rightTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #e6eaf2;
+  margin-bottom: 6px;
+}
+
+.rightSub {
+  font-size: 13px;
+  color: #6b7282;
+  margin-bottom: 24px;
+}
+
+/* Field groups */
+.fieldWrap {
+  margin-bottom: 15px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #5b6371;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.fieldInput {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #dde3ee;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.fieldInput:focus {
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+/* Auth segmented tabs */
+.authSeg {
+  display: flex;
+  gap: 3px;
+  background: #0b0d12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.authTab {
+  flex: 1;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7282;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.authTab:hover {
+  color: #aeb6c4;
+}
+
+.authTabActive {
+  background: var(--accent, #2dd4bf);
+  color: #06181a;
+  font-weight: 600;
+}
+
+/* Email + Password side by side */
+.row2 {
+  display: flex;
+  gap: 11px;
+  margin-bottom: 15px;
+}
+
+.row2 > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* SSO warning box */
+.ssoWarn {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  background: rgba(245, 179, 64, 0.07);
+  border: 1px solid rgba(245, 179, 64, 0.22);
+  border-radius: 9px;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+}
+
+.ssoWarnIcon {
+  color: #f5b340;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.ssoWarnText {
+  font-size: 12.5px;
+  color: #c8b083;
+  line-height: 1.55;
+}
+
+/* Self-signed toggle row */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 22px;
+}
+
+.toggleLabel {
+  font-size: 12.5px;
+  color: #aeb6c4;
+}
+
+.toggle {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #1e2530;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  position: relative;
+  flex: none;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.toggleOn {
+  background: var(--accent, #2dd4bf);
+  border-color: transparent;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.knobOn {
+  transform: translateX(16px);
+}
+
+/* Test connection row */
+.testRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.testBtn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 9px;
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--accent, #2dd4bf);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.testBtn:hover {
+  background: rgba(45, 212, 191, 0.18);
+}
+
+.testedLabel {
+  font-size: 12px;
+  color: #34e0a1;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 11px;
+}
+
+.btnPrimary {
+  flex: 1;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent, #2dd4bf);
+  color: #06181a;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.88;
+}
+
+.btnSkip {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #8b93a3;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btnSkip:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #aeb6c4;
+}
+
+/* Keychain note */
+.keychainNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 11px;
+  color: #4b5362;
+}
+
+.keychainIcon {
+  color: var(--accent, #2dd4bf);
+}

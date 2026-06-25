@@ -13,6 +13,7 @@ import { ResultsHeader } from './components/ResultsHeader';
 import { ResultsTable } from './components/ResultsTable';
 import { DrawerInspector } from './components/DrawerInspector';
 import { SettingsModal } from './components/SettingsModal';
+import { SetupWizard } from './components/SetupWizard';
 import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
@@ -21,6 +22,10 @@ function App() {
   const [activeNav, setActiveNav] = useState<string>('Logs');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<'password' | 'token' | 'sso'>('password');
+  const [tested, setTested] = useState(false);
+  const [selfSigned, setSelfSigned] = useState(false);
   const [accent, setAccent] = useState<string>('#2dd4bf');
   const [mcpOn, setMcpOn] = useState<boolean>(false);
   const [conn, setConn] = useState<{ url: string; org: string; email?: string }>({
@@ -219,6 +224,21 @@ function App() {
           onToggleHisto={() => setShowHistogram((v) => !v)}
           onToggleMcp={() => setMcpOn((v) => !v)}
           onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
+          onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
+        />
+
+        {/* SetupWizard — task 13: full-screen first-launch overlay */}
+        <SetupWizard
+          open={setupOpen}
+          conn={conn}
+          authTab={authTab}
+          tested={tested}
+          selfSigned={selfSigned}
+          onAuthTab={setAuthTab}
+          onField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
+          onToggleSelfSigned={() => setSelfSigned((v) => !v)}
+          onTest={() => setTested(true)}
+          onClose={() => setSetupOpen(false)}
         />
       </div>
     </div>
