@@ -11,6 +11,7 @@ import { FieldsPanel } from './components/FieldsPanel';
 import { Histogram } from './components/Histogram';
 import { ResultsHeader } from './components/ResultsHeader';
 import { ResultsTable } from './components/ResultsTable';
+import { DrawerInspector } from './components/DrawerInspector';
 import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density } from './types';
@@ -175,6 +176,15 @@ function App() {
                   onServiceCtx={() => {}}
                 />
               </div>
+
+              {/* DrawerInspector — task 11: right column, shown when a row is selected */}
+              {selectedRow && (
+                <DrawerInspector
+                  row={LOGS.find((r) => r.id === selectedRow)!}
+                  onClose={() => setSelectedRow(null)}
+                  onKvCtx={() => {}}
+                />
+              )}
             </div>
           </div>
         </div>
