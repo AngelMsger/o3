@@ -17,6 +17,8 @@ export interface QueryEditorProps {
   onToggleHistory: () => void;
   onToggleGuide: () => void;
   onQueryChange: (s: string) => void;
+  onEditorFocus?: () => void;
+  onEditorBlur?: () => void;
   timePicker?: ReactNode;
   historyPanel?: ReactNode;
   autocomplete?: ReactNode;
@@ -37,6 +39,8 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     onToggleHistory,
     onToggleGuide,
     onQueryChange,
+    onEditorFocus,
+    onEditorBlur,
     timePicker,
     historyPanel,
     autocomplete,
@@ -145,6 +149,8 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             className={styles.textarea}
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
+            onFocus={onEditorFocus}
+            onBlur={onEditorBlur}
             spellCheck={false}
             wrap="soft"
           />

@@ -43,6 +43,11 @@
   cursor: pointer;
 }
 
+/* active row — design line 216: hexA(accent,0.10) */
+.rowActive {
+  background: color-mix(in srgb, var(--accent, #2dd4bf) 10%, transparent);
+}
+
 /* kind badge — design line 217 */
 .badge {
   width: 18px;

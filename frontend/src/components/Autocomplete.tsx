@@ -34,8 +34,7 @@ export function Autocomplete({
         {suggestions.map((s, i) => (
           <div
             key={i}
-            className={styles.row}
-            style={i === activeIndex ? { background: hexA('#2dd4bf', 0.1) } : undefined}
+            className={`${styles.row}${i === activeIndex ? ` ${styles.rowActive}` : ''}`}
             onMouseDown={(e) => { e.preventDefault(); onSelect(s); }}
             onMouseEnter={() => onHover(i)}
           >

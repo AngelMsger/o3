@@ -147,7 +147,7 @@
   cursor: pointer;
   background: var(--accent, #2dd4bf);
   color: #06181a;
-  box-shadow: 0 4px 14px -4px rgba(45, 212, 191, 0.6);
+  box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--accent, #2dd4bf) 60%, transparent);
   transition: opacity 0.12s;
 }
 

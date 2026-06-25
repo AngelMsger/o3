@@ -36,12 +36,12 @@
 
 /* active state — design line 1068: hexA(accent,0.14) bg + accent color */
 .active {
-  background: rgba(45, 212, 191, 0.14);
+  background: color-mix(in srgb, var(--accent, #2dd4bf) 14%, transparent);
   color: var(--accent, #2dd4bf);
 }
 
 .active:hover {
-  background: rgba(45, 212, 191, 0.2);
+  background: color-mix(in srgb, var(--accent, #2dd4bf) 20%, transparent);
   color: var(--accent, #2dd4bf);
 }
 

@@ -137,6 +137,8 @@ function App() {
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
               onToggleGuide={() => setGuideOpen((v) => !v)}
+              onEditorFocus={() => setSuggestOpen(true)}
+              onEditorBlur={() => setSuggestOpen(false)}
               timePicker={
                 <TimeRangePicker
                   open={timeOpen}

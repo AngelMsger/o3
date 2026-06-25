@@ -90,7 +90,7 @@
 
 /* design lines 1123–1124 — active tab: teal-tinted (hexA(accent,0.16) + accent) */
 .tabActive {
-  background: rgba(45, 212, 191, 0.16);
+  background: color-mix(in srgb, var(--accent, #2dd4bf) 16%, transparent);
   color: var(--accent, #2dd4bf);
   font-weight: 600;
 }
@@ -176,7 +176,7 @@
 
 /* design line 1129 — active unit button: hexA(accent,0.18) + accent */
 .unitActive {
-  background: rgba(45, 212, 191, 0.18);
+  background: color-mix(in srgb, var(--accent, #2dd4bf) 18%, transparent);
   color: var(--accent, #2dd4bf);
   font-weight: 600;
 }

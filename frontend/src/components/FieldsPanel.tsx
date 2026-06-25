@@ -2,20 +2,8 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import type { Field, StreamInfo } from '../types';
+import { hexA } from '../lib/format';
 import styles from './FieldsPanel.module.css';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Convert a 6-digit hex colour to rgba(r,g,b,a). */
-function hexA(hex: string, a: number): string {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${a})`;
-}
 
 // Field glyph/color mapping — design script lines 1140-1146
 const TYPE_GLYPH: Record<string, string> = {
