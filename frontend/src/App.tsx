@@ -170,7 +170,7 @@ function App() {
                   rows={LOGS}
                   selectedId={selectedRow}
                   density={density}
-                  onSelectRow={setSelectedRow}
+                  onSelectRow={(id) => setSelectedRow((prev) => (prev === id ? null : id))}
                   onLevelCtx={() => {}}
                   onServiceCtx={() => {}}
                 />

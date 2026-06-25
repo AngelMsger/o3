@@ -93,7 +93,7 @@ export function ResultsTable({
                     className={styles.levelBadge}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onLevelCtx('level', row.level, e);
+                      onLevelCtx('severity', row.level, e);
                     }}
                   >
                     {row.level}
@@ -106,7 +106,7 @@ export function ResultsTable({
                     className={styles.service}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onServiceCtx('service', row.service, e);
+                      onServiceCtx('service_name', row.service, e);
                     }}
                   >
                     {row.service}
