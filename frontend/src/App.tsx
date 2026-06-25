@@ -12,13 +12,22 @@ import { Histogram } from './components/Histogram';
 import { ResultsHeader } from './components/ResultsHeader';
 import { ResultsTable } from './components/ResultsTable';
 import { DrawerInspector } from './components/DrawerInspector';
+import { SettingsModal } from './components/SettingsModal';
 import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS } from './data/mock';
 import { computeSuggestions } from './lib/format';
-import type { QueryMode, TimeTab, Density } from './types';
+import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
 
 function App() {
   const [activeNav, setActiveNav] = useState<string>('Logs');
-  const [, setSettingsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
+  const [accent, setAccent] = useState<string>('#2dd4bf');
+  const [mcpOn, setMcpOn] = useState<boolean>(false);
+  const [conn, setConn] = useState<{ url: string; org: string; email?: string }>({
+    url: 'https://observe.example.internal',
+    org: 'default',
+    email: 'ops@example.com',
+  });
   const [tabs] = useState(TABS);
   const [activeTab, setActiveTab] = useState<string>(TABS[0].id);
 
@@ -41,7 +50,7 @@ function App() {
 
   /* ResultsTable state — task 10 */
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
-  const [density] = useState<Density>('ultra');
+  const [density, setDensity] = useState<Density>('ultra');
 
   /* FieldsPanel state — task 8 */
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -57,6 +66,11 @@ function App() {
   const [absTo, setAbsTo] = useState<string>('');
 
   void guideOpen;
+
+  const handlePickAccent = (c: string) => {
+    setAccent(c);
+    document.documentElement.style.setProperty('--accent', c);
+  };
 
   return (
     <div className={styles.shell}>
@@ -188,6 +202,24 @@ function App() {
             </div>
           </div>
         </div>
+
+        {/* SettingsModal — task 12: absolute overlay inside .card (position:relative) */}
+        <SettingsModal
+          open={settingsOpen}
+          tab={settingsTab}
+          accent={accent}
+          density={density}
+          mcpOn={mcpOn}
+          showHistogram={showHistogram}
+          conn={conn}
+          onClose={() => setSettingsOpen(false)}
+          onTab={setSettingsTab}
+          onPickAccent={handlePickAccent}
+          onPickDensity={setDensity}
+          onToggleHisto={() => setShowHistogram((v) => !v)}
+          onToggleMcp={() => setMcpOn((v) => !v)}
+          onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
+        />
       </div>
     </div>
   );

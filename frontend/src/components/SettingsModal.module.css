@@ -1,0 +1,740 @@
+/* SettingsModal — design/Observe.dc.html lines 379–559 */
+
+/* Overlay backdrop — design line 381 */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 5, 7, 0.62);
+  backdrop-filter: blur(3px);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 38px;
+}
+
+/* Inner panel — design line 382 */
+.panel {
+  width: 800px;
+  max-width: 100%;
+  height: 600px;
+  max-height: 100%;
+  background: #0c0f15;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ooFade 0.14s ease;
+}
+
+/* Header row — design line 383 */
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.headerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6eaf2;
+}
+
+.headerSpacer {
+  flex: 1;
+}
+
+.closeBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0e1116;
+  color: #99a2b2;
+  cursor: pointer;
+}
+
+/* Body flex row — design line 389 */
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* Left tab list — design line 390 */
+.tabList {
+  width: 180px;
+  flex: none;
+  background: #090b0f;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Tab button base — design line 1213 */
+.tab {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  margin-bottom: 2px;
+  background: transparent;
+  color: #99a2b2;
+  transition: background 0.1s, color 0.1s;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #dde3ee;
+}
+
+.tabActive {
+  font-weight: 600;
+  color: var(--accent, #2dd4bf);
+  background: rgba(45, 212, 191, 0.14);
+}
+
+.tabActive:hover {
+  background: rgba(45, 212, 191, 0.18);
+  color: var(--accent, #2dd4bf);
+}
+
+/* Scrollable right content — design line 395 */
+.scrollBody {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.content {
+  padding: 26px 30px;
+}
+
+/* Shared panel heading */
+.panelTitle {
+  font-size: 19px;
+  font-weight: 600;
+  color: #e6eaf2;
+  margin-bottom: 5px;
+}
+
+.panelSub {
+  font-size: 13px;
+  color: #6b7282;
+  margin-bottom: 22px;
+  line-height: 1.55;
+}
+
+/* Status card — design line 404 */
+.statusCard {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+
+.statusDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #34e0a1;
+  box-shadow: 0 0 10px #34e0a1;
+  flex: none;
+}
+
+.statusUrl {
+  font-size: 13px;
+  color: #dde3ee;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusMeta {
+  font-size: 11px;
+  color: #6b7282;
+  margin-top: 3px;
+}
+
+.testBtn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--accent, #2dd4bf);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+/* Form card — design line 413 */
+.formCard {
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #5b6371;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.fieldWrap {
+  margin-bottom: 16px;
+}
+
+.fieldInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #dde3ee;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.fieldInput:focus {
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+/* Auth tabs segmented — design line 424 */
+.authSeg {
+  display: flex;
+  gap: 3px;
+  background: #0b0d12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 14px;
+}
+
+.authTab {
+  flex: 1;
+  text-align: center;
+  padding: 7px 4px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  background: transparent;
+  color: #8b93a3;
+  transition: background 0.1s, color 0.1s;
+}
+
+.authTab:hover {
+  color: #dde3ee;
+}
+
+.authTabActive {
+  background: rgba(45, 212, 191, 0.18);
+  color: var(--accent, #2dd4bf);
+}
+
+/* Email + Password row */
+.row2 {
+  display: flex;
+  gap: 12px;
+}
+
+.row2 > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* SSO warning — design line 438 */
+.ssoWarn {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  background: rgba(245, 179, 64, 0.07);
+  border: 1px solid rgba(245, 179, 64, 0.22);
+  border-radius: 9px;
+  padding: 12px 14px;
+}
+
+.ssoWarnIcon {
+  color: #f5b340;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.ssoWarnText {
+  font-size: 12.5px;
+  color: #c8b083;
+  line-height: 1.55;
+}
+
+/* Self-signed toggle row — design line 443 */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.toggleLabel {
+  font-size: 12.5px;
+  color: #dde3ee;
+}
+
+.toggleSub {
+  font-size: 11px;
+  color: #6b7282;
+  margin-top: 1px;
+}
+
+/* Toggle button — design lines 1231-1232 */
+.toggle {
+  width: 38px;
+  height: 21px;
+  border-radius: 11px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  flex: none;
+  background: #1c2230;
+  transition: background 0.12s;
+}
+
+.toggleOn {
+  background: var(--accent, #2dd4bf);
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #5b6371;
+  transition: left 0.12s;
+}
+
+.knobOn {
+  left: 19px;
+  background: #06181a;
+}
+
+/* Credentials note — design line 449 */
+.credNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 11.5px;
+  color: #5b6371;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.credNoteIcon {
+  color: var(--accent, #2dd4bf);
+}
+
+/* Action buttons row — design line 454 */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnPrimary {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 9px;
+  border: none;
+  background: var(--accent, #2dd4bf);
+  color: #06181a;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btnSecondary {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #aeb6c4;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Appearance: swatch grid — design line 469 */
+.swatchGrid {
+  display: flex;
+  gap: 12px;
+}
+
+.swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: none;
+}
+
+.swatchActive {
+  box-shadow: 0 0 0 2px #0a0c11, 0 0 0 4px var(--swatch-color, #2dd4bf);
+}
+
+/* Density segmented — design line 477 */
+.densitySeg {
+  display: flex;
+  gap: 4px;
+  background: #0b0d12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.densityTab {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: inherit;
+  background: transparent;
+  color: #8b93a3;
+  transition: background 0.1s, color 0.1s;
+}
+
+.densityTab:hover {
+  color: #dde3ee;
+}
+
+.densityTabActive {
+  background: rgba(45, 212, 191, 0.16);
+  color: var(--accent, #2dd4bf);
+}
+
+/* Histogram row card */
+.histoCard {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.histoCardLabel {
+  font-size: 12.5px;
+  color: #dde3ee;
+  font-weight: 600;
+}
+
+.histoCardSub {
+  font-size: 11.5px;
+  color: #6b7282;
+  margin-top: 2px;
+}
+
+.themeNote {
+  font-size: 11.5px;
+  color: #4b5362;
+  margin-top: 14px;
+}
+
+/* MCP: expose card — design line 496 */
+.mcpCard {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.mcpCardTitle {
+  font-size: 13px;
+  color: #dde3ee;
+  font-weight: 600;
+}
+
+.mcpCardSub {
+  font-size: 11.5px;
+  color: #6b7282;
+  margin-top: 2px;
+}
+
+/* MCP endpoint/token card — design line 503 */
+.endpointLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #5b6371;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.endpointRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.codeChip {
+  flex: 1;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 8px 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.endpointUrl {
+  color: #a3e08c;
+}
+
+.tokenMask {
+  color: #7c8696;
+}
+
+.iconBtn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0e1116;
+  color: #99a2b2;
+  font-size: 11.5px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Connect agent snippet — design line 510 */
+.snippetCard {
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.snippetTitle {
+  font-size: 12.5px;
+  color: #dde3ee;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.snippetPre {
+  margin: 0;
+  background: #08090d;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #cfd6e4;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+.snippetNote {
+  font-size: 11px;
+  color: #6b7282;
+  margin-top: 9px;
+}
+
+/* Default leash card — design line 518 */
+.leashCard {
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.leashTitle {
+  font-size: 12.5px;
+  color: #dde3ee;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.leashDesc {
+  font-size: 11.5px;
+  color: #6b7282;
+  margin-bottom: 12px;
+}
+
+.agentSeg {
+  display: flex;
+  gap: 4px;
+  background: #0b0d12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.agentTab {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: inherit;
+  background: transparent;
+  color: #8b93a3;
+  transition: background 0.1s, color 0.1s;
+}
+
+.agentTab:hover {
+  color: #dde3ee;
+}
+
+.agentTabActive {
+  background: rgba(45, 212, 191, 0.16);
+  color: var(--accent, #2dd4bf);
+}
+
+/* Stats cards row — design line 526 */
+.statsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.statCard {
+  flex: 1;
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: #6b7282;
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 14px;
+  color: #dde3ee;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* About brand card — design line 540 */
+.brandCard {
+  background: #0c0e13;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.brandIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent, #2dd4bf);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 22px -4px var(--accent, #2dd4bf);
+  flex: none;
+}
+
+.brandName {
+  font-size: 15px;
+  color: #e6eaf2;
+  font-weight: 600;
+}
+
+.brandTagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--accent, #2dd4bf);
+  margin-top: 4px;
+}
+
+.brandVersion {
+  font-size: 12px;
+  color: #6b7282;
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 4px;
+}
+
+.updateBtn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #aeb6c4;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.aboutLinks {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #5b6371;
+}
+
+.aboutLink {
+  cursor: pointer;
+  color: var(--accent, #2dd4bf);
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 0;
+}
