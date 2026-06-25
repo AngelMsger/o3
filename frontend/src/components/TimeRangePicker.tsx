@@ -3,13 +3,13 @@ import type { ReactElement } from 'react';
 import styles from './TimeRangePicker.module.css';
 import type { TimeTab } from '../types';
 
-/* Relative-unit buttons — design line 132: Seconds/Minutes/Hours/Days/Weeks */
+/* Relative-unit buttons — design line 1125: s→sec, m→min, h→hr, d→day, w→wk */
 const REL_UNITS: { label: string; value: string }[] = [
-  { label: 'Seconds', value: 's' },
-  { label: 'Minutes', value: 'm' },
-  { label: 'Hours',   value: 'h' },
-  { label: 'Days',    value: 'd' },
-  { label: 'Weeks',   value: 'w' },
+  { label: 'sec', value: 's' },
+  { label: 'min', value: 'm' },
+  { label: 'hr',  value: 'h' },
+  { label: 'day', value: 'd' },
+  { label: 'wk',  value: 'w' },
 ];
 
 export interface TimeRangePickerProps {
@@ -129,7 +129,7 @@ export function TimeRangePicker(props: TimeRangePickerProps): ReactElement | nul
         {tab === 'absolute' && (
           <div>
             {/* design line 140 — From label */}
-            <div className={styles.paneLabel}>From</div>
+            <div className={`${styles.paneLabel} ${styles.paneLabelAbs}`}>From</div>
 
             {/* design line 141 — From input */}
             <input
@@ -140,7 +140,7 @@ export function TimeRangePicker(props: TimeRangePickerProps): ReactElement | nul
             />
 
             {/* design line 142 — To label */}
-            <div className={styles.paneLabel}>To</div>
+            <div className={`${styles.paneLabel} ${styles.paneLabelAbs}`}>To</div>
 
             {/* design line 143 — To input */}
             <input
