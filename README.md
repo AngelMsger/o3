@@ -18,4 +18,8 @@ A fast, native desktop client for [OpenObserve](https://openobserve.ai) built wi
 
 ## Status
 
-**M1 — static UI.** All 13 UI components are complete and pixel-faithful to the design. No real API calls are made yet; M2 will wire `pkg/apiclient` via `go.work` to a live OpenObserve instance.
+**M1 — static UI.** All 14 UI components are complete and pixel-faithful to the design. No real API calls are made; all data is mock. M2 will wire the shared Go client `github.com/angelmsger/openobserve-cli/pkg/apiclient` via `go.work` to a live OpenObserve instance.
+
+### M2 open item
+
+There is no public `pkg/auth` package yet. M2 will need either a small auth helper or a header-injecting `http.RoundTripper` decorator that attaches credentials before delegating to `apiclient`.

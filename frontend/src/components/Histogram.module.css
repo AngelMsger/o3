@@ -65,10 +65,6 @@
   transition: opacity 0.12s;
 }
 
-.bar:hover {
-  opacity: 0.72;
-}
-
 /* X-axis labels — design script lines 921-922 */
 .axis {
   display: flex;

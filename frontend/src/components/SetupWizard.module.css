@@ -312,10 +312,6 @@
   transition: transform 0.2s;
 }
 
-.knobOn {
-  transform: translateX(16px);
-}
-
 /* Test connection row */
 .testRow {
   display: flex;
