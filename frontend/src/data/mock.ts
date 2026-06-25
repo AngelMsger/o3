@@ -78,11 +78,11 @@ export const TIMES: string[] = [
 // ---------------------------------------------------------------------------
 export const NAV: NavItem[] = [
   { name: 'Logs',       icon: 'logs',    soon: false },
-  { name: 'Metrics',    icon: 'metrics', soon: false },
-  { name: 'Traces',     icon: 'traces',  soon: false },
-  { name: 'Dashboards', icon: 'dash',    soon: false },
-  { name: 'Streams',    icon: 'streams', soon: false },
-  { name: 'Alerts',     icon: 'alerts',  soon: false },
+  { name: 'Metrics',    icon: 'metrics', soon: true },
+  { name: 'Traces',     icon: 'traces',  soon: true },
+  { name: 'Dashboards', icon: 'dash',    soon: true },
+  { name: 'Streams',    icon: 'streams', soon: true },
+  { name: 'Alerts',     icon: 'alerts',  soon: true },
 ];
 
 // ---------------------------------------------------------------------------

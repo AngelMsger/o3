@@ -2,9 +2,10 @@
 import styles from './NavRail.module.css';
 import { NAV } from '../data/mock';
 import type { NavItem } from '../types';
+import type { ReactElement } from 'react';
 
 /* SVG paths from design lines 711–716, rendered with common wrapper attrs */
-const ICONS: Record<NavItem['icon'], JSX.Element> = {
+const ICONS: Record<NavItem['icon'], ReactElement> = {
   logs: (
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 6h16M4 12h16M4 18h10" />
