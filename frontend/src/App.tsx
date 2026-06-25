@@ -4,8 +4,9 @@ import { TitleBar } from './components/TitleBar';
 import { NavRail } from './components/NavRail';
 import { QueryTabs } from './components/QueryTabs';
 import { QueryEditor } from './components/QueryEditor';
-import { TABS } from './data/mock';
-import type { QueryMode } from './types';
+import { TimeRangePicker } from './components/TimeRangePicker';
+import { TABS, QUICK_RANGES } from './data/mock';
+import type { QueryMode, TimeTab } from './types';
 
 function App() {
   const [activeNav, setActiveNav] = useState<string>('Logs');
@@ -19,17 +20,23 @@ function App() {
   const [queryMode, setQueryMode] = useState<QueryMode>('sql');
   const [showHistogram, setShowHistogram] = useState<boolean>(true);
   const [running, setRunning] = useState<boolean>(false);
-  const [timeRange] = useState<string>('Past 15 Minutes');
+  const [timeRange, setTimeRange] = useState<string>('Past 15 Minutes');
   const [historyOpen, setHistoryOpen] = useState<boolean>(false);
   const [suggestOpen, setSuggestOpen] = useState<boolean>(false);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
   const [timeOpen, setTimeOpen] = useState<boolean>(false);
 
-  /* suppress unused-var warnings for open/close booleans that Tasks 6-7 will consume */
+  /* TimeRangePicker state — task 6 */
+  const [timeTab, setTimeTab] = useState<TimeTab>('relative');
+  const [relAmount, setRelAmount] = useState<string>('15');
+  const [relUnit, setRelUnit] = useState<string>('m');
+  const [absFrom, setAbsFrom] = useState<string>('');
+  const [absTo, setAbsTo] = useState<string>('');
+
+  /* suppress unused-var warnings for open/close booleans that Tasks 7 will consume */
   void historyOpen;
   void suggestOpen;
   void guideOpen;
-  void timeOpen;
 
   return (
     <div className={styles.shell}>
@@ -70,7 +77,31 @@ function App() {
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
               onToggleGuide={() => setGuideOpen((v) => !v)}
-              timePicker={undefined}
+              timePicker={
+                <TimeRangePicker
+                  open={timeOpen}
+                  tab={timeTab}
+                  quickRanges={QUICK_RANGES.map((r) => ({ label: r[0] }))}
+                  relAmount={relAmount}
+                  relUnit={relUnit}
+                  absFrom={absFrom}
+                  absTo={absTo}
+                  onPickQuick={(label) => { setTimeRange(label); setTimeOpen(false); }}
+                  onSetTab={setTimeTab}
+                  onRelAmount={setRelAmount}
+                  onRelUnit={setRelUnit}
+                  onApplyRelative={() => {
+                    setTimeRange(`Last ${relAmount}${relUnit}`);
+                    setTimeOpen(false);
+                  }}
+                  onAbsFrom={setAbsFrom}
+                  onAbsTo={setAbsTo}
+                  onApplyAbsolute={() => {
+                    setTimeRange(`${absFrom} — ${absTo}`);
+                    setTimeOpen(false);
+                  }}
+                />
+              }
               historyPanel={undefined}
               autocomplete={undefined}
             />

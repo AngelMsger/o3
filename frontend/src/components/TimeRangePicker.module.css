@@ -1,0 +1,234 @@
+/* TimeRangePicker styles — design/Observe.dc.html lines 114–150 */
+
+/* design line 114 — popover container */
+.popover {
+  position: absolute;
+  right: 0;
+  top: 38px;
+  width: 432px;
+  background: #0f131a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  z-index: 60;
+  display: flex;
+  animation: ooFade 0.1s ease;
+}
+
+/* design line 115 — quick-ranges left column */
+.quickCol {
+  width: 168px;
+  flex: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 8px 7px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+/* design line 116 — "Quick ranges" section label */
+.quickLabel {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #4b5362;
+  font-weight: 700;
+  padding: 3px 8px 6px;
+}
+
+/* design line 118 — quick range item (base) */
+.quickItem {
+  font-size: 12px;
+  color: #8d98ab;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.quickItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #dde3ee;
+}
+
+/* design line 121 — right pane */
+.rightPane {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+}
+
+/* design lines 122–125 — segmented tab bar */
+.tabBar {
+  display: flex;
+  gap: 3px;
+  background: #0b0d12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 14px;
+}
+
+/* design lines 123–124 — tab button (base) */
+.tabBtn {
+  flex: 1;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #5b6371;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  font-family: inherit;
+}
+
+.tabBtn:hover {
+  color: #aeb6c4;
+}
+
+/* design line 123 / 124 — active tab */
+.tabActive {
+  background: #1a2232;
+  color: #dde3ee;
+  font-weight: 600;
+}
+
+.tabActive:hover {
+  color: #dde3ee;
+}
+
+/* design lines 128 / 140 / 142 — pane section label */
+.paneLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #5b6371;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* design lines 129–133 — amount + unit row */
+.relRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+
+/* design line 130 — amount input */
+.amountInput {
+  width: 64px;
+  height: 36px;
+  padding: 0 10px;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #dde3ee;
+  font-size: 15px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  text-align: center;
+  box-sizing: border-box;
+  transition: border-color 0.12s;
+}
+
+.amountInput:focus {
+  border-color: var(--accent, #2dd4bf);
+}
+
+/* design line 131 — unit button bar */
+.unitBar {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  background: #0b0d12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+/* design line 132 — unit button (base) */
+.unitBtn {
+  flex: 1;
+  height: 26px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #5b6371;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.unitBtn:hover {
+  color: #aeb6c4;
+}
+
+/* design line 132 — active unit button */
+.unitActive {
+  background: #1a2232;
+  color: #dde3ee;
+  font-weight: 600;
+}
+
+.unitActive:hover {
+  color: #dde3ee;
+}
+
+/* design lines 141 / 143 — absolute From/To input */
+.absInput {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #dde3ee;
+  font-size: 12.5px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 11px;
+  transition: border-color 0.12s;
+}
+
+/* design line 143 — To input (smaller bottom gap before hint) */
+.absInputTo {
+  margin-bottom: 7px;
+}
+
+.absInput:focus {
+  border-color: var(--accent, #2dd4bf);
+}
+
+/* design line 144 — format/timezone hint */
+.absHint {
+  font-size: 10px;
+  color: #4b5362;
+  margin-bottom: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* design lines 135 / 145 — Apply button */
+.applyBtn {
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent, #2dd4bf);
+  color: #06181a;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.12s;
+}
+
+.applyBtn:hover {
+  opacity: 0.88;
+}
