@@ -1,0 +1,22 @@
+/* Outer shell — design/Observe.dc.html lines 37-38 */
+
+.shell {
+  height: 100vh;
+  padding: 12px;
+  display: flex;
+}
+
+.card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #0a0c11;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 28px 80px -20px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}

@@ -1,6 +1,7 @@
-# build artifacts
-/build/bin/
-node_modules/
-frontend/dist/
-frontend/node_modules/
-.DS_Store
+build/bin
+build/
+node_modules
+frontend/dist
+.superpowers/
+go.work.sum
+openobserve-desktop
