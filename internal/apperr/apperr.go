@@ -3,6 +3,8 @@
 package apperr
 
 import (
+	"errors"
+
 	cerr "github.com/angelmsger/openobserve-cli/pkg/errors"
 )
 
@@ -25,7 +27,8 @@ func Wrap(err error) error {
 	if err == nil {
 		return nil
 	}
-	if ae, ok := err.(AppError); ok {
+	var ae AppError
+	if errors.As(err, &ae) {
 		return ae
 	}
 	ce := cerr.AsCLIError(err)

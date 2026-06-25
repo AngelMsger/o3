@@ -2,6 +2,7 @@ package apperr
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	cerr "github.com/angelmsger/openobserve-cli/pkg/errors"
@@ -49,5 +50,17 @@ func TestNotConfigured(t *testing.T) {
 	}
 	if ae.Category != CategoryNotConfigured {
 		t.Fatalf("Category = %q, want %q", ae.Category, CategoryNotConfigured)
+	}
+}
+
+func TestWrapPreservesWrappedAppError(t *testing.T) {
+	orig := AppError{Category: "auth", Message: "bad creds", Hint: "check password"}
+	wrapped := Wrap(fmt.Errorf("while connecting: %w", orig))
+	var ae AppError
+	if !errors.As(wrapped, &ae) {
+		t.Fatalf("Wrap did not produce an AppError: %T", wrapped)
+	}
+	if ae.Category != "auth" || ae.Message != "bad creds" || ae.Hint != "check password" {
+		t.Fatalf("wrapped AppError not preserved: %+v", ae)
 	}
 }
