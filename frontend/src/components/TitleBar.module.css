@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 0 14px 0 78px;
+  padding: 0 14px 0 96px;
   background: linear-gradient(#101319, #0c0e13);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }

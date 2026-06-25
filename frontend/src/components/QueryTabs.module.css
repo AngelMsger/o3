@@ -60,6 +60,36 @@
   white-space: nowrap;
 }
 
+/* close affordance (added beyond static design) — appears on tab hover/active */
+.close {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-left: 1px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #5b6371;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.12s, background 0.12s, color 0.12s;
+}
+
+.tab:hover .close,
+.active .close {
+  opacity: 1;
+}
+
+.close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e6eaf2;
+}
+
 /* design line 90 — new tab button */
 .newBtn {
   align-self: center;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import { TitleBar } from './components/TitleBar';
 import { NavRail } from './components/NavRail';
@@ -35,8 +35,9 @@ function App() {
     org: 'default',
     email: 'ops@example.com',
   });
-  const [tabs] = useState(TABS);
+  const [tabs, setTabs] = useState(TABS);
   const [activeTab, setActiveTab] = useState<string>(TABS[0].id);
+  const tabSeq = useRef(0);
 
   /* QueryEditor state — task 5 */
   const activeTabData = tabs.find((t) => t.id === activeTab) ?? tabs[0];
@@ -114,6 +115,24 @@ function App() {
     document.documentElement.style.setProperty('--accent', c);
   };
 
+  const handleNewTab = () => {
+    tabSeq.current += 1;
+    const id = `t-new-${tabSeq.current}`;
+    setTabs((prev) => [...prev, { id, name: 'untitled', q: `SELECT *\nFROM ${stream}\n`, stream }]);
+    setActiveTab(id);
+  };
+
+  const handleCloseTab = (id: string) => {
+    if (tabs.length <= 1) return; // keep at least one tab open
+    const idx = tabs.findIndex((t) => t.id === id);
+    const next = tabs.filter((t) => t.id !== id);
+    setTabs(next);
+    if (id === activeTab) {
+      const neighbor = next[Math.min(idx, next.length - 1)];
+      setActiveTab(neighbor.id);
+    }
+  };
+
   return (
     <div className={styles.shell}>
       <div className={styles.card}>
@@ -136,7 +155,8 @@ function App() {
               tabs={tabs}
               activeId={activeTab}
               onPick={setActiveTab}
-              onNew={() => {}}
+              onNew={handleNewTab}
+              onClose={handleCloseTab}
             />
 
             {/* QueryEditor — design lines 93–207 */}

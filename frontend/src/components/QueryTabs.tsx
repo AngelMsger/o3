@@ -9,12 +9,14 @@ const STREAM_COLORS: Record<string, string> = Object.fromEntries(
   STREAMS.map(s => [s.name, s.color])
 );
 
-export function QueryTabs({ tabs, activeId, onPick, onNew }: {
+export function QueryTabs({ tabs, activeId, onPick, onNew, onClose }: {
   tabs: QueryTab[];
   activeId: string;
   onPick: (id: string) => void;
   onNew: () => void;
+  onClose: (id: string) => void;
 }): ReactElement {
+  const closable = tabs.length > 1;
   return (
     /* design line 78 — saved-query tabs container */
     <div className={`${styles.strip} oo-scroll`}>
@@ -37,6 +39,19 @@ export function QueryTabs({ tabs, activeId, onPick, onNew }: {
             />
             {/* design lines 85-87 — tab name (static, editing deferred) */}
             <span className={styles.name}>{t.name}</span>
+            {/* close affordance (added beyond the static design); hidden when only one tab */}
+            {closable && (
+              <button
+                className={styles.close}
+                title="Close query"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose(t.id);
+                }}
+              >
+                ×
+              </button>
+            )}
           </div>
         );
       })}
