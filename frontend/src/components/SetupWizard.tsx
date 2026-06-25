@@ -12,6 +12,7 @@ interface SetupWizardProps {
   onToggleSelfSigned: () => void;
   onTest: () => void;
   onClose: () => void;
+  onSave?: () => void;
 }
 
 const AUTH_TABS: Array<{ id: 'password' | 'token' | 'sso'; label: string }> = [
@@ -31,6 +32,7 @@ export function SetupWizard({
   onToggleSelfSigned,
   onTest,
   onClose,
+  onSave,
 }: SetupWizardProps): ReactElement {
   return (
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
@@ -202,7 +204,7 @@ export function SetupWizard({
 
           {/* Action buttons — design lines 624–627 */}
           <div className={styles.actions}>
-            <button className={styles.btnPrimary} onClick={onClose}>
+            <button className={styles.btnPrimary} onClick={onSave ?? onClose}>
               Connect &amp; continue
             </button>
             <button className={styles.btnSkip} onClick={onClose}>

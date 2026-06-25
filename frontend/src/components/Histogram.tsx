@@ -1,17 +1,17 @@
 import type { ReactElement } from 'react';
 import styles from './Histogram.module.css';
-import { histogramBars, hexA } from '../lib/format';
+import { hexA } from '../lib/format';
+import type { HistoBar } from '../types';
 
 // X-axis labels — design script line 908
 const AXIS_LABELS = ['13:44', '13:46', '13:48', '13:50', '13:52', '13:54', '13:56', '13:58'];
 
 interface HistogramProps {
   accent: string;
+  bars: HistoBar[];
 }
 
-export function Histogram({ accent }: HistogramProps): ReactElement {
-  const bars = histogramBars();
-
+export function Histogram({ accent, bars }: HistogramProps): ReactElement {
   return (
     <div className={styles.histogram}>
       {/* Header row — design lines 295-300 */}

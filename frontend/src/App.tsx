@@ -20,6 +20,16 @@ import { SyntaxGuide } from './components/SyntaxGuide';
 import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
+import type { LogRow as TLogRow, Field as TField, HistoBar } from './types';
+import {
+  LoadConnection, SaveConnection, TestConnection,
+  ListStreams, GetFields, RunQuery,
+} from '../wailsjs/go/main/App';
+
+// Stream color palette — assigned round-robin since the API does not return colors
+const STREAM_PALETTE = ['#2dd4bf', '#60a5fa', '#f59e0b', '#a78bfa', '#f4685f', '#34d399'];
+const withColors = (streams: { name: string; size: string }[]) =>
+  streams.map((s, i) => ({ ...s, color: STREAM_PALETTE[i % STREAM_PALETTE.length] }));
 
 function App() {
   const [activeNav, setActiveNav] = useState<string>('Logs');
@@ -64,7 +74,7 @@ function App() {
   /* Histogram delayed-unmount */
   const histoT = useDelayedUnmount(showHistogram);
 
-  /* ctxItems — design lines 1173–1179, verbatim icons + labels */
+  /* ctxItems — design lines 1173-1179, verbatim icons + labels */
   const ctxItems = [
     { icon: '=',    label: 'Filter for value' },
     { icon: '≠', label: 'Exclude value' },
@@ -73,7 +83,7 @@ function App() {
     { icon: '⧉', label: 'Copy value' },
   ];
 
-  /* openCtx — clamp to viewport like design lines 948–950 */
+  /* openCtx — clamp to viewport like design lines 948-950 */
   const openCtx = (field: string, value: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const x = Math.max(8, Math.min(e.clientX, window.innerWidth - 252));
@@ -119,6 +129,113 @@ function App() {
   const [absFrom, setAbsFrom] = useState<string>('');
   const [absTo, setAbsTo] = useState<string>('');
 
+  /* Live-data state — M2 */
+  const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
+  const [liveFields, setLiveFields] = useState<TField[]>([]);
+  const [liveStreams, setLiveStreams] = useState<{ name: string; size: string; color: string }[]>([]);
+  const [liveBars, setLiveBars] = useState<HistoBar[]>([]);
+  const [liveMeta, setLiveMeta] = useState<{ total: number; tookMs: number; shown: number }>({ total: 0, tookMs: 0, shown: 0 });
+  const [loading, setLoading] = useState(false);
+  const [queryError, setQueryError] = useState<{ message: string; hint: string } | null>(null);
+  const [configured, setConfigured] = useState<boolean>(true);
+
+  /* Step 3: Load connection on startup; auto-open wizard when unconfigured */
+  useEffect(() => {
+    LoadConnection()
+      .then((c) => {
+        if (!c.url) {
+          setConfigured(false);
+          setSetupOpen(true);
+          return;
+        }
+        setConn((prev) => ({ ...prev, url: c.url, org: c.org, email: c.username }));
+        setConfigured(true);
+        return ListStreams().then((s) => {
+          const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
+          setLiveStreams(mapped);
+          if (mapped.length > 0) setStream(mapped[0].name);
+        });
+      })
+      .catch(() => { setConfigured(false); setSetupOpen(true); });
+  }, []);
+
+  /* Step 4: Wire stream selector to load fields */
+  useEffect(() => {
+    if (!configured || !stream) return;
+    GetFields(stream)
+      .then((f) => setLiveFields(f as unknown as TField[]))
+      .catch(() => setLiveFields([]));
+  }, [stream, configured]);
+
+  /* Step 5: Compute time window from relative picker state */
+  const computeRange = (): { startMicros: number; endMicros: number } => {
+    const now = Date.now() * 1000; // micros
+    const amount = parseInt(relAmount, 10) || 15;
+    const unitMicros: Record<string, number> = {
+      s: 1e6, m: 60e6, h: 3600e6, d: 86400e6, w: 604800e6,
+    };
+    const span = amount * (unitMicros[relUnit] ?? 60e6);
+    return { startMicros: Math.round(now - span), endMicros: Math.round(now) };
+  };
+
+  const runQuery = async () => {
+    setRunning(true);
+    setLoading(true);
+    setQueryError(null);
+    const { startMicros, endMicros } = computeRange();
+    try {
+      const res = await RunQuery({
+        stream,
+        sql: query,
+        startMicros,
+        endMicros,
+        from: 0,
+        size: 100,
+        histogram: showHistogram,
+      } as any);
+      setLiveRows((res.rows ?? []) as unknown as TLogRow[]);
+      setLiveBars((res.histogram ?? []) as unknown as HistoBar[]);
+      setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
+    } catch (e: any) {
+      setQueryError({ message: e?.message ?? String(e), hint: e?.hint ?? '' });
+      setLiveRows([]);
+      setLiveBars([]);
+    } finally {
+      setRunning(false);
+      setLoading(false);
+    }
+  };
+
+  /* Step 8: Test and Save connection handlers */
+  const handleTest = async () => {
+    try {
+      const scheme = authTab === 'token' ? 'token' : 'basic';
+      await TestConnection({
+        url: conn.url, org: conn.org, scheme,
+        username: conn.email ?? '',
+        secret: (scheme === 'token' ? conn.token : conn.password) ?? '',
+      } as any);
+      setTested(true);
+    } catch (e: any) {
+      setTested(false);
+      setQueryError({ message: e?.message ?? String(e), hint: e?.hint ?? '' });
+    }
+  };
+
+  const handleSaveConnection = async () => {
+    const scheme = authTab === 'token' ? 'token' : 'basic';
+    await SaveConnection({
+      url: conn.url, org: conn.org, scheme,
+      username: conn.email ?? '',
+      secret: (scheme === 'token' ? conn.token : conn.password) ?? '',
+    } as any);
+    setConfigured(true);
+    setSetupOpen(false);
+    const s = await ListStreams();
+    const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
+    setLiveStreams(mapped);
+    if (mapped.length > 0) setStream(mapped[0].name);
+  };
 
   const handlePickAccent = (c: string) => {
     setAccent(c);
@@ -160,7 +277,7 @@ function App() {
 
           {/* main column — design line 75 */}
           <div className={styles.main}>
-            {/* QueryTabs — design lines 77–91 */}
+            {/* QueryTabs — design lines 77-91 */}
             <QueryTabs
               tabs={tabs}
               activeId={activeTab}
@@ -169,7 +286,7 @@ function App() {
               onClose={handleCloseTab}
             />
 
-            {/* QueryEditor — design lines 93–207 */}
+            {/* QueryEditor — design lines 93-207 */}
             <QueryEditor
               query={query}
               queryMode={queryMode}
@@ -179,7 +296,7 @@ function App() {
               onModeChange={setQueryMode}
               onToggleHisto={() => setShowHistogram((v) => !v)}
               onQueryChange={setQuery}
-              onRun={() => setRunning((v) => !v)}
+              onRun={runQuery}
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
               onToggleGuide={() => setGuideOpen((v) => !v)}
@@ -236,8 +353,8 @@ function App() {
                 collapsed={sidebarCollapsed}
                 stream={stream}
                 streamOpen={streamOpen}
-                streams={STREAMS}
-                fields={FIELDS}
+                streams={liveStreams.length ? liveStreams : STREAMS}
+                fields={liveFields.length ? liveFields : FIELDS}
                 fieldFilter={fieldFilter}
                 onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
                 onToggleStream={() => setStreamOpen((v) => !v)}
@@ -250,31 +367,46 @@ function App() {
               <div className={styles.centerCol}>
                 {histoT.mounted && (
                   <div className={`${styles.histoWrap} ${histoT.visible ? styles.histoWrapShown : styles.histoWrapHidden}`}>
-                    <Histogram accent={accent} />
+                    <Histogram accent={accent} bars={liveBars} />
                   </div>
                 )}
-                {/* Results header + table — task 10 */}
+                {/* Results header */}
                 <ResultsHeader
-                  shownCount={50}
-                  totalEvents="402,170"
-                  queryMs={247}
+                  shownCount={liveMeta.shown}
+                  totalEvents={liveMeta.total.toLocaleString()}
+                  queryMs={liveMeta.tookMs}
                 />
-                <ResultsTable
-                  rows={LOGS}
-                  selectedId={selectedRow}
-                  density={density}
-                  accent={accent}
-                  onSelectRow={(id) => setSelectedRow((prev) => (prev === id ? null : id))}
-                  onLevelCtx={openCtx}
-                  onServiceCtx={openCtx}
-                />
+                {/* Results area — loading / error / empty / data */}
+                {loading ? (
+                  <div className={styles.stateCenter}>
+                    <div className={styles.spinner} />
+                    <span>Running query...</span>
+                  </div>
+                ) : queryError ? (
+                  <div className={styles.errorBanner}>
+                    <strong>{queryError.message}</strong>
+                    {queryError.hint && <span>{queryError.hint}</span>}
+                  </div>
+                ) : liveRows.length === 0 ? (
+                  <div className={styles.stateCenter}>No results for this query and time range.</div>
+                ) : (
+                  <ResultsTable
+                    rows={liveRows}
+                    selectedId={selectedRow}
+                    density={density}
+                    accent={accent}
+                    onSelectRow={(id) => setSelectedRow((prev) => (prev === id ? null : id))}
+                    onLevelCtx={openCtx}
+                    onServiceCtx={openCtx}
+                  />
+                )}
               </div>
 
               {/* DrawerInspector — task 11: right column; stays mounted through the
                   close transition via drawerRowId (see delayed-unmount effect). */}
-              {drawerRowId && (
+              {drawerRowId && liveRows.find((r) => r.id === drawerRowId) && (
                 <DrawerInspector
-                  row={LOGS.find((r) => r.id === drawerRowId)!}
+                  row={liveRows.find((r) => r.id === drawerRowId)!}
                   visible={drawerVisible}
                   onClose={() => setSelectedRow(null)}
                   onKvCtx={openCtx}
@@ -316,8 +448,9 @@ function App() {
             onAuthTab={setAuthTab}
             onField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
             onToggleSelfSigned={() => setSelfSigned((v) => !v)}
-            onTest={() => setTested(true)}
+            onTest={handleTest}
             onClose={() => setSetupOpen(false)}
+            onSave={handleSaveConnection}
           />
         )}
 

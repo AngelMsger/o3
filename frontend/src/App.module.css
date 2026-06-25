@@ -65,3 +65,36 @@
   max-height: 0;
   opacity: 0;
 }
+
+/* Loading / empty / error states */
+.stateCenter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #5b6371;
+  font-size: 12px;
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--accent, #2dd4bf);
+  animation: ooSpin 0.7s linear infinite;
+}
+@keyframes ooSpin { to { transform: rotate(360deg); } }
+.errorBanner {
+  margin: 10px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #f4685f 12%, transparent);
+  border: 1px solid color-mix(in srgb, #f4685f 40%, transparent);
+  color: #f4a39c;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
