@@ -14,7 +14,9 @@ import { ResultsTable } from './components/ResultsTable';
 import { DrawerInspector } from './components/DrawerInspector';
 import { SettingsModal } from './components/SettingsModal';
 import { SetupWizard } from './components/SetupWizard';
-import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS } from './data/mock';
+import { ValueActionMenu } from './components/ValueActionMenu';
+import { SyntaxGuide } from './components/SyntaxGuide';
+import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
 
@@ -48,6 +50,26 @@ function App() {
   const [suggestIndex] = useState<number>(0);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
 
+  /* Value-action context menu state — task 14 */
+  const [ctxMenu, setCtxMenu] = useState<{ open: boolean; field: string; value: string; x: number; y: number } | null>(null);
+
+  /* ctxItems — design lines 1173–1179, verbatim icons + labels */
+  const ctxItems = [
+    { icon: '=',    label: 'Filter for value' },
+    { icon: '≠', label: 'Exclude value' },
+    { icon: '⊞', label: `Group by ${ctxMenu?.field ?? 'field'}` },
+    { icon: '▦', label: 'Top 10 values' },
+    { icon: '⧉', label: 'Copy value' },
+  ];
+
+  /* openCtx — clamp to viewport like design lines 948–950 */
+  const openCtx = (field: string, value: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const x = Math.max(8, Math.min(e.clientX, window.innerWidth - 252));
+    const y = Math.max(8, Math.min(e.clientY, window.innerHeight - 236));
+    setCtxMenu({ open: true, field, value, x, y });
+  };
+
   /* static autocomplete — derive currentWord from seeded query first line */
   const currentWord = 'co';
   const suggestions = computeSuggestions(currentWord);
@@ -70,7 +92,6 @@ function App() {
   const [absFrom, setAbsFrom] = useState<string>('');
   const [absTo, setAbsTo] = useState<string>('');
 
-  void guideOpen;
 
   const handlePickAccent = (c: string) => {
     setAccent(c);
@@ -192,8 +213,8 @@ function App() {
                   density={density}
                   accent={accent}
                   onSelectRow={(id) => setSelectedRow((prev) => (prev === id ? null : id))}
-                  onLevelCtx={() => {}}
-                  onServiceCtx={() => {}}
+                  onLevelCtx={openCtx}
+                  onServiceCtx={openCtx}
                 />
               </div>
 
@@ -202,7 +223,7 @@ function App() {
                 <DrawerInspector
                   row={LOGS.find((r) => r.id === selectedRow)!}
                   onClose={() => setSelectedRow(null)}
-                  onKvCtx={() => {}}
+                  onKvCtx={openCtx}
                 />
               )}
             </div>
@@ -240,6 +261,26 @@ function App() {
           onToggleSelfSigned={() => setSelfSigned((v) => !v)}
           onTest={() => setTested(true)}
           onClose={() => setSetupOpen(false)}
+        />
+
+        {/* ValueActionMenu — task 14: Graylog-style value action menu */}
+        <ValueActionMenu
+          open={!!ctxMenu?.open}
+          field={ctxMenu?.field ?? ''}
+          value={ctxMenu?.value ?? ''}
+          x={ctxMenu?.x ?? 0}
+          y={ctxMenu?.y ?? 0}
+          items={ctxItems}
+          onPick={() => setCtxMenu(null)}
+          onClose={() => setCtxMenu(null)}
+        />
+
+        {/* SyntaxGuide — task 14: SQL syntax guide overlay */}
+        <SyntaxGuide
+          open={guideOpen}
+          sections={GUIDE}
+          onClose={() => setGuideOpen(false)}
+          onUse={() => setGuideOpen(false)}
         />
       </div>
     </div>

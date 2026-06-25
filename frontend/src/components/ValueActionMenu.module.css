@@ -1,0 +1,84 @@
+/* ValueActionMenu — design/Observe.dc.html lines 634–651 */
+
+/* Fixed full-screen backdrop — design line 636 */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+}
+
+/* Positioned menu panel — design line 637 */
+.menu {
+  position: fixed;
+  width: 236px;
+  background: #0f131a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 22px 54px -12px rgba(0, 0, 0, 0.85);
+  z-index: 96;
+  overflow: hidden;
+  animation: ooFade 0.1s ease;
+}
+
+/* Header section — design line 638 */
+.header {
+  padding: 8px 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0b0e13;
+}
+
+/* Field label — design line 639 */
+.field {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent, #2dd4bf);
+  margin-bottom: 2px;
+  letter-spacing: 0.3px;
+}
+
+/* Value label — design line 640 */
+.value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #dde3ee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Items container — design line 642 */
+.items {
+  padding: 4px;
+}
+
+/* Action item row — design line 644 */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #c3cad7;
+}
+
+.item:hover {
+  background: #161b22;
+  color: #fff;
+}
+
+/* Icon — design line 645 */
+.icon {
+  width: 15px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent, #2dd4bf);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Label — design line 646 */
+.label {
+  flex: 1;
+}
