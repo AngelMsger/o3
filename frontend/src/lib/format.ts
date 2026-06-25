@@ -22,8 +22,8 @@ export function hexA(hex: string, a: number): string {
 }
 
 /**
- * Generate 66 deterministic, normalized histogram bars.
- * Seeding formula from design lines 904-906; normalize by max.
+ * Generate 66 deterministic histogram bars.
+ * Seeding formula from design lines 904-906; clamp each value to [0, 1].
  */
 export function histogramBars(): HistoBar[] {
   const seeds: number[] = [];
@@ -31,10 +31,9 @@ export function histogramBars(): HistoBar[] {
     const v = 0.35 + 0.45 * Math.abs(Math.sin(i * 1.3) + Math.cos(i * 0.7)) / 2
       + (i % 11 === 0 ? 0.4 : 0)
       + (i % 7 === 0 ? 0.15 : 0);
-    seeds.push(v);
+    seeds.push(Math.min(1, v));
   }
-  const mx = Math.max(...seeds);
-  return seeds.map(v => ({ h: v / mx }));
+  return seeds.map(v => ({ h: v }));
 }
 
 /**
