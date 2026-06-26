@@ -1,19 +1,37 @@
+/* SetupWizard — design/Observe.dc.html lines 563-659 (multi-context variant).
+   Left panel shows "Your contexts" list + "+ New context"; right pane edits the
+   selected context (name, URL, org, auth, test, save). */
 import type { ReactElement } from 'react';
 import styles from './SetupWizard.module.css';
 
+// UICtx mirrors the interface in App.tsx (kept local to avoid a shared types file)
+interface UICtx {
+  name: string; url: string; org: string;
+  scheme: string;
+  username: string;
+  hasSecret: boolean; isCurrent: boolean;
+  color: string;
+  password: string; token: string;
+  draft: boolean;
+}
+
 interface SetupWizardProps {
   visible: boolean;
-  conn: { url: string; org: string; email?: string; password?: string; token?: string };
+  contexts: UICtx[];
+  currentName: string;
   authTab: 'password' | 'token' | 'sso';
   tested: boolean;
   selfSigned: boolean;
   error?: string | null;
   onAuthTab: (t: 'password' | 'token' | 'sso') => void;
-  onField: (key: string, value: string) => void;
+  // mutate a single field on the named context
+  onUpdateCtx: (name: string, key: string, value: string) => void;
+  onSelectCtx: (name: string) => void;
   onToggleSelfSigned: () => void;
-  onTest: () => void;
+  onTest: (ctx: UICtx) => void;
   onClose: () => void;
-  onSave?: () => void;
+  onSave: (ctx: UICtx) => Promise<void>;
+  onAddContext: () => void;
 }
 
 const AUTH_TABS: Array<{ id: 'password' | 'token' | 'sso'; label: string }> = [
@@ -24,18 +42,23 @@ const AUTH_TABS: Array<{ id: 'password' | 'token' | 'sso'; label: string }> = [
 
 export function SetupWizard({
   visible,
-  conn,
+  contexts,
+  currentName,
   authTab,
   tested,
   selfSigned,
   error,
   onAuthTab,
-  onField,
+  onUpdateCtx,
+  onSelectCtx,
   onToggleSelfSigned,
   onTest,
   onClose,
   onSave,
+  onAddContext,
 }: SetupWizardProps): ReactElement {
+  const selected = contexts.find((c) => c.name === currentName) ?? contexts[0];
+
   return (
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
       {/* ===== Left brand panel — design line 563 ===== */}
@@ -54,14 +77,14 @@ export function SetupWizard({
           </svg>
         </span>
 
-        {/* Welcome text — design lines 570–572 */}
+        {/* Welcome text — design lines 570-572 */}
         <div className={styles.welcomeTitle}>Welcome to o3</div>
         <div className={styles.welcomeTagline}>SELECT signal FROM noise</div>
         <div className={styles.welcomeDesc}>
           A fast, native desktop client for OpenObserve. Point it at your self-hosted instance to begin.
         </div>
 
-        {/* Steps 1-3 — design lines 573–577 */}
+        {/* Steps 1-3 — design lines 573-577 */}
         <div className={styles.stepsList}>
           <div className={styles.stepRow}>
             <span className={`${styles.stepNum} ${styles.stepNumActive}`}>1</span>
@@ -77,47 +100,92 @@ export function SetupWizard({
           </div>
         </div>
 
-        {/* Spacer — design line 578 */}
+        {/* "Your contexts" list — design lines 644-656 */}
+        <div className={styles.ctxSection}>
+          <div className={styles.ctxSectionLabel}>Your contexts</div>
+          <div className={styles.ctxSectionList}>
+            {contexts.map((c) => {
+              const active = c.name === currentName;
+              return (
+                <div
+                  key={c.name}
+                  className={styles.ctxItem}
+                  onClick={() => onSelectCtx(c.name)}
+                  style={{
+                    border: `1px solid ${active ? `${c.color}80` : 'rgba(255,255,255,.07)'}`,
+                    background: active ? `${c.color}1a` : 'rgba(255,255,255,.02)',
+                  }}
+                >
+                  <span
+                    className={styles.ctxItemDot}
+                    style={{ background: c.color, boxShadow: `0 0 8px -1px ${c.color}` }}
+                  />
+                  <span className={styles.ctxItemName}>{c.name}</span>
+                  {active && <span className={styles.ctxItemCheck}>✓</span>}
+                </div>
+              );
+            })}
+
+            {/* "+ New context" button — design line 654 */}
+            <button className={styles.ctxAddBtn} onClick={onAddContext}>
+              + New context
+            </button>
+          </div>
+        </div>
+
+        {/* Spacer — design line 657 */}
         <div className={styles.spacer} />
 
-        {/* Footer — design line 579 */}
+        {/* Footer — design line 658 */}
         <div className={styles.leftFooter}>No telemetry · everything runs locally on your machine.</div>
       </div>
 
-      {/* ===== Right pane — design line 582 ===== */}
+      {/* ===== Right pane — design line 661 ===== */}
       <div className={`oo-scroll ${styles.right}`}>
         <div className={styles.rightInner}>
-          {/* Heading — design lines 584–585 */}
+          {/* Heading — design lines 663-664 */}
           <div className={styles.rightTitle}>Connect to OpenObserve</div>
           <div className={styles.rightSub}>
-            Enter the endpoint and a service account. Self-hosted OSS uses basic auth — no hosted OAuth.
+            Name this context and point it at your instance. Switch between contexts any time from the title bar. Self-hosted OSS uses basic auth — no hosted OAuth.
           </div>
 
-          {/* Server URL — design lines 587–590 */}
+          {/* Context name — design line 667 */}
+          <div className={styles.fieldWrap}>
+            <div className={styles.fieldLabel}>Context name</div>
+            <input
+              className={styles.fieldInput}
+              value={selected?.name ?? ''}
+              onChange={(e) => selected && onUpdateCtx(selected.name, 'name', e.target.value)}
+              placeholder="prod, staging, local..."
+              spellCheck={false}
+            />
+          </div>
+
+          {/* Server URL — design line 671 */}
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Server URL</div>
             <input
               className={styles.fieldInput}
-              value={conn.url}
-              onChange={(e) => onField('url', e.target.value)}
+              value={selected?.url ?? ''}
+              onChange={(e) => selected && onUpdateCtx(selected.name, 'url', e.target.value)}
               placeholder="http://localhost:5080"
               spellCheck={false}
             />
           </div>
 
-          {/* Organization — design lines 591–594 */}
+          {/* Organization */}
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Organization</div>
             <input
               className={styles.fieldInput}
-              value={conn.org}
-              onChange={(e) => onField('org', e.target.value)}
+              value={selected?.org ?? ''}
+              onChange={(e) => selected && onUpdateCtx(selected.name, 'org', e.target.value)}
               placeholder="default"
               spellCheck={false}
             />
           </div>
 
-          {/* Authentication segmented tabs — design lines 595–600 */}
+          {/* Authentication segmented tabs */}
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Authentication</div>
             <div className={styles.authSeg}>
@@ -133,15 +201,15 @@ export function SetupWizard({
             </div>
           </div>
 
-          {/* Auth pane: password — design lines 601–606 */}
+          {/* Auth pane: password */}
           {authTab === 'password' && (
             <div className={styles.row2}>
               <div>
                 <div className={styles.fieldLabel}>Email</div>
                 <input
                   className={styles.fieldInput}
-                  value={conn.email ?? ''}
-                  onChange={(e) => onField('email', e.target.value)}
+                  value={selected?.username ?? ''}
+                  onChange={(e) => selected && onUpdateCtx(selected.name, 'username', e.target.value)}
                   spellCheck={false}
                 />
               </div>
@@ -150,27 +218,27 @@ export function SetupWizard({
                 <input
                   type="password"
                   className={styles.fieldInput}
-                  value={conn.password ?? ''}
-                  onChange={(e) => onField('password', e.target.value)}
+                  value={selected?.password ?? ''}
+                  onChange={(e) => selected && onUpdateCtx(selected.name, 'password', e.target.value)}
                 />
               </div>
             </div>
           )}
 
-          {/* Auth pane: token — design lines 607–609 */}
+          {/* Auth pane: token */}
           {authTab === 'token' && (
             <div className={styles.fieldWrap}>
               <div className={styles.fieldLabel}>Service-account token</div>
               <input
                 className={styles.fieldInput}
-                value={conn.token ?? ''}
-                onChange={(e) => onField('token', e.target.value)}
-                placeholder="oo_sa_…"
+                value={selected?.token ?? ''}
+                onChange={(e) => selected && onUpdateCtx(selected.name, 'token', e.target.value)}
+                placeholder="oo_sa_..."
               />
             </div>
           )}
 
-          {/* Auth pane: SSO — design lines 610–612 */}
+          {/* Auth pane: SSO */}
           {authTab === 'sso' && (
             <div className={styles.ssoWarn}>
               <span className={styles.ssoWarnIcon}>⚠</span>
@@ -180,7 +248,7 @@ export function SetupWizard({
             </div>
           )}
 
-          {/* Self-signed toggle — design lines 614–617 */}
+          {/* Self-signed toggle */}
           <div className={styles.toggleRow}>
             <button
               className={`${styles.toggle}${selfSigned ? ` ${styles.toggleOn}` : ''}`}
@@ -194,20 +262,28 @@ export function SetupWizard({
             <span className={styles.toggleLabel}>Trust self-signed certificate</span>
           </div>
 
-          {/* Test connection row — design lines 619–622 */}
+          {/* Test connection row */}
           <div className={styles.testRow}>
-            <button className={styles.testBtn} onClick={onTest}>
+            <button
+              className={styles.testBtn}
+              onClick={() => selected && onTest(selected)}
+              disabled={!selected}
+            >
               Test connection
             </button>
             {tested && (
-              <span className={styles.testedLabel}>✓ reachable · 6 streams · v0.14.1</span>
+              <span className={styles.testedLabel}>✓ reachable</span>
             )}
           </div>
           {error && <div className={styles.testError}>{error}</div>}
 
-          {/* Action buttons — design lines 624–627 */}
+          {/* Action buttons */}
           <div className={styles.actions}>
-            <button className={styles.btnPrimary} onClick={onSave ?? onClose}>
+            <button
+              className={styles.btnPrimary}
+              onClick={() => selected && onSave(selected)}
+              disabled={!selected}
+            >
               Connect &amp; continue
             </button>
             <button className={styles.btnSkip} onClick={onClose}>
@@ -215,7 +291,7 @@ export function SetupWizard({
             </button>
           </div>
 
-          {/* Keychain note — design line 628 (Tauri → Wails, intentional deviation) */}
+          {/* Keychain note */}
           <div className={styles.keychainNote}>
             <span className={styles.keychainIcon}>🔒</span>
             Stored in your OS keychain via Wails — never in plaintext.

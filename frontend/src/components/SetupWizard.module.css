@@ -146,6 +146,80 @@
   color: #6b7282;
 }
 
+/* ===== "Your contexts" list in the left panel — design lines 644-656 ===== */
+
+.ctxSection {
+  margin-top: 30px;
+}
+
+.ctxSectionLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #5b6b67;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.ctxSectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Each context row in the wizard sidebar — design lines 648-652 */
+.ctxItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.ctxItemDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.ctxItemName {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: #cfe3de;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctxItemCheck {
+  color: var(--accent, #2dd4bf);
+  font-size: 12px;
+}
+
+/* "+ New context" button — design line 654 */
+.ctxAddBtn {
+  margin-top: 4px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #9fb4ae;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.ctxAddBtn:hover {
+  border-color: var(--accent, #2dd4bf);
+  color: #e6eaf2;
+}
+
 /* Spacer */
 .spacer {
   flex: 1;

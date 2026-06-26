@@ -22,7 +22,7 @@ import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
-  LoadConnection, SaveConnection, TestConnection,
+  ListContexts, SwitchContext, SaveContext, TestConnection,
   ListStreams, GetFields, RunQuery,
 } from '../wailsjs/go/main/App';
 
@@ -46,6 +46,29 @@ const STREAM_PALETTE = ['#2dd4bf', '#60a5fa', '#f59e0b', '#a78bfa', '#f4685f', '
 const withColors = (streams: { name: string; size: string }[]) =>
   streams.map((s, i) => ({ ...s, color: STREAM_PALETTE[i % STREAM_PALETTE.length] }));
 
+// UICtx — one context as the frontend holds it (color + draft secret fields are UI-only)
+interface UICtx {
+  name: string; url: string; org: string;
+  scheme: string;       // 'basic' | 'token'
+  username: string;     // email
+  hasSecret: boolean; isCurrent: boolean;
+  color: string;
+  password: string; token: string; // draft-only, never read back from backend
+  draft: boolean;       // true until first successful SaveContext
+}
+
+// Context color palette — distinct from stream palette
+const CTX_PALETTE = ['#34e0a1', '#f5b340', '#7c83ff', '#2dd4bf', '#60a5fa', '#f4685f'];
+
+// toUICtx maps ContextInfo[] from the backend to the UI representation.
+const toUICtx = (infos: { name: string; url: string; org: string; scheme: string; username: string; hasSecret: boolean; isCurrent: boolean }[]): UICtx[] =>
+  infos.map((c, i) => ({
+    name: c.name, url: c.url, org: c.org, scheme: c.scheme, username: c.username,
+    hasSecret: c.hasSecret, isCurrent: c.isCurrent,
+    color: CTX_PALETTE[i % CTX_PALETTE.length],
+    password: '', token: '', draft: false,
+  }));
+
 function App() {
   const [activeNav, setActiveNav] = useState<string>('Logs');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -64,6 +87,11 @@ function App() {
   const [tabs, setTabs] = useState(TABS);
   const [activeTab, setActiveTab] = useState<string>(TABS[0].id);
   const tabSeq = useRef(0);
+
+  // Contexts state — kubectl-style named contexts loaded from shared config
+  const [contexts, setContexts] = useState<UICtx[]>([]);
+  const [currentName, setCurrentName] = useState<string>('');
+  const [ctxSwitchOpen, setCtxSwitchOpen] = useState(false);
 
   /* QueryEditor state — task 5 */
   const activeTabData = tabs.find((t) => t.id === activeTab) ?? tabs[0];
@@ -155,27 +183,36 @@ function App() {
   const [configured, setConfigured] = useState<boolean>(true);
   const [wizardError, setWizardError] = useState<string | null>(null);
 
-  /* Step 3: Load connection on startup; auto-open wizard when unconfigured */
+  // refreshContexts loads contexts from the backend and syncs state.
+  const refreshContexts = async (): Promise<UICtx[]> => {
+    const infos = await ListContexts();
+    const ui = toUICtx(infos as any);
+    setContexts(ui);
+    const cur = ui.find((c) => c.isCurrent) ?? ui[0];
+    setCurrentName(cur?.name ?? '');
+    return ui;
+  };
+
+  /* Startup: load contexts; open wizard only when none usable (no current with secret) */
   useEffect(() => {
-    LoadConnection()
-      .then((c) => {
-        if (!c.url || !c.hasSecret) {
+    refreshContexts()
+      .then((ui) => {
+        const cur = ui.find((c) => c.isCurrent) ?? ui[0];
+        if (!cur || !cur.hasSecret) {
           setConfigured(false);
           setSetupOpen(true);
           return;
         }
-        setConn((prev) => ({ ...prev, url: c.url, org: c.org, email: c.username }));
         setConfigured(true);
-        return ListStreams().then((s) => {
-          const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
-          setLiveStreams(mapped);
-          if (mapped.length > 0) setStream(mapped[0].name);
-        }).catch((e) => {
-          if (parseAppError(e).category === 'not_configured') {
-            setConfigured(false);
-            setSetupOpen(true);
-          }
-        });
+        return ListStreams()
+          .then((s) => {
+            const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
+            setLiveStreams(mapped);
+            if (mapped.length > 0) setStream(mapped[0].name);
+          })
+          .catch((e) => {
+            if (parseAppError(e).category === 'not_configured') { setConfigured(false); setSetupOpen(true); }
+          });
       })
       .catch(() => { setConfigured(false); setSetupOpen(true); });
   }, []);
@@ -234,43 +271,57 @@ function App() {
     }
   };
 
-  /* Step 8: Test and Save connection handlers */
-  const handleTest = async () => {
-    setWizardError(null);
+  // handleSwitchContext switches the active context and reloads streams.
+  const handleSwitchContext = async (name: string) => {
     try {
-      const scheme = authTab === 'token' ? 'token' : 'basic';
-      await TestConnection({
-        url: conn.url, org: conn.org, scheme,
-        username: conn.email ?? '',
-        secret: (scheme === 'token' ? conn.token : conn.password) ?? '',
-      } as any);
-      setTested(true);
+      await SwitchContext(name);
+      setCurrentName(name);
+      await refreshContexts();
+      setConfigured(true);
+      setQueryError(null);
+      setLiveRows([]); setLiveBars([]);
+      const s = await ListStreams().catch((e) => {
+        if (parseAppError(e).category === 'not_configured') { setConfigured(false); setSetupOpen(true); }
+        return [];
+      });
+      const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
+      setLiveStreams(mapped);
+      if (mapped.length > 0) setStream(mapped[0].name);
     } catch (e: any) {
-      setTested(false);
-      const ae = parseAppError(e);
-      setWizardError(ae.message);
+      setWizardError(parseAppError(e).message);
     }
   };
 
-  const handleSaveConnection = async () => {
-    const scheme = authTab === 'token' ? 'token' : 'basic';
-    await SaveConnection({
-      url: conn.url, org: conn.org, scheme,
-      username: conn.email ?? '',
-      secret: (scheme === 'token' ? conn.token : conn.password) ?? '',
-    } as any);
+  // handleAddContext appends a draft context held in state until SaveContext persists it.
+  const handleAddContext = () => {
+    const color = CTX_PALETTE[contexts.length % CTX_PALETTE.length];
+    const draft: UICtx = {
+      name: 'new-context', url: '', org: 'default', scheme: 'basic', username: '',
+      hasSecret: false, isCurrent: false, color, password: '', token: '', draft: true,
+    };
+    setContexts((cs) => [...cs, draft]);
+    setCurrentName('new-context');
+  };
+
+  // handleSaveContext persists the named context (upsert + secret) then refreshes.
+  const handleSaveContext = async (ctx: UICtx): Promise<void> => {
+    const secret = ctx.scheme === 'token' ? ctx.token : ctx.password;
+    await SaveContext({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret } as any);
     setConfigured(true);
-    setSetupOpen(false);
-    const s = await ListStreams().catch((e) => {
-      if (parseAppError(e).category === 'not_configured') {
-        setConfigured(false);
-        setSetupOpen(true);
-      }
-      return [];
-    });
-    const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
-    setLiveStreams(mapped);
-    if (mapped.length > 0) setStream(mapped[0].name);
+    await refreshContexts();
+  };
+
+  // handleTestContext tests the connection for the given context draft.
+  const handleTestContext = async (ctx: UICtx): Promise<void> => {
+    setWizardError(null);
+    try {
+      const secret = ctx.scheme === 'token' ? ctx.token : ctx.password;
+      await TestConnection({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret } as any);
+      setTested(true);
+    } catch (e: any) {
+      setTested(false);
+      setWizardError(parseAppError(e).message);
+    }
   };
 
   const handlePickAccent = (c: string) => {
@@ -299,8 +350,16 @@ function App() {
   return (
     <div className={styles.shell}>
       <div className={styles.card}>
-        {/* TitleBar — design line 41 */}
-        <TitleBar />
+        {/* TitleBar — design line 41; context switcher added in task 3 */}
+        <TitleBar
+          contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName }))}
+          currentName={currentName}
+          switchOpen={ctxSwitchOpen}
+          onToggleSwitch={() => setCtxSwitchOpen((v) => !v)}
+          onSwitch={(name) => { setCtxSwitchOpen(false); handleSwitchContext(name); }}
+          onAddContext={() => { setCtxSwitchOpen(false); handleAddContext(); setSettingsOpen(true); setSettingsTab('connection'); }}
+          onManage={() => { setCtxSwitchOpen(false); setSettingsOpen(true); setSettingsTab('connection'); }}
+        />
 
         {/* BODY flex row — design line 61 */}
         <div className={styles.body}>
@@ -473,21 +532,44 @@ function App() {
           />
         )}
 
-        {/* SetupWizard — task 13: full-screen first-launch overlay */}
+        {/* SetupWizard — task 3: multi-context first-launch + add overlay */}
         {setupT.mounted && (
           <SetupWizard
             visible={setupT.visible}
-            conn={conn}
+            contexts={contexts}
+            currentName={currentName}
             authTab={authTab}
             tested={tested}
             selfSigned={selfSigned}
             error={wizardError}
             onAuthTab={setAuthTab}
-            onField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
+            onUpdateCtx={(name, key, value) =>
+              setContexts((cs) =>
+                cs.map((c) => (c.name === name ? { ...c, [key]: value } : c))
+              )
+            }
+            onSelectCtx={setCurrentName}
             onToggleSelfSigned={() => setSelfSigned((v) => !v)}
-            onTest={handleTest}
+            onTest={(ctx) => handleTestContext(ctx)}
             onClose={() => { setSetupOpen(false); setWizardError(null); }}
-            onSave={handleSaveConnection}
+            onSave={async (ctx) => {
+              await handleSaveContext(ctx);
+              // after saving, load streams and close if successful
+              const s = await ListStreams().catch((e) => {
+                if (parseAppError(e).category === 'not_configured') {
+                  setConfigured(false);
+                }
+                return [];
+              });
+              if (s.length > 0 || configured) {
+                const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
+                setLiveStreams(mapped);
+                if (mapped.length > 0) setStream(mapped[0].name);
+                setSetupOpen(false);
+                setWizardError(null);
+              }
+            }}
+            onAddContext={() => { handleAddContext(); }}
           />
         )}
 
