@@ -19,11 +19,10 @@ interface SetupWizardProps {
   visible: boolean;
   contexts: UICtx[];
   currentName: string;
-  authTab: 'password' | 'token' | 'sso';
+  // authTab and onAuthTab removed — Fix 3: scheme is now the source of truth
   tested: boolean;
   selfSigned: boolean;
   error?: string | null;
-  onAuthTab: (t: 'password' | 'token' | 'sso') => void;
   // mutate a single field on the named context
   onUpdateCtx: (name: string, key: string, value: string) => void;
   onSelectCtx: (name: string) => void;
@@ -44,11 +43,9 @@ export function SetupWizard({
   visible,
   contexts,
   currentName,
-  authTab,
   tested,
   selfSigned,
   error,
-  onAuthTab,
   onUpdateCtx,
   onSelectCtx,
   onToggleSelfSigned,
@@ -58,6 +55,10 @@ export function SetupWizard({
   onAddContext,
 }: SetupWizardProps): ReactElement {
   const selected = contexts.find((c) => c.name === currentName) ?? contexts[0];
+  // Fix 3: derive the active auth tab from the selected context's scheme so the
+  // displayed tab always matches what handleSaveContext / handleTestContext will use.
+  const authTab: 'password' | 'token' | 'sso' =
+    selected?.scheme === 'token' ? 'token' : selected?.scheme === 'sso' ? 'sso' : 'password';
 
   return (
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
@@ -193,7 +194,13 @@ export function SetupWizard({
                 <button
                   key={a.id}
                   className={`${styles.authTab}${authTab === a.id ? ` ${styles.authTabActive}` : ''}`}
-                  onClick={() => onAuthTab(a.id)}
+                  onClick={() => {
+                    if (!selected) return;
+                    // Fix 3: toggling the auth tab updates the selected context's scheme
+                    // so Save/Test always use the scheme the user sees.
+                    const scheme = a.id === 'token' ? 'token' : a.id === 'sso' ? 'sso' : 'basic';
+                    onUpdateCtx(selected.name, 'scheme', scheme);
+                  }}
                 >
                   {a.label}
                 </button>

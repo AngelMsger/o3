@@ -189,6 +189,15 @@
   text-overflow: ellipsis;
 }
 
+/* Sub-label (server URL) beneath context name — design line 77 */
+.ctxRowSub {
+  font-size: 10.5px;
+  color: #6b7282;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Active checkmark — design line 79 */
 .ctxCheckmark {
   color: var(--accent, #2dd4bf);

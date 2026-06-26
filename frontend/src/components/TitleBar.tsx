@@ -6,6 +6,7 @@ import styles from './TitleBar.module.css';
 
 interface TitleBarCtxItem {
   name: string;
+  url: string;   // Fix 6: sub-label shown under the name (design line 77)
   color: string;
   isCurrent: boolean;
 }
@@ -94,6 +95,9 @@ export function TitleBar({
                     />
                     <div className={styles.ctxRowBody}>
                       <div className={styles.ctxRowName}>{c.name}</div>
+                      {c.url && (
+                        <div className={styles.ctxRowSub}>{c.url}</div>
+                      )}
                     </div>
                     {c.isCurrent && <span className={styles.ctxCheckmark}>✓</span>}
                   </div>

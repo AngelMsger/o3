@@ -293,14 +293,21 @@ function App() {
   };
 
   // handleAddContext appends a draft context held in state until SaveContext persists it.
+  // Fix 5: dedupe the draft name so two "+ Add" clicks never produce the same key.
   const handleAddContext = () => {
     const color = CTX_PALETTE[contexts.length % CTX_PALETTE.length];
+    let draftName = 'new-context';
+    let seq = 2;
+    while (contexts.some((c) => c.name === draftName)) {
+      draftName = `new-context-${seq}`;
+      seq += 1;
+    }
     const draft: UICtx = {
-      name: 'new-context', url: '', org: 'default', scheme: 'basic', username: '',
+      name: draftName, url: '', org: 'default', scheme: 'basic', username: '',
       hasSecret: false, isCurrent: false, color, password: '', token: '', draft: true,
     };
     setContexts((cs) => [...cs, draft]);
-    setCurrentName('new-context');
+    setCurrentName(draftName);
   };
 
   // handleSaveContext persists the named context (upsert + secret) then refreshes.
@@ -352,7 +359,7 @@ function App() {
       <div className={styles.card}>
         {/* TitleBar — design line 41; context switcher added in task 3 */}
         <TitleBar
-          contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName }))}
+          contexts={contexts.map((c) => ({ name: c.name, url: c.url, color: c.color, isCurrent: c.name === currentName }))}
           currentName={currentName}
           switchOpen={ctxSwitchOpen}
           onToggleSwitch={() => setCtxSwitchOpen((v) => !v)}
@@ -538,36 +545,45 @@ function App() {
             visible={setupT.visible}
             contexts={contexts}
             currentName={currentName}
-            authTab={authTab}
             tested={tested}
             selfSigned={selfSigned}
             error={wizardError}
-            onAuthTab={setAuthTab}
-            onUpdateCtx={(name, key, value) =>
+            onUpdateCtx={(name, key, value) => {
               setContexts((cs) =>
                 cs.map((c) => (c.name === name ? { ...c, [key]: value } : c))
-              )
-            }
-            onSelectCtx={setCurrentName}
+              );
+              // Fix 2: when renaming the currently-selected context, keep
+              // currentName in sync so `selected` keeps tracking the right entry.
+              if (key === 'name' && name === currentName) {
+                setCurrentName(value);
+              }
+            }}
+            onSelectCtx={(name) => { setCurrentName(name); setWizardError(null); }}
             onToggleSelfSigned={() => setSelfSigned((v) => !v)}
             onTest={(ctx) => handleTestContext(ctx)}
             onClose={() => { setSetupOpen(false); setWizardError(null); }}
             onSave={async (ctx) => {
+              // Fix 1: close unconditionally after a successful SaveContext —
+              // never gate the close on stream count or stale `configured`.
               await handleSaveContext(ctx);
-              // after saving, load streams and close if successful
-              const s = await ListStreams().catch((e) => {
-                if (parseAppError(e).category === 'not_configured') {
-                  setConfigured(false);
-                }
-                return [];
-              });
-              if (s.length > 0 || configured) {
-                const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
-                setLiveStreams(mapped);
-                if (mapped.length > 0) setStream(mapped[0].name);
-                setSetupOpen(false);
-                setWizardError(null);
-              }
+              setSetupOpen(false);
+              setConfigured(true);
+              setWizardError(null);
+              // Best-effort stream load; failure only reopens the wizard on
+              // not_configured — it does NOT prevent the wizard from closing.
+              ListStreams()
+                .then((s) => {
+                  const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
+                  setLiveStreams(mapped);
+                  if (mapped.length > 0) setStream(mapped[0].name);
+                })
+                .catch((e) => {
+                  if (parseAppError(e).category === 'not_configured') {
+                    setConfigured(false);
+                    setSetupOpen(true);
+                  }
+                  // other errors (e.g. zero streams) are silently ignored
+                });
             }}
             onAddContext={() => { handleAddContext(); }}
           />
