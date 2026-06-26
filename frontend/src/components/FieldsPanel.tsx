@@ -119,7 +119,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
 
         {/* stream dropdown — shown when streamOpen=true */}
         {streamOpen && (
-          <div className={styles.dropdown}>
+          <div className={`oo-scroll ${styles.dropdown}`}>
             {streams.map((s) => (
               <div
                 key={s.name}

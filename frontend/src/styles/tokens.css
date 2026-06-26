@@ -29,11 +29,21 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  /* The app owns its own scroll regions (results list, field list, dropdowns).
+     Pin the document so the whole interface — title bar, sidebar — never scrolls
+     or rubber-bands as a unit inside the macOS WebView. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
   background: radial-gradient(120% 120% at 80% -10%, #11141b 0%, #06070a 55%, #04050700 100%), #050608;
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
 }
 
 ::selection {
