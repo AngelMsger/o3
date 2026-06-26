@@ -18,7 +18,7 @@ import { SetupWizard } from './components/SetupWizard';
 import { ValueActionMenu } from './components/ValueActionMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
-import { computeSuggestions, fromStream, setFromStream } from './lib/format';
+import { computeSuggestions, wordBeforeCaret, fromStream, setFromStream } from './lib/format';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
@@ -117,8 +117,8 @@ function App() {
   const [running, setRunning] = useState<boolean>(false);
   const [timeRange, setTimeRange] = useState<string>('Past 15 Minutes');
   const [historyOpen, setHistoryOpen] = useState<boolean>(false);
-  const [suggestOpen, setSuggestOpen] = useState<boolean>(false);
-  const [suggestIndex] = useState<number>(0);
+  const [editorFocused, setEditorFocused] = useState<boolean>(false);
+  const [acActiveIndex, setAcActiveIndex] = useState<number>(0);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
 
   /* Delayed-unmount hooks for animated overlays */
@@ -188,9 +188,10 @@ function App() {
   const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
   const [liveFields, setLiveFields] = useState<TField[]>([]);
 
-  /* static autocomplete — derive suggestions from current word + live fields */
-  const currentWord = 'co';
-  const suggestions = computeSuggestions(currentWord, liveFields);
+  /* context-aware autocomplete — caret-driven, SQL-mode-gated, live-field suggestions */
+  const currentWord = mode === 'sql' ? wordBeforeCaret(editorText, caret) : '';
+  const suggestions = mode === 'sql' ? computeSuggestions(currentWord, liveFields) : [];
+  const acOpen = mode === 'sql' && editorFocused && currentWord.length > 0 && suggestions.length > 0;
   const [liveStreams, setLiveStreams] = useState<{ name: string; size: string; color: string }[]>([]);
   const [liveBars, setLiveBars] = useState<HistoBucket[]>([]);
   const [liveMeta, setLiveMeta] = useState<{ total: number; tookMs: number; shown: number }>({ total: 0, tookMs: 0, shown: 0 });
@@ -426,6 +427,21 @@ function App() {
     }
   };
 
+  const acceptSuggestion = (label: string) => {
+    const start = caret - currentWord.length;
+    const next = editorText.slice(0, start) + label + editorText.slice(caret);
+    setEditorText(next);
+    const newCaret = start + label.length;
+    setCaret(newCaret);
+    setAcActiveIndex(0);
+    requestAnimationFrame(() => {
+      const t = textareaRef.current;
+      if (!t) return;
+      t.focus();
+      t.selectionStart = t.selectionEnd = newCaret;
+    });
+  };
+
   const handleInsertField = (name: string) => {
     const ta = textareaRef.current;
     const pos = ta ? ta.selectionStart : editorText.length;
@@ -490,10 +506,20 @@ function App() {
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
               onToggleGuide={() => setGuideOpen((v) => !v)}
-              onEditorFocus={() => setSuggestOpen(true)}
-              onEditorBlur={() => setSuggestOpen(false)}
+              onEditorFocus={() => setEditorFocused(true)}
+              onEditorBlur={() => setEditorFocused(false)}
               textareaRef={textareaRef}
               onCaretChange={setCaret}
+              acOpen={acOpen}
+              acCount={suggestions.length}
+              acActiveIndex={Math.min(acActiveIndex, Math.max(0, suggestions.length - 1))}
+              onAcMove={(delta) => setAcActiveIndex((i) => {
+                const n = suggestions.length;
+                if (n === 0) return 0;
+                return (Math.min(i, n - 1) + delta + n) % n;
+              })}
+              onAcAccept={() => { const s = suggestions[Math.min(acActiveIndex, suggestions.length - 1)]; if (s) acceptSuggestion(s.label); }}
+              onAcClose={() => setEditorFocused(false)}
               timePicker={
                 <TimeRangePicker
                   open={timeOpen}
@@ -529,12 +555,12 @@ function App() {
               }
               autocomplete={
                 <Autocomplete
-                  open={suggestOpen}
+                  open={acOpen}
                   currentWord={currentWord}
                   suggestions={suggestions}
-                  activeIndex={suggestIndex}
-                  onSelect={() => setSuggestOpen(false)}
-                  onHover={() => {}}
+                  activeIndex={Math.min(acActiveIndex, Math.max(0, suggestions.length - 1))}
+                  onSelect={(s) => acceptSuggestion(s.label)}
+                  onHover={(i) => setAcActiveIndex(i)}
                 />
               }
             />

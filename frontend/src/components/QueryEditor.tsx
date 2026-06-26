@@ -25,6 +25,12 @@ export interface QueryEditorProps {
   caretHint?: string;
   textareaRef?: RefObject<HTMLTextAreaElement>;
   onCaretChange?: (pos: number) => void;
+  acOpen?: boolean;
+  acCount?: number;
+  acActiveIndex?: number;
+  onAcMove?: (delta: number) => void;
+  onAcAccept?: () => void;
+  onAcClose?: () => void;
 }
 
 export function QueryEditor(props: QueryEditorProps): ReactElement {
@@ -49,6 +55,10 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     caretHint,
     textareaRef,
     onCaretChange,
+    acOpen,
+    onAcMove,
+    onAcAccept,
+    onAcClose,
   } = props;
 
   /* line-number gutter — design line 163 */
@@ -159,6 +169,13 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             onSelect={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
             onKeyUp={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
             onClick={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
+            onKeyDown={(e) => {
+              if (!acOpen) return;
+              if (e.key === 'ArrowDown') { e.preventDefault(); onAcMove?.(1); }
+              else if (e.key === 'ArrowUp') { e.preventDefault(); onAcMove?.(-1); }
+              else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); onAcAccept?.(); }
+              else if (e.key === 'Escape') { e.preventDefault(); onAcClose?.(); }
+            }}
             spellCheck={false}
             wrap="soft"
           />
