@@ -16,3 +16,4 @@ export interface QueryTab { id: string; name: string; q: string; stream: string;
 export interface GuideSection { title: string; items: { code: string; note: string }[]; }
 export interface NavItem { name: string; icon: 'logs'|'metrics'|'traces'|'streams'|'dash'|'alerts'; soon: boolean; }
 export interface HistoBar { h: number; }   // normalized 0..1 height
+export interface HistoBucket { t: string; h: number; c: number }  // t=label, h=0..1 height, c=raw count

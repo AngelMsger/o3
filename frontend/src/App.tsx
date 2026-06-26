@@ -20,11 +20,26 @@ import { SyntaxGuide } from './components/SyntaxGuide';
 import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
-import type { LogRow as TLogRow, Field as TField, HistoBar } from './types';
+import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
   LoadConnection, SaveConnection, TestConnection,
   ListStreams, GetFields, RunQuery,
 } from '../wailsjs/go/main/App';
+
+// parseAppError unpacks the structured error string Wails delivers (apperr emits
+// JSON), falling back to a plain message for non-structured rejections.
+function parseAppError(e: unknown): { category: string; message: string; hint: string } {
+  const raw = typeof e === 'string' ? e : ((e as any)?.message ?? String(e));
+  try {
+    const o = JSON.parse(raw);
+    if (o && typeof o === 'object' && 'message' in o) {
+      return { category: o.category ?? 'internal', message: o.message ?? raw, hint: o.hint ?? '' };
+    }
+  } catch {
+    /* not JSON - fall through */
+  }
+  return { category: 'internal', message: raw, hint: '' };
+}
 
 // Stream color palette — assigned round-robin since the API does not return colors
 const STREAM_PALETTE = ['#2dd4bf', '#60a5fa', '#f59e0b', '#a78bfa', '#f4685f', '#34d399'];
@@ -133,7 +148,7 @@ function App() {
   const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
   const [liveFields, setLiveFields] = useState<TField[]>([]);
   const [liveStreams, setLiveStreams] = useState<{ name: string; size: string; color: string }[]>([]);
-  const [liveBars, setLiveBars] = useState<HistoBar[]>([]);
+  const [liveBars, setLiveBars] = useState<HistoBucket[]>([]);
   const [liveMeta, setLiveMeta] = useState<{ total: number; tookMs: number; shown: number }>({ total: 0, tookMs: 0, shown: 0 });
   const [loading, setLoading] = useState(false);
   const [queryError, setQueryError] = useState<{ message: string; hint: string } | null>(null);
@@ -144,7 +159,7 @@ function App() {
   useEffect(() => {
     LoadConnection()
       .then((c) => {
-        if (!c.url) {
+        if (!c.url || !c.hasSecret) {
           setConfigured(false);
           setSetupOpen(true);
           return;
@@ -155,6 +170,11 @@ function App() {
           const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
           setLiveStreams(mapped);
           if (mapped.length > 0) setStream(mapped[0].name);
+        }).catch((e) => {
+          if (parseAppError(e).category === 'not_configured') {
+            setConfigured(false);
+            setSetupOpen(true);
+          }
         });
       })
       .catch(() => { setConfigured(false); setSetupOpen(true); });
@@ -165,7 +185,13 @@ function App() {
     if (!configured || !stream) return;
     GetFields(stream)
       .then((f) => setLiveFields(f as unknown as TField[]))
-      .catch(() => setLiveFields([]));
+      .catch((e) => {
+        setLiveFields([]);
+        if (parseAppError(e).category === 'not_configured') {
+          setConfigured(false);
+          setSetupOpen(true);
+        }
+      });
   }, [stream, configured]);
 
   /* Step 5: Compute time window from relative picker state */
@@ -195,10 +221,11 @@ function App() {
         histogram: showHistogram,
       } as any);
       setLiveRows((res.rows ?? []) as unknown as TLogRow[]);
-      setLiveBars((res.histogram ?? []) as unknown as HistoBar[]);
+      setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
       setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
     } catch (e: any) {
-      setQueryError({ message: e?.message ?? String(e), hint: e?.hint ?? '' });
+      const ae = parseAppError(e);
+      setQueryError({ message: ae.message, hint: ae.hint });
       setLiveRows([]);
       setLiveBars([]);
     } finally {
@@ -220,7 +247,8 @@ function App() {
       setTested(true);
     } catch (e: any) {
       setTested(false);
-      setWizardError(e?.message ?? String(e));
+      const ae = parseAppError(e);
+      setWizardError(ae.message);
     }
   };
 
@@ -355,8 +383,8 @@ function App() {
                 collapsed={sidebarCollapsed}
                 stream={stream}
                 streamOpen={streamOpen}
-                streams={liveStreams.length ? liveStreams : STREAMS}
-                fields={liveFields.length ? liveFields : FIELDS}
+                streams={configured ? liveStreams : STREAMS}
+                fields={configured ? liveFields : FIELDS}
                 fieldFilter={fieldFilter}
                 onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
                 onToggleStream={() => setStreamOpen((v) => !v)}
