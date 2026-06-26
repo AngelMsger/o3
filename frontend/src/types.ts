@@ -12,7 +12,14 @@ export interface LogRow {
 }
 export interface HistoryItem { q: string; preview: string; stream: string; meta: string; ago: string; }
 export interface Suggestion { label: string; kind: 'keyword'|'function'|'field'; tag: string; detail: string; color: string; }
-export interface QueryTab { id: string; name: string; q: string; stream: string; }
+export interface QueryTab {
+  id: string;
+  name: string;
+  mode: QueryMode;   // active editor mode for this tab
+  sql: string;       // SQL-mode buffer
+  search: string;    // Search-mode buffer (free-text terms)
+  stream: string;    // target stream
+}
 export interface GuideSection { title: string; items: { code: string; note: string }[]; }
 export interface NavItem { name: string; icon: 'logs'|'metrics'|'traces'|'streams'|'dash'|'alerts'; soon: boolean; }
 export interface HistoBar { h: number; }   // normalized 0..1 height
