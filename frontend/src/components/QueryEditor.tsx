@@ -26,7 +26,6 @@ export interface QueryEditorProps {
   textareaRef?: RefObject<HTMLTextAreaElement>;
   onCaretChange?: (pos: number) => void;
   acOpen?: boolean;
-  acCount?: number;
   acActiveIndex?: number;
   onAcMove?: (delta: number) => void;
   onAcAccept?: () => void;

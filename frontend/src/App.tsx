@@ -118,6 +118,7 @@ function App() {
   const [timeRange, setTimeRange] = useState<string>('Past 15 Minutes');
   const [historyOpen, setHistoryOpen] = useState<boolean>(false);
   const [editorFocused, setEditorFocused] = useState<boolean>(false);
+  const [acDismissed, setAcDismissed] = useState(false);
   const [acActiveIndex, setAcActiveIndex] = useState<number>(0);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
 
@@ -191,7 +192,7 @@ function App() {
   /* context-aware autocomplete — caret-driven, SQL-mode-gated, live-field suggestions */
   const currentWord = mode === 'sql' ? wordBeforeCaret(editorText, caret) : '';
   const suggestions = mode === 'sql' ? computeSuggestions(currentWord, liveFields) : [];
-  const acOpen = mode === 'sql' && editorFocused && currentWord.length > 0 && suggestions.length > 0;
+  const acOpen = mode === 'sql' && editorFocused && !acDismissed && currentWord.length > 0 && suggestions.length > 0;
   const [liveStreams, setLiveStreams] = useState<{ name: string; size: string; color: string }[]>([]);
   const [liveBars, setLiveBars] = useState<HistoBucket[]>([]);
   const [liveMeta, setLiveMeta] = useState<{ total: number; tookMs: number; shown: number }>({ total: 0, tookMs: 0, shown: 0 });
@@ -434,6 +435,7 @@ function App() {
     const newCaret = start + label.length;
     setCaret(newCaret);
     setAcActiveIndex(0);
+    setAcDismissed(true);
     requestAnimationFrame(() => {
       const t = textareaRef.current;
       if (!t) return;
@@ -501,7 +503,7 @@ function App() {
               timeRange={timeRange}
               onModeChange={setMode}
               onToggleHisto={() => setShowHistogram((v) => !v)}
-              onQueryChange={setEditorText}
+              onQueryChange={(t) => { setEditorText(t); setAcDismissed(false); }}
               onRun={runQuery}
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
@@ -511,7 +513,6 @@ function App() {
               textareaRef={textareaRef}
               onCaretChange={setCaret}
               acOpen={acOpen}
-              acCount={suggestions.length}
               acActiveIndex={Math.min(acActiveIndex, Math.max(0, suggestions.length - 1))}
               onAcMove={(delta) => setAcActiveIndex((i) => {
                 const n = suggestions.length;
@@ -519,7 +520,7 @@ function App() {
                 return (Math.min(i, n - 1) + delta + n) % n;
               })}
               onAcAccept={() => { const s = suggestions[Math.min(acActiveIndex, suggestions.length - 1)]; if (s) acceptSuggestion(s.label); }}
-              onAcClose={() => setEditorFocused(false)}
+              onAcClose={() => setAcDismissed(true)}
               timePicker={
                 <TimeRangePicker
                   open={timeOpen}
