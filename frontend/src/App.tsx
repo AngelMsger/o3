@@ -664,7 +664,14 @@ function App() {
                 .then((s) => {
                   const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
                   setLiveStreams(mapped);
-                  if (mapped.length > 0) setActiveStream(mapped[0].name);
+                  if (mapped.length > 0) {
+                    const s = mapped[0].name;
+                    setTabs((ts) => ts.map((t) =>
+                      t.id === activeTab
+                        ? (t.sql.trim() ? { ...t, stream: s } : { ...t, stream: s, sql: setFromStream('', s) })
+                        : t,
+                    ));
+                  }
                 })
                 .catch((e) => {
                   if (parseAppError(e).category === 'not_configured') {
