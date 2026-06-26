@@ -62,8 +62,8 @@
 
 /* inline rename input — visually matches .name; transparent chrome */
 .nameEdit {
-  font-size: 11.5px;
-  color: #e6eaf2;
+  font-size: inherit;
+  color: inherit;
   font-weight: inherit;
   white-space: nowrap;
   background: transparent;

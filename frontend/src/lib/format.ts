@@ -107,7 +107,7 @@ export function wordBeforeCaret(text: string, caret: number): string {
 /**
  * Compute autocomplete suggestions for a given word prefix.
  * Ported from design lines 868-877.
- * Returns up to 8 matches across keywords (K/#ff7b9c), functions (f/#7dd3fc), fields (·/#a3e08c).
+ * Returns up to 8 matches across keywords (K/#ff7b9c), functions (ƒ/#7dd3fc), fields (·/#a3e08c).
  * Takes a live fields parameter instead of the mock FIELDS constant.
  */
 export function computeSuggestions(word: string, fields: Field[]): Suggestion[] {

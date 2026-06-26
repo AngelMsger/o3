@@ -83,6 +83,6 @@ describe('computeSuggestions', () => {
   });
   it('caps results at 8', () => {
     const many: Field[] = Array.from({ length: 20 }, (_, i) => ({ name: `sfield${i}`, type: 'string' }));
-    expect(computeSuggestions('s', many).length).toBeLessThanOrEqual(8);
+    expect(computeSuggestions('s', many).length).toBe(8);
   });
 });

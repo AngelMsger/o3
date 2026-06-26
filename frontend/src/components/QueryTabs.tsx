@@ -1,5 +1,5 @@
 /* QueryTabs — design/Observe.dc.html lines 77–91 */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import styles from './QueryTabs.module.css';
 import { STREAMS } from '../data/mock';
 import type { QueryTab } from '../types';
@@ -21,6 +21,9 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: 
   const closable = tabs.length > 1;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<string>('');
+  // committingRef prevents the double-commit that occurs when Enter clears
+  // editingId (unmounting the input) and the resulting blur fires commit again.
+  const committingRef = useRef(false);
 
   const commit = (id: string, fallback: string) => {
     const name = draft.trim() || fallback;
@@ -57,10 +60,13 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: 
                 onChange={(e) => setDraft(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') { e.preventDefault(); commit(t.id, t.name); }
-                  else if (e.key === 'Escape') { e.preventDefault(); setEditingId(null); }
+                  if (e.key === 'Enter') { e.preventDefault(); committingRef.current = true; commit(t.id, t.name); }
+                  else if (e.key === 'Escape') { e.preventDefault(); committingRef.current = true; setEditingId(null); }
                 }}
-                onBlur={() => commit(t.id, t.name)}
+                onBlur={() => {
+                  if (committingRef.current) { committingRef.current = false; return; }
+                  commit(t.id, t.name);
+                }}
               />
             ) : (
               <span className={styles.name}>{t.name}</span>

@@ -78,7 +78,6 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
   const [setupOpen, setSetupOpen] = useState(false);
-  const [authTab, setAuthTab] = useState<'password' | 'token' | 'sso'>('password');
   const [tested, setTested] = useState(false);
   const [selfSigned, setSelfSigned] = useState(false);
   const [accent, setAccent] = useState<string>('#2dd4bf');
@@ -213,6 +212,7 @@ function App() {
 
   /* Startup: load contexts; open wizard only when none usable (no current with secret) */
   useEffect(() => {
+    const seedTabId = activeTab; // capture the tab active when the load begins (always 't1' here)
     refreshContexts()
       .then((ui) => {
         const cur = ui.find((c) => c.isCurrent) ?? ui[0];
@@ -228,9 +228,9 @@ function App() {
             setLiveStreams(mapped);
             if (mapped.length > 0) {
               const first = mapped[0].name;
-              // Seed the active tab's sql buffer only when it is empty.
+              // Seed the tab that was active when the load began (not the current activeTab).
               setTabs((ts) => ts.map((t) => {
-                if (t.id !== activeTab) return t;
+                if (t.id !== seedTabId) return t;
                 return t.sql.trim()
                   ? { ...t, stream: first }
                   : { ...t, stream: first, sql: setFromStream('', first) };
@@ -311,6 +311,7 @@ function App() {
 
   // handleSwitchContext switches the active context and reloads streams.
   const handleSwitchContext = async (name: string) => {
+    const seedTabId = activeTab; // capture before any awaits
     try {
       await SwitchContext(name);
       setCurrentName(name);
@@ -326,9 +327,9 @@ function App() {
       setLiveStreams(mapped);
       if (mapped.length > 0) {
         const first = mapped[0].name;
-        // After a context switch, seed the active tab's sql buffer only when empty.
+        // Seed the tab that was active when the switch began (not the current activeTab).
         setTabs((ts) => ts.map((t) => {
-          if (t.id !== activeTab) return t;
+          if (t.id !== seedTabId) return t;
           return t.sql.trim()
             ? { ...t, stream: first }
             : { ...t, stream: first, sql: setFromStream('', first) };
@@ -713,6 +714,7 @@ function App() {
             onTest={(ctx) => handleTestContext(ctx)}
             onClose={() => { setSetupOpen(false); setWizardError(null); }}
             onSave={async (ctx) => {
+              const seedTabId = activeTab; // capture before any awaits
               // Fix 1: close unconditionally after a successful SaveContext —
               // never gate the close on stream count or stale `configured`.
               await handleSaveContext(ctx);
@@ -727,8 +729,9 @@ function App() {
                   setLiveStreams(mapped);
                   if (mapped.length > 0) {
                     const s = mapped[0].name;
+                    // Seed the tab that was active when the save began (not the current activeTab).
                     setTabs((ts) => ts.map((t) =>
-                      t.id === activeTab
+                      t.id === seedTabId
                         ? (t.sql.trim() ? { ...t, stream: s } : { ...t, stream: s, sql: setFromStream('', s) })
                         : t,
                     ));

@@ -10,6 +10,10 @@ import (
 // keychainService is the OS keychain service name. It matches the CLI's
 // constants.KeychainService so a credential saved by either tool is found by
 // the other.
+//
+// Note: o3 uses the OS keychain only (no file fallback). The CLI additionally
+// supports a credentials file fallback for headless or locked-keychain hosts.
+// On such hosts the two tools' secret stores can diverge.
 const keychainService = "openobserve-cli"
 
 // secretAccount derives the keychain account for a base URL and scheme,
