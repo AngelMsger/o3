@@ -72,6 +72,8 @@ const toUICtx = (infos: { name: string; url: string; org: string; scheme: string
   }));
 
 function App() {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [caret, setCaret] = useState<number>(0);
   const [activeNav, setActiveNav] = useState<string>('Logs');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
@@ -424,6 +426,22 @@ function App() {
     }
   };
 
+  const handleInsertField = (name: string) => {
+    const ta = textareaRef.current;
+    const pos = ta ? ta.selectionStart : editorText.length;
+    const end = ta ? ta.selectionEnd : editorText.length;
+    const next = editorText.slice(0, pos) + name + editorText.slice(end);
+    setEditorText(next);
+    const newCaret = pos + name.length;
+    setCaret(newCaret);
+    requestAnimationFrame(() => {
+      const t = textareaRef.current;
+      if (!t) return;
+      t.focus();
+      t.selectionStart = t.selectionEnd = newCaret;
+    });
+  };
+
   return (
     <div className={styles.shell}>
       <div className={styles.card}>
@@ -474,6 +492,8 @@ function App() {
               onToggleGuide={() => setGuideOpen((v) => !v)}
               onEditorFocus={() => setSuggestOpen(true)}
               onEditorBlur={() => setSuggestOpen(false)}
+              textareaRef={textareaRef}
+              onCaretChange={setCaret}
               timePicker={
                 <TimeRangePicker
                   open={timeOpen}
@@ -535,9 +555,10 @@ function App() {
                     ? { stream: name, sql: setFromStream(activeTabData.sql, name) }
                     : { stream: name });
                   setStreamOpen(false);
+                  requestAnimationFrame(() => textareaRef.current?.focus());
                 }}
                 onFieldFilter={setFieldFilter}
-                onInsertField={() => {}}
+                onInsertField={handleInsertField}
               />
 
               {/* center column — design line 290 */}

@@ -1,5 +1,5 @@
 /* QueryEditor — design/Observe.dc.html lines 93–207 */
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode, RefObject } from 'react';
 import styles from './QueryEditor.module.css';
 import { highlight } from '../lib/format';
 import type { QueryMode } from '../types';
@@ -23,6 +23,8 @@ export interface QueryEditorProps {
   historyPanel?: ReactNode;
   autocomplete?: ReactNode;
   caretHint?: string;
+  textareaRef?: RefObject<HTMLTextAreaElement>;
+  onCaretChange?: (pos: number) => void;
 }
 
 export function QueryEditor(props: QueryEditorProps): ReactElement {
@@ -45,6 +47,8 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     historyPanel,
     autocomplete,
     caretHint,
+    textareaRef,
+    onCaretChange,
   } = props;
 
   /* line-number gutter — design line 163 */
@@ -146,11 +150,15 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
 
           {/* design line 166 — transparent overlaid textarea */}
           <textarea
+            ref={textareaRef}
             className={styles.textarea}
             value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
+            onChange={(e) => { onQueryChange(e.target.value); onCaretChange?.(e.target.selectionStart); }}
             onFocus={onEditorFocus}
             onBlur={onEditorBlur}
+            onSelect={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
+            onKeyUp={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
+            onClick={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
             spellCheck={false}
             wrap="soft"
           />
