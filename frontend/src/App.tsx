@@ -18,8 +18,8 @@ import { SetupWizard } from './components/SetupWizard';
 import { ValueActionMenu } from './components/ValueActionMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
-import { computeSuggestions } from './lib/format';
-import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
+import { computeSuggestions, fromStream, setFromStream } from './lib/format';
+import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
@@ -86,7 +86,9 @@ function App() {
     org: 'default',
     email: 'ops@example.com',
   });
-  const [tabs, setTabs] = useState([{ id: 't1', name: 'untitled', q: '', stream: '' }]);
+  const [tabs, setTabs] = useState<QueryTab[]>([
+    { id: 't1', name: 'untitled', mode: 'sql', sql: '', search: '', stream: '' },
+  ]);
   const [activeTab, setActiveTab] = useState<string>('t1');
   const tabSeq = useRef(0);
 
@@ -95,12 +97,20 @@ function App() {
   const [currentName, setCurrentName] = useState<string>('');
   const [ctxSwitchOpen, setCtxSwitchOpen] = useState(false);
 
-  /* QueryEditor state — task 5 */
+  /* Active-tab derivation — tab is the single source of truth for editor state */
   const activeTabData = tabs.find((t) => t.id === activeTab) ?? tabs[0];
-  const [query, setQuery] = useState<string>(activeTabData.q);
+  const mode = activeTabData.mode;
+  const stream = activeTabData.stream;
+  const editorText = mode === 'sql' ? activeTabData.sql : activeTabData.search;
+
+  const patchActive = (patch: Partial<QueryTab>) =>
+    setTabs((ts) => ts.map((t) => (t.id === activeTab ? { ...t, ...patch } : t)));
+  const setEditorText = (text: string) => patchActive(mode === 'sql' ? { sql: text } : { search: text });
+  const setMode = (m: QueryMode) => patchActive({ mode: m });
+  const setActiveStream = (s: string) => patchActive({ stream: s });
+
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 100;
-  const [queryMode, setQueryMode] = useState<QueryMode>('sql');
   const [showHistogram, setShowHistogram] = useState<boolean>(true);
   const [running, setRunning] = useState<boolean>(false);
   const [timeRange, setTimeRange] = useState<string>('Past 15 Minutes');
@@ -138,9 +148,6 @@ function App() {
     setCtxMenu({ open: true, field, value, x, y });
   };
 
-  /* static autocomplete — derive currentWord from seeded query first line */
-  const currentWord = 'co';
-  const suggestions = computeSuggestions(currentWord);
   const [timeOpen, setTimeOpen] = useState<boolean>(false);
 
   /* ResultsTable state — task 10 */
@@ -165,7 +172,6 @@ function App() {
 
   /* FieldsPanel state — task 8 */
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
-  const [stream, setStream] = useState<string>('demo_logs');
   const [streamOpen, setStreamOpen] = useState<boolean>(false);
   const [fieldFilter, setFieldFilter] = useState<string>('');
 
@@ -179,6 +185,10 @@ function App() {
   /* Live-data state — M2 */
   const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
   const [liveFields, setLiveFields] = useState<TField[]>([]);
+
+  /* static autocomplete — derive suggestions from current word + live fields */
+  const currentWord = 'co';
+  const suggestions = computeSuggestions(currentWord, liveFields);
   const [liveStreams, setLiveStreams] = useState<{ name: string; size: string; color: string }[]>([]);
   const [liveBars, setLiveBars] = useState<HistoBucket[]>([]);
   const [liveMeta, setLiveMeta] = useState<{ total: number; tookMs: number; shown: number }>({ total: 0, tookMs: 0, shown: 0 });
@@ -197,9 +207,6 @@ function App() {
     return ui;
   };
 
-  // seedSql builds the default SELECT for a stream when no query has been typed yet.
-  const seedSql = (s: string) => `SELECT *\nFROM "${s}"\nORDER BY _timestamp DESC\nLIMIT 100`;
-
   /* Startup: load contexts; open wizard only when none usable (no current with secret) */
   useEffect(() => {
     refreshContexts()
@@ -217,14 +224,13 @@ function App() {
             setLiveStreams(mapped);
             if (mapped.length > 0) {
               const first = mapped[0].name;
-              setStream(first);
-              // Seed the first tab's query when no query has been typed yet.
-              setQuery((prev) => {
-                if (prev.trim()) return prev;
-                const seeded = seedSql(first);
-                setTabs((ts) => ts.map((t) => (t.id === activeTab ? { ...t, q: seeded, stream: first } : t)));
-                return seeded;
-              });
+              // Seed the active tab's sql buffer only when it is empty.
+              setTabs((ts) => ts.map((t) => {
+                if (t.id !== activeTab) return t;
+                return t.sql.trim()
+                  ? { ...t, stream: first }
+                  : { ...t, stream: first, sql: setFromStream('', first) };
+              }));
             }
           })
           .catch((e) => {
@@ -259,22 +265,16 @@ function App() {
     return { startMicros: Math.round(now - span), endMicros: Math.round(now) };
   };
 
-  // fromStream extracts the stream name from a SQL FROM clause.
-  const fromStream = (sql: string): string => {
-    const m = sql.match(/\bfrom\s+"?([a-zA-Z_][\w.-]*)"?/i);
-    return m ? m[1] : '';
-  };
-
   // buildRequest returns the effective SQL and stream for the current query mode.
   const buildRequest = (): { sql: string; effStream: string } => {
-    if (queryMode === 'search') {
+    if (mode === 'search') {
       const eff = stream; // dropdown stream is the FROM in search mode
-      const terms = query.trim();
+      const terms = activeTabData.search.trim();
       const where = terms ? ` WHERE match_all('${terms.replace(/'/g, "''")}')` : '';
       return { sql: `SELECT * FROM "${eff}"${where} ORDER BY _timestamp DESC`, effStream: eff };
     }
-    const eff = fromStream(query) || stream;
-    return { sql: query, effStream: eff };
+    const sql = activeTabData.sql;
+    return { sql, effStream: fromStream(sql) || stream };
   };
 
   const runQueryAt = async (pageNum: number) => {
@@ -294,7 +294,7 @@ function App() {
       setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
       setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
       setPage(pageNum);
-      if (effStream && effStream !== stream) setStream(effStream); // sync dropdown to the queried FROM
+      if (effStream && effStream !== stream) setActiveStream(effStream); // sync tab to the queried FROM
     } catch (e: any) {
       const ae = parseAppError(e);
       setQueryError({ message: ae.message, hint: ae.hint });
@@ -322,14 +322,13 @@ function App() {
       setLiveStreams(mapped);
       if (mapped.length > 0) {
         const first = mapped[0].name;
-        setStream(first);
-        // After a context switch, seed the active tab's query if it is blank.
-        setQuery((prev) => {
-          if (prev.trim()) return prev;
-          const seeded = seedSql(first);
-          setTabs((ts) => ts.map((t) => (t.id === activeTab ? { ...t, q: seeded, stream: first } : t)));
-          return seeded;
-        });
+        // After a context switch, seed the active tab's sql buffer only when empty.
+        setTabs((ts) => ts.map((t) => {
+          if (t.id !== activeTab) return t;
+          return t.sql.trim()
+            ? { ...t, stream: first }
+            : { ...t, stream: first, sql: setFromStream('', first) };
+        }));
       }
     } catch (e: any) {
       const ae = parseAppError(e);
@@ -409,7 +408,8 @@ function App() {
   const handleNewTab = () => {
     tabSeq.current += 1;
     const id = `t-new-${tabSeq.current}`;
-    setTabs((prev) => [...prev, { id, name: 'untitled', q: `SELECT *\nFROM ${stream}\n`, stream }]);
+    const s = activeTabData.stream;
+    setTabs((prev) => [...prev, { id, name: 'untitled', mode: 'sql', sql: s ? setFromStream('', s) : '', search: '', stream: s }]);
     setActiveTab(id);
   };
 
@@ -460,14 +460,14 @@ function App() {
 
             {/* QueryEditor — design lines 93-207 */}
             <QueryEditor
-              query={query}
-              queryMode={queryMode}
+              query={editorText}
+              queryMode={mode}
               showHistogram={showHistogram}
               running={running}
               timeRange={timeRange}
-              onModeChange={setQueryMode}
+              onModeChange={setMode}
               onToggleHisto={() => setShowHistogram((v) => !v)}
-              onQueryChange={setQuery}
+              onQueryChange={setEditorText}
               onRun={runQuery}
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
@@ -503,7 +503,7 @@ function App() {
                 <HistoryDropdown
                   open={historyOpen}
                   items={HISTORY}
-                  onPick={(item) => { setQuery(item.q); setHistoryOpen(false); }}
+                  onPick={(item) => { setEditorText(item.q); setHistoryOpen(false); }}
                   onClose={() => setHistoryOpen(false)}
                 />
               }
@@ -530,7 +530,12 @@ function App() {
                 fieldFilter={fieldFilter}
                 onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
                 onToggleStream={() => setStreamOpen((v) => !v)}
-                onPickStream={(name) => { setStream(name); setStreamOpen(false); }}
+                onPickStream={(name) => {
+                  patchActive(mode === 'sql'
+                    ? { stream: name, sql: setFromStream(activeTabData.sql, name) }
+                    : { stream: name });
+                  setStreamOpen(false);
+                }}
                 onFieldFilter={setFieldFilter}
                 onInsertField={() => {}}
               />
@@ -659,7 +664,7 @@ function App() {
                 .then((s) => {
                   const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
                   setLiveStreams(mapped);
-                  if (mapped.length > 0) setStream(mapped[0].name);
+                  if (mapped.length > 0) setActiveStream(mapped[0].name);
                 })
                 .catch((e) => {
                   if (parseAppError(e).category === 'not_configured') {

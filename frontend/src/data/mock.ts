@@ -90,29 +90,29 @@ export const NAV: NavItem[] = [
 // ---------------------------------------------------------------------------
 export const TABS: QueryTab[] = [
   {
-    id: 't1', name: 'message errors',
-    q: "SELECT _timestamp, service_name, body\nFROM demo_logs\nWHERE severity = 'error'\nORDER BY _timestamp DESC",
-    stream: 'demo_logs',
+    id: 't1', name: 'message errors', mode: 'sql',
+    sql: "SELECT _timestamp, service_name, body\nFROM demo_logs\nWHERE severity = 'error'\nORDER BY _timestamp DESC",
+    search: '', stream: 'demo_logs',
   },
   {
-    id: 't2', name: 'dingtalk volume',
-    q: "SELECT histogram(_timestamp, '30s') AS ts, count(*) AS events\nFROM demo_logs\nWHERE body LIKE '%dingtalk%'\nGROUP BY ts",
-    stream: 'demo_logs',
+    id: 't2', name: 'dingtalk volume', mode: 'sql',
+    sql: "SELECT histogram(_timestamp, '30s') AS ts, count(*) AS events\nFROM demo_logs\nWHERE body LIKE '%dingtalk%'\nGROUP BY ts",
+    search: '', stream: 'demo_logs',
   },
   {
-    id: 't3', name: '5xx by route',
-    q: "SELECT path, count(*) AS events\nFROM nginx_access\nWHERE status >= 500\nGROUP BY path\nORDER BY events DESC",
-    stream: 'nginx_access',
+    id: 't3', name: '5xx by route', mode: 'sql',
+    sql: "SELECT path, count(*) AS events\nFROM nginx_access\nWHERE status >= 500\nGROUP BY path\nORDER BY events DESC",
+    search: '', stream: 'nginx_access',
   },
   {
-    id: 't4', name: 'failed logins',
-    q: "SELECT * FROM demo_audit\nWHERE str_match(body, 'login failed')\nLIMIT 200",
-    stream: 'demo_audit',
+    id: 't4', name: 'failed logins', mode: 'sql',
+    sql: "SELECT * FROM demo_audit\nWHERE str_match(body, 'login failed')\nLIMIT 200",
+    search: '', stream: 'demo_audit',
   },
   {
-    id: 't5', name: 'all logs',
-    q: "SELECT *\nFROM demo_logs",
-    stream: 'demo_logs',
+    id: 't5', name: 'all logs', mode: 'sql',
+    sql: "SELECT *\nFROM demo_logs",
+    search: '', stream: 'demo_logs',
   },
 ];
 
