@@ -222,7 +222,7 @@ function App() {
               setQuery((prev) => {
                 if (prev.trim()) return prev;
                 const seeded = seedSql(first);
-                setTabs((ts) => ts.map((t) => (t.id === 't1' ? { ...t, q: seeded, stream: first } : t)));
+                setTabs((ts) => ts.map((t) => (t.id === activeTab ? { ...t, q: seeded, stream: first } : t)));
                 return seeded;
               });
             }
@@ -548,6 +548,7 @@ function App() {
                   totalEvents={liveMeta.total.toLocaleString()}
                   queryMs={liveMeta.tookMs}
                   page={page}
+                  pageSize={PAGE_SIZE}
                   totalPages={Math.max(1, Math.ceil(liveMeta.total / PAGE_SIZE))}
                   onPrev={() => { if (page > 1) runQueryAt(page - 1); }}
                   onNext={() => { const tp = Math.max(1, Math.ceil(liveMeta.total / PAGE_SIZE)); if (page < tp) runQueryAt(page + 1); }}

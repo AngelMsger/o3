@@ -8,17 +8,20 @@ interface ResultsHeaderProps {
   totalEvents: string;
   queryMs: number;
   page: number;
+  pageSize: number;
   totalPages: number;
   onPrev: () => void;
   onNext: () => void;
 }
 
-export function ResultsHeader({ shownCount, totalEvents, queryMs, page, totalPages, onPrev, onNext }: ResultsHeaderProps): ReactElement {
+export function ResultsHeader({ shownCount, totalEvents, queryMs, page, pageSize, totalPages, onPrev, onNext }: ResultsHeaderProps): ReactElement {
+  const start = shownCount > 0 ? (page - 1) * pageSize + 1 : 0;
+  const end = (page - 1) * pageSize + shownCount;
   return (
     <div className={styles.header}>
       {/* Showing N of total — design line 308 */}
       <span className={styles.showing}>
-        Showing <b className={styles.showingNum}>1-{shownCount}</b> of{' '}
+        Showing <b className={styles.showingNum}>{start}-{end}</b> of{' '}
         <b className={styles.showingNum}>{totalEvents}</b> events
       </span>
 
