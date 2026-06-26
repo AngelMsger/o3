@@ -17,7 +17,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { SetupWizard } from './components/SetupWizard';
 import { ValueActionMenu } from './components/ValueActionMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
-import { TABS, QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
+import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
@@ -86,8 +86,8 @@ function App() {
     org: 'default',
     email: 'ops@example.com',
   });
-  const [tabs, setTabs] = useState(TABS);
-  const [activeTab, setActiveTab] = useState<string>(TABS[0].id);
+  const [tabs, setTabs] = useState([{ id: 't1', name: 'untitled', q: '', stream: '' }]);
+  const [activeTab, setActiveTab] = useState<string>('t1');
   const tabSeq = useRef(0);
 
   // Contexts state — kubectl-style named contexts loaded from shared config
@@ -98,6 +98,8 @@ function App() {
   /* QueryEditor state — task 5 */
   const activeTabData = tabs.find((t) => t.id === activeTab) ?? tabs[0];
   const [query, setQuery] = useState<string>(activeTabData.q);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 100;
   const [queryMode, setQueryMode] = useState<QueryMode>('sql');
   const [showHistogram, setShowHistogram] = useState<boolean>(true);
   const [running, setRunning] = useState<boolean>(false);
@@ -195,6 +197,9 @@ function App() {
     return ui;
   };
 
+  // seedSql builds the default SELECT for a stream when no query has been typed yet.
+  const seedSql = (s: string) => `SELECT *\nFROM "${s}"\nORDER BY _timestamp DESC\nLIMIT 100`;
+
   /* Startup: load contexts; open wizard only when none usable (no current with secret) */
   useEffect(() => {
     refreshContexts()
@@ -210,7 +215,17 @@ function App() {
           .then((s) => {
             const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
             setLiveStreams(mapped);
-            if (mapped.length > 0) setStream(mapped[0].name);
+            if (mapped.length > 0) {
+              const first = mapped[0].name;
+              setStream(first);
+              // Seed the first tab's query when no query has been typed yet.
+              setQuery((prev) => {
+                if (prev.trim()) return prev;
+                const seeded = seedSql(first);
+                setTabs((ts) => ts.map((t) => (t.id === 't1' ? { ...t, q: seeded, stream: first } : t)));
+                return seeded;
+              });
+            }
           })
           .catch((e) => {
             if (parseAppError(e).category === 'not_configured') { setConfigured(false); setSetupOpen(true); }
@@ -244,34 +259,51 @@ function App() {
     return { startMicros: Math.round(now - span), endMicros: Math.round(now) };
   };
 
-  const runQuery = async () => {
-    setRunning(true);
-    setLoading(true);
-    setQueryError(null);
+  // fromStream extracts the stream name from a SQL FROM clause.
+  const fromStream = (sql: string): string => {
+    const m = sql.match(/\bfrom\s+"?([a-zA-Z_][\w.-]*)"?/i);
+    return m ? m[1] : '';
+  };
+
+  // buildRequest returns the effective SQL and stream for the current query mode.
+  const buildRequest = (): { sql: string; effStream: string } => {
+    if (queryMode === 'search') {
+      const eff = stream; // dropdown stream is the FROM in search mode
+      const terms = query.trim();
+      const where = terms ? ` WHERE match_all('${terms.replace(/'/g, "''")}')` : '';
+      return { sql: `SELECT * FROM "${eff}"${where} ORDER BY _timestamp DESC`, effStream: eff };
+    }
+    const eff = fromStream(query) || stream;
+    return { sql: query, effStream: eff };
+  };
+
+  const runQueryAt = async (pageNum: number) => {
+    setRunning(true); setLoading(true); setQueryError(null);
     const { startMicros, endMicros } = computeRange();
+    const { sql, effStream } = buildRequest();
     try {
       const res = await RunQuery({
-        stream,
-        sql: query,
-        startMicros,
-        endMicros,
-        from: 0,
-        size: 100,
+        stream: effStream,            // histogram + results target the SAME stream
+        sql,
+        startMicros, endMicros,
+        from: (pageNum - 1) * PAGE_SIZE,
+        size: PAGE_SIZE,
         histogram: showHistogram,
       } as any);
       setLiveRows((res.rows ?? []) as unknown as TLogRow[]);
       setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
       setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
+      setPage(pageNum);
+      if (effStream && effStream !== stream) setStream(effStream); // sync dropdown to the queried FROM
     } catch (e: any) {
       const ae = parseAppError(e);
       setQueryError({ message: ae.message, hint: ae.hint });
-      setLiveRows([]);
-      setLiveBars([]);
+      setLiveRows([]); setLiveBars([]);
     } finally {
-      setRunning(false);
-      setLoading(false);
+      setRunning(false); setLoading(false);
     }
   };
+  const runQuery = () => runQueryAt(1); // a fresh Run resets to page 1
 
   // handleSwitchContext switches the active context and reloads streams.
   const handleSwitchContext = async (name: string) => {
@@ -288,7 +320,17 @@ function App() {
       });
       const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
       setLiveStreams(mapped);
-      if (mapped.length > 0) setStream(mapped[0].name);
+      if (mapped.length > 0) {
+        const first = mapped[0].name;
+        setStream(first);
+        // After a context switch, seed the active tab's query if it is blank.
+        setQuery((prev) => {
+          if (prev.trim()) return prev;
+          const seeded = seedSql(first);
+          setTabs((ts) => ts.map((t) => (t.id === activeTab ? { ...t, q: seeded, stream: first } : t)));
+          return seeded;
+        });
+      }
     } catch (e: any) {
       const ae = parseAppError(e);
       if (ae.category === 'not_configured') {
@@ -505,6 +547,10 @@ function App() {
                   shownCount={liveMeta.shown}
                   totalEvents={liveMeta.total.toLocaleString()}
                   queryMs={liveMeta.tookMs}
+                  page={page}
+                  totalPages={Math.max(1, Math.ceil(liveMeta.total / PAGE_SIZE))}
+                  onPrev={() => { if (page > 1) runQueryAt(page - 1); }}
+                  onNext={() => { const tp = Math.max(1, Math.ceil(liveMeta.total / PAGE_SIZE)); if (page < tp) runQueryAt(page + 1); }}
                 />
                 {/* Results area — loading / error / empty / data */}
                 {loading ? (

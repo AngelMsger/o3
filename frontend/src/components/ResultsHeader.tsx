@@ -1,20 +1,24 @@
 import type { ReactElement } from 'react';
 import styles from './ResultsHeader.module.css';
 
-// Design lines 306–322
+// Design lines 306-322
 
 interface ResultsHeaderProps {
   shownCount: number;
   totalEvents: string;
   queryMs: number;
+  page: number;
+  totalPages: number;
+  onPrev: () => void;
+  onNext: () => void;
 }
 
-export function ResultsHeader({ shownCount, totalEvents, queryMs }: ResultsHeaderProps): ReactElement {
+export function ResultsHeader({ shownCount, totalEvents, queryMs, page, totalPages, onPrev, onNext }: ResultsHeaderProps): ReactElement {
   return (
     <div className={styles.header}>
       {/* Showing N of total — design line 308 */}
       <span className={styles.showing}>
-        Showing <b className={styles.showingNum}>1–{shownCount}</b> of{' '}
+        Showing <b className={styles.showingNum}>1-{shownCount}</b> of{' '}
         <b className={styles.showingNum}>{totalEvents}</b> events
       </span>
 
@@ -34,13 +38,25 @@ export function ResultsHeader({ shownCount, totalEvents, queryMs }: ResultsHeade
       {/* Timezone — design line 314 */}
       <span className={styles.tz}>Asia/Shanghai</span>
 
-      {/* Pagination — design lines 315–321 */}
+      {/* Pagination — design lines 315-321; functional prev/next with page X / Y display */}
       <div className={styles.pages}>
-        <button className={styles.pageBtn}>‹</button>
-        <span className={styles.pageActive}>1</span>
-        <button className={styles.pageInactive}>2</button>
-        <button className={styles.pageInactive}>3</button>
-        <button className={styles.pageBtn}>›</button>
+        <button
+          className={styles.pageBtn}
+          onClick={onPrev}
+          disabled={page <= 1}
+          style={page <= 1 ? { opacity: 0.35, cursor: 'default' } : undefined}
+        >
+          &#8249;
+        </button>
+        <span className={styles.pageActive}>{page} / {totalPages}</span>
+        <button
+          className={styles.pageBtn}
+          onClick={onNext}
+          disabled={page >= totalPages}
+          style={page >= totalPages ? { opacity: 0.35, cursor: 'default' } : undefined}
+        >
+          &#8250;
+        </button>
       </div>
     </div>
   );
