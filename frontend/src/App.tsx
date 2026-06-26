@@ -409,12 +409,21 @@ function App() {
     document.documentElement.style.setProperty('--accent', c);
   };
 
+  const selectTab = (id: string) => {
+    setActiveTab(id);
+    setPage(1);
+    setLiveRows([]);
+    setLiveBars([]);
+    setLiveMeta({ total: 0, tookMs: 0, shown: 0 });
+    setQueryError(null);
+  };
+
   const handleNewTab = () => {
     tabSeq.current += 1;
     const id = `t-new-${tabSeq.current}`;
     const s = activeTabData.stream;
     setTabs((prev) => [...prev, { id, name: 'untitled', mode: 'sql', sql: s ? setFromStream('', s) : '', search: '', stream: s }]);
-    setActiveTab(id);
+    selectTab(id);
   };
 
   const handleRenameTab = (id: string, name: string) =>
@@ -427,7 +436,7 @@ function App() {
     setTabs(next);
     if (id === activeTab) {
       const neighbor = next[Math.min(idx, next.length - 1)];
-      setActiveTab(neighbor.id);
+      selectTab(neighbor.id);
     }
   };
 
@@ -492,7 +501,7 @@ function App() {
             <QueryTabs
               tabs={tabs}
               activeId={activeTab}
-              onPick={setActiveTab}
+              onPick={selectTab}
               onNew={handleNewTab}
               onClose={handleCloseTab}
               onRename={handleRenameTab}
