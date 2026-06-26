@@ -22,7 +22,7 @@ import { computeSuggestions } from './lib/format';
 import type { QueryMode, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
-  ListContexts, SwitchContext, SaveContext, TestConnection,
+  ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery,
 } from '../wailsjs/go/main/App';
 
@@ -331,6 +331,19 @@ function App() {
     }
   };
 
+  // handleRemoveContext deletes the named context from the shared config and
+  // switches to whichever context the backend promotes as current.
+  const handleRemoveContext = async (name: string) => {
+    try {
+      await RemoveContext(name);
+      const ui = await refreshContexts();
+      const cur = ui.find((c) => c.isCurrent) ?? ui[0];
+      if (cur) await handleSwitchContext(cur.name);
+    } catch (e: any) {
+      setWizardError(parseAppError(e).message);
+    }
+  };
+
   const handlePickAccent = (c: string) => {
     setAccent(c);
     document.documentElement.style.setProperty('--accent', c);
@@ -536,6 +549,15 @@ function App() {
             onToggleMcp={() => setMcpOn((v) => !v)}
             onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
             onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
+            contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName }))}
+            active={(() => { const a = contexts.find((c) => c.name === currentName); return a ? { name: a.name, url: a.url, org: a.org, scheme: a.scheme, username: a.username, password: a.password, token: a.token } : null; })()}
+            canRemove={contexts.length > 1}
+            onAddContext={handleAddContext}
+            onUse={(name) => handleSwitchContext(name)}
+            onRemove={(name) => handleRemoveContext(name)}
+            onField={(key, value) => setContexts((cs) => cs.map((c) => (c.name === currentName ? { ...c, [key]: value } : c)))}
+            onTest={() => { const a = contexts.find((c) => c.name === currentName); if (a) handleTestContext(a); }}
+            onSave={() => { const a = contexts.find((c) => c.name === currentName); if (a) handleSaveContext(a); }}
           />
         )}
 

@@ -4,7 +4,20 @@ import type { SettingsTab, Density } from '../types';
 import { hexA } from '../lib/format';
 import styles from './SettingsModal.module.css';
 
-interface SettingsModalProps {
+// Props for the kubectl-style contexts manager (Task 4)
+interface SettingsContextsProps {
+  contexts: { name: string; color: string; isCurrent: boolean }[];
+  active: { name: string; url: string; org: string; scheme: string; username: string; password: string; token: string } | null;
+  canRemove: boolean;
+  onAddContext: () => void;
+  onUse: (name: string) => void;
+  onRemove: (name: string) => void;
+  onField: (key: string, value: string) => void;
+  onTest: () => void;
+  onSave: () => void;
+}
+
+interface SettingsModalProps extends SettingsContextsProps {
   visible: boolean;
   tab: SettingsTab;
   accent: string;
@@ -68,15 +81,24 @@ export function SettingsModal({
   onToggleMcp,
   onConnField,
   onOpenSetup,
+  contexts,
+  active,
+  canRemove,
+  onAddContext,
+  onUse,
+  onRemove,
+  onField,
+  onTest,
+  onSave,
 }: SettingsModalProps): ReactElement {
   // Agent leash mode local state — design line 1235
   const [agentMode, setAgentMode] = useState<string>('observe');
 
-  // Auth tab: M1-static — mode is fixed at 'password' and not user-switchable in this milestone.
-  // The tabs render as visual affordances only (no onClick handler). authMode will be lifted to
-  // App.tsx state in a future milestone when the Settings connection tab becomes fully interactive.
-  // Declared as useState so TypeScript does not narrow away the token/sso branches.
-  const [authMode] = useState<'password' | 'token' | 'sso'>('password');
+  // Auth mode for the edit-active-context form — derived from the active context scheme.
+  // 'basic' (backend) maps to 'password' (UI tab); 'token' maps to 'token'; else password.
+  const _scheme = active?.scheme ?? 'basic';
+  const authMode: 'password' | 'token' | 'sso' =
+    _scheme === 'token' ? 'token' : _scheme === 'sso' ? 'sso' : 'password';
 
   return (
     /* Overlay backdrop — design line 381 */
@@ -116,7 +138,7 @@ export function SettingsModal({
           <div className={`oo-scroll ${styles.scrollBody}`}>
             <div className={styles.content}>
 
-              {/* ===== CONNECTION ===== design lines 399–459 */}
+              {/* ===== CONNECTION ===== design lines 438-523 */}
               {tab === 'connection' && (
                 <div>
                   <div className={styles.panelTitle}>Connection</div>
@@ -124,123 +146,195 @@ export function SettingsModal({
                     Where this desktop client sends its queries. Self-hosted OpenObserve authenticates with an endpoint + service account — there is no hosted OAuth in the OSS edition.
                   </div>
 
-                  {/* Status card — design line 404 */}
-                  <div className={styles.statusCard}>
-                    <span className={styles.statusDot} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className={styles.statusUrl}>{conn.url}</div>
-                      <div className={styles.statusMeta}>
-                        org <b style={{ color: '#99a2b2' }}>{conn.org}</b> · OpenObserve v0.14.1 · 6 streams
-                      </div>
+                  {/* Contexts manager header — design line 439 */}
+                  <div className={styles.ctxHeader}>
+                    <div className={styles.ctxHeaderLeft}>
+                      <span className={styles.ctxHeaderTitle}>Contexts</span>
+                      <span className={styles.ctxHeaderSub}>switch the active instance any time</span>
                     </div>
-                    <button className={styles.testBtn}>Test connection</button>
+                    <button className={styles.ctxAddBtn} onClick={onAddContext}>+ Add context</button>
                   </div>
 
-                  {/* Form card — design line 413 */}
-                  <div className={styles.formCard}>
-                    <div className={styles.fieldWrap}>
-                      <div className={styles.fieldLabel}>Server URL</div>
-                      <input
-                        className={styles.fieldInput}
-                        value={conn.url}
-                        onChange={(e) => onConnField('url', e.target.value)}
-                        spellCheck={false}
-                      />
-                    </div>
-                    <div className={styles.fieldWrap}>
-                      <div className={styles.fieldLabel}>Organization</div>
-                      <input
-                        className={styles.fieldInput}
-                        value={conn.org}
-                        onChange={(e) => onConnField('org', e.target.value)}
-                        spellCheck={false}
-                      />
-                    </div>
-                    <div style={{ marginBottom: 14 }}>
-                      <div className={styles.fieldLabel}>Authentication</div>
-                      <div className={styles.authSeg}>
-                        {(['password', 'token', 'sso'] as const).map((id, i) => {
-                          const labels = ['Email & Password', 'API Token', 'SSO'];
-                          return (
-                            <button
-                              key={id}
-                              className={`${styles.authTab}${authMode === id ? ` ${styles.authTabActive}` : ''}`}
-                              style={authMode === id ? { background: hexA(accent, 0.18), color: accent } : undefined}
-                            >
-                              {labels[i]}
-                            </button>
-                          );
-                        })}
+                  {/* Context rows — design lines 443-463 */}
+                  <div className={styles.ctxList}>
+                    {contexts.map((c) => (
+                      <div
+                        key={c.name}
+                        className={styles.ctxRow}
+                        style={{
+                          border: `1px solid ${c.isCurrent ? hexA(c.color, 0.45) : 'rgba(255,255,255,.07)'}`,
+                          background: c.isCurrent ? hexA(c.color, 0.08) : '#0c0e13',
+                        }}
+                        onClick={() => !c.isCurrent && onUse(c.name)}
+                      >
+                        {/* color dot — design line 1360 */}
+                        <span
+                          style={{
+                            width: 9, height: 9, borderRadius: '50%', flex: 'none',
+                            background: c.color, boxShadow: `0 0 8px -1px ${c.color}`,
+                          }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span className={styles.ctxRowName}>{c.name}</span>
+                            {c.isCurrent && (
+                              <span className={styles.ctxActiveBadge} style={{ color: accent, background: hexA(accent, 0.12) }}>active</span>
+                            )}
+                          </div>
+                        </div>
+                        {/* "Use" button — only on non-active rows — design line 455-457 */}
+                        {!c.isCurrent && (
+                          <button
+                            className={styles.ctxUseBtn}
+                            onClick={(e) => { e.stopPropagation(); onUse(c.name); }}
+                          >
+                            Use
+                          </button>
+                        )}
+                        {/* Delete "X" — only when canRemove — design line 458-460 */}
+                        {canRemove && (
+                          <button
+                            className={styles.ctxRemoveBtn}
+                            title="Delete context"
+                            onClick={(e) => { e.stopPropagation(); onRemove(c.name); }}
+                          >
+                            ✕
+                          </button>
+                        )}
                       </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    {authMode === 'password' && (
-                      <div className={styles.row2}>
-                        <div>
-                          <div className={styles.fieldLabel}>Email</div>
+                  {/* Edit active context label — design line 464 */}
+                  <div className={styles.editCtxLabel}>Edit active context</div>
+
+                  {active && (
+                    <>
+                      {/* Status card for active context — design lines 466-473 */}
+                      <div className={styles.statusCard}>
+                        <span className={styles.statusDot} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className={styles.statusUrl}>{active.url || 'no endpoint set'}</div>
+                          <div className={styles.statusMeta}>
+                            org <b style={{ color: '#99a2b2' }}>{active.org}</b>
+                          </div>
+                        </div>
+                        <button className={styles.testBtn} onClick={onTest}>Test connection</button>
+                      </div>
+
+                      {/* Edit form card — design lines 475-513 */}
+                      <div className={styles.formCard}>
+                        {/* Context name — design line 477-479 */}
+                        <div className={styles.fieldWrap}>
+                          <div className={styles.fieldLabel}>Context name</div>
                           <input
                             className={styles.fieldInput}
-                            value={conn.email ?? ''}
-                            onChange={(e) => onConnField('email', e.target.value)}
+                            value={active.name}
+                            onChange={(e) => onField('name', e.target.value)}
                             spellCheck={false}
                           />
                         </div>
-                        <div>
-                          <div className={styles.fieldLabel}>Password</div>
+                        {/* Server URL — design line 481-483 */}
+                        <div className={styles.fieldWrap}>
+                          <div className={styles.fieldLabel}>Server URL</div>
                           <input
-                            type="password"
                             className={styles.fieldInput}
-                            value=""
-                            onChange={() => {}}
+                            value={active.url}
+                            onChange={(e) => onField('url', e.target.value)}
+                            spellCheck={false}
                           />
                         </div>
-                      </div>
-                    )}
-
-                    {authMode === 'token' && (
-                      <div>
-                        <div className={styles.fieldLabel}>Service-account token</div>
-                        <input
-                          className={styles.fieldInput}
-                          value=""
-                          onChange={() => {}}
-                          placeholder="Paste a token from OpenObserve → IAM → Service Accounts"
-                        />
-                      </div>
-                    )}
-
-                    {authMode === 'sso' && (
-                      <div className={styles.ssoWarn}>
-                        <span className={styles.ssoWarnIcon}>⚠</span>
-                        <div className={styles.ssoWarnText}>
-                          OAuth / SSO requires <b style={{ color: '#f5d9a0' }}>OpenObserve Enterprise</b>. The self-hosted OSS edition uses email + password or a service-account token — pick one of those above. SSO can be added later behind a capability flag.
+                        {/* Organization — design line 485-487 */}
+                        <div className={styles.fieldWrap}>
+                          <div className={styles.fieldLabel}>Organization</div>
+                          <input
+                            className={styles.fieldInput}
+                            value={active.org}
+                            onChange={(e) => onField('org', e.target.value)}
+                            spellCheck={false}
+                          />
                         </div>
+                        {/* Authentication segmented — design lines 488-492 */}
+                        <div style={{ marginBottom: 14 }}>
+                          <div className={styles.fieldLabel}>Authentication</div>
+                          <div className={styles.authSeg}>
+                            {(['password', 'token', 'sso'] as const).map((id, i) => {
+                              const labels = ['Email & Password', 'API Token', 'SSO'];
+                              return (
+                                <button
+                                  key={id}
+                                  className={`${styles.authTab}${authMode === id ? ` ${styles.authTabActive}` : ''}`}
+                                  style={authMode === id ? { background: hexA(accent, 0.18), color: accent } : undefined}
+                                  onClick={() => onField('scheme', id === 'password' ? 'basic' : id)}
+                                >
+                                  {labels[i]}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Email + password fields — design lines 494-498 */}
+                        {authMode === 'password' && (
+                          <div className={styles.row2}>
+                            <div>
+                              <div className={styles.fieldLabel}>Email</div>
+                              <input
+                                className={styles.fieldInput}
+                                value={active.username}
+                                onChange={(e) => onField('username', e.target.value)}
+                                spellCheck={false}
+                              />
+                            </div>
+                            <div>
+                              <div className={styles.fieldLabel}>Password</div>
+                              <input
+                                type="password"
+                                className={styles.fieldInput}
+                                value={active.password}
+                                onChange={(e) => onField('password', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Token field — design lines 500-502 */}
+                        {authMode === 'token' && (
+                          <div>
+                            <div className={styles.fieldLabel}>Service-account token</div>
+                            <input
+                              className={styles.fieldInput}
+                              value={active.token}
+                              onChange={(e) => onField('token', e.target.value)}
+                              placeholder="Paste a token from OpenObserve -> IAM -> Service Accounts"
+                            />
+                          </div>
+                        )}
+
+                        {/* SSO warning — design lines 503-508 */}
+                        {authMode === 'sso' && (
+                          <div className={styles.ssoWarn}>
+                            <span className={styles.ssoWarnIcon}>⚠</span>
+                            <div className={styles.ssoWarnText}>
+                              OAuth / SSO requires <b style={{ color: '#f5d9a0' }}>OpenObserve Enterprise</b>. The self-hosted OSS edition uses email + password or a service-account token — pick one of those above. SSO can be added later behind a capability flag.
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    {/* Self-signed toggle — design line 443 */}
-                    <div className={styles.toggleRow}>
-                      <button className={styles.toggle}>
-                        <span className={styles.knob} />
-                      </button>
-                      <div>
-                        <div className={styles.toggleLabel}>Trust self-signed certificate</div>
-                        <div className={styles.toggleSub}>Common for internal HTTPS endpoints behind a private CA.</div>
+                      {/* Credentials note — design line 515-518 */}
+                      <div className={styles.credNote}>
+                        <span className={styles.credNoteIcon}>🔒</span>
+                        <span>Credentials are stored in your OS keychain through Wails — never written to disk in plaintext.</span>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Credentials note — design line 449 */}
-                  <div className={styles.credNote}>
-                    <span className={styles.credNoteIcon}>🔒</span>
-                    <span>Credentials are stored in your OS keychain through Wails — never written to disk in plaintext.</span>
-                  </div>
-
-                  {/* Action buttons — design line 454 */}
-                  <div className={styles.actions}>
-                    <button className={styles.btnPrimary}>Test &amp; save</button>
-                    <button className={styles.btnSecondary} onClick={onOpenSetup}>Re-run setup wizard…</button>
-                  </div>
+                      {/* Action buttons — design lines 520-523 */}
+                      <div className={styles.actions}>
+                        <button className={styles.btnPrimary} onClick={onSave}>Save</button>
+                        <button className={styles.btnSecondary} onClick={onOpenSetup}>Re-run setup wizard…</button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
