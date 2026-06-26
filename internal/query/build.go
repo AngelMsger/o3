@@ -2,6 +2,8 @@ package query
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -82,11 +84,38 @@ func Interval(startMicros, endMicros int64) string {
 	return intervalLadder[len(intervalLadder)-1].word
 }
 
+var whereRe = regexp.MustCompile(`(?i)\bwhere\b`)
+var afterWhereRe = regexp.MustCompile(`(?i)\b(group\s+by|order\s+by|limit)\b`)
+
+// ExtractWhere returns the WHERE predicate from a single-statement SQL query:
+// the text between WHERE and the next GROUP BY / ORDER BY / LIMIT clause (or end
+// of string), trimmed. It returns "" when there is no WHERE clause. The scan is
+// case-insensitive and word-bounded; it is intended for the editor's
+// single-statement queries and does not handle WHERE inside subqueries.
+func ExtractWhere(sql string) string {
+	wloc := whereRe.FindStringIndex(sql)
+	if wloc == nil {
+		return ""
+	}
+	start := wloc[1]
+	rest := sql[start:]
+	end := len(sql)
+	if cloc := afterWhereRe.FindStringIndex(rest); cloc != nil {
+		end = start + cloc[0]
+	}
+	return strings.TrimSpace(sql[start:end])
+}
+
 // HistogramSQL builds the time-bucket aggregation, matching the CLI's
-// buildHistogramSQL shape (zo_sql_key / zo_sql_num columns).
-func HistogramSQL(stream, interval string) string {
-	return fmt.Sprintf(
-		`SELECT histogram(_timestamp, '%s') AS zo_sql_key, count(*) AS zo_sql_num FROM "%s" GROUP BY zo_sql_key ORDER BY zo_sql_key`,
-		interval, stream,
-	)
+// buildHistogramSQL shape (zo_sql_key / zo_sql_num columns). When where is
+// non-empty it is injected as the WHERE clause so the histogram reflects the
+// same filter as the main query.
+func HistogramSQL(stream, where, interval string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, `SELECT histogram(_timestamp, '%s') AS zo_sql_key, count(*) AS zo_sql_num FROM "%s"`, interval, stream)
+	if w := strings.TrimSpace(where); w != "" {
+		fmt.Fprintf(&b, " WHERE %s", w)
+	}
+	b.WriteString(" GROUP BY zo_sql_key ORDER BY zo_sql_key")
+	return b.String()
 }

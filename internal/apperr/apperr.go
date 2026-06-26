@@ -3,6 +3,7 @@
 package apperr
 
 import (
+	"encoding/json"
 	"errors"
 
 	cerr "github.com/angelmsger/openobserve-cli/pkg/errors"
@@ -19,7 +20,21 @@ type AppError struct {
 	Hint     string `json:"hint"`
 }
 
-func (e AppError) Error() string { return e.Message }
+// Error returns the JSON encoding of the error so the value survives the Wails
+// boundary (Wails rejects a frontend promise with this string). The frontend
+// parses it back into {category, message, hint}. On the rare marshal failure it
+// falls back to the plain message.
+func (e AppError) Error() string {
+	b, err := json.Marshal(struct {
+		Category string `json:"category"`
+		Message  string `json:"message"`
+		Hint     string `json:"hint"`
+	}{e.Category, e.Message, e.Hint})
+	if err != nil {
+		return e.Message
+	}
+	return string(b)
+}
 
 // Wrap converts any error into an AppError. CLIErrors keep their category and
 // hint; plain errors become an "internal" AppError with the error text.

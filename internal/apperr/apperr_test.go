@@ -1,6 +1,7 @@
 package apperr
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -34,6 +35,24 @@ func TestWrapPlainError(t *testing.T) {
 	}
 	if ae.Message != "boom" {
 		t.Fatalf("Message = %q, want %q", ae.Message, "boom")
+	}
+	if ae.Category != "internal" {
+		t.Fatalf("Category = %q, want internal", ae.Category)
+	}
+}
+
+func TestErrorEmitsJSON(t *testing.T) {
+	e := AppError{Category: "auth", Message: "bad creds", Hint: "check password"}
+	var got struct {
+		Category string `json:"category"`
+		Message  string `json:"message"`
+		Hint     string `json:"hint"`
+	}
+	if err := json.Unmarshal([]byte(e.Error()), &got); err != nil {
+		t.Fatalf("Error() is not valid JSON: %v (got %q)", err, e.Error())
+	}
+	if got.Category != "auth" || got.Message != "bad creds" || got.Hint != "check password" {
+		t.Fatalf("Error() JSON = %+v, want auth/bad creds/check password", got)
 	}
 }
 

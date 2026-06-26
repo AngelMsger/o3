@@ -24,10 +24,11 @@ type LogRow struct {
 }
 
 // Bucket is one histogram column: T is the bucket label, H is the normalized
-// height in [0,1].
+// height in [0,1], and C is the raw event count for that bucket.
 type Bucket struct {
 	T string  `json:"t"`
 	H float64 `json:"h"`
+	C int64   `json:"c"`
 }
 
 // QueryMeta summarizes a search for the results header.

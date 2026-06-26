@@ -6,6 +6,7 @@ export namespace main {
 	    scheme: string;
 	    username: string;
 	    secret: string;
+	    hasSecret: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ConnConfig(source);
@@ -18,6 +19,7 @@ export namespace main {
 	        this.scheme = source["scheme"];
 	        this.username = source["username"];
 	        this.secret = source["secret"];
+	        this.hasSecret = source["hasSecret"];
 	    }
 	}
 	export class ConnInfo {
@@ -74,6 +76,7 @@ export namespace query {
 	export class Bucket {
 	    t: string;
 	    h: number;
+	    c: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Bucket(source);
@@ -83,6 +86,7 @@ export namespace query {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.t = source["t"];
 	        this.h = source["h"];
+	        this.c = source["c"];
 	    }
 	}
 	export class KV {

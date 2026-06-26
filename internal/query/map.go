@@ -58,7 +58,7 @@ func MapHistogram(hits []map[string]any) []Bucket {
 		if max > 0 {
 			h = counts[i] / max
 		}
-		buckets = append(buckets, Bucket{T: labels[i], H: h})
+		buckets = append(buckets, Bucket{T: labels[i], H: h, C: int64(counts[i])})
 	}
 	return buckets
 }

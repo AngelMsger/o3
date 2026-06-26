@@ -114,6 +114,9 @@ func TestMapHistogramNormalizes(t *testing.T) {
 	if buckets[1].T != "2026-06-26T10:00:30" {
 		t.Fatalf("bucket label = %q", buckets[1].T)
 	}
+	if buckets[0].C != 5 || buckets[1].C != 20 || buckets[2].C != 0 {
+		t.Fatalf("counts = %v, want [5 20 0]", []int64{buckets[0].C, buckets[1].C, buckets[2].C})
+	}
 }
 
 func TestMapHistogramEmpty(t *testing.T) {

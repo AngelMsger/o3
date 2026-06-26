@@ -48,11 +48,12 @@ func (a *App) startup(ctx context.Context) {
 // ConnConfig is the connection settings exchanged with the frontend. Secret is
 // inbound only (Save/Test); it is never returned by LoadConnection.
 type ConnConfig struct {
-	URL      string `json:"url"`
-	Org      string `json:"org"`
-	Scheme   string `json:"scheme"`
-	Username string `json:"username"`
-	Secret   string `json:"secret"`
+	URL       string `json:"url"`
+	Org       string `json:"org"`
+	Scheme    string `json:"scheme"`
+	Username  string `json:"username"`
+	Secret    string `json:"secret"`
+	HasSecret bool   `json:"hasSecret"` // outbound only: whether a secret exists in the keychain
 }
 
 // ConnInfo summarizes a verified connection.
@@ -198,7 +199,8 @@ func (a *App) SaveConnection(c ConnConfig) error {
 }
 
 // LoadConnection returns the saved config without the secret. A zero URL means
-// the app is unconfigured (the UI opens the setup wizard).
+// the app is unconfigured (the UI opens the setup wizard). HasSecret is set so
+// the UI can detect a saved-config-but-missing-secret state and open the wizard.
 func (a *App) LoadConnection() (ConnConfig, error) {
 	dir, err := config.DataDir()
 	if err != nil {
@@ -208,7 +210,12 @@ func (a *App) LoadConnection() (ConnConfig, error) {
 	if err != nil {
 		return ConnConfig{}, apperr.Wrap(err)
 	}
-	return ConnConfig{URL: cfg.URL, Org: cfg.Org, Scheme: cfg.Scheme, Username: cfg.Username}, nil
+	scheme := cfg.Scheme
+	if scheme == "" {
+		scheme = pkgauth.SchemeBasic
+	}
+	_, hasSecret, _ := config.LoadSecret(cfg.URL, scheme)
+	return ConnConfig{URL: cfg.URL, Org: cfg.Org, Scheme: cfg.Scheme, Username: cfg.Username, HasSecret: hasSecret}, nil
 }
 
 // ListStreams returns the logs streams in the configured org.
@@ -279,9 +286,10 @@ func (a *App) RunQuery(p query.SearchParams) (query.SearchResult, error) {
 	}
 	if p.Histogram {
 		interval := query.Interval(p.StartMicros, p.EndMicros)
+		where := query.ExtractWhere(p.SQL)
 		hResp, herr := client.Search(a.ctx, client.DefaultOrg(), api.SearchRequest{
 			Query: api.SearchQuery{
-				SQL:       query.HistogramSQL(p.Stream, interval),
+				SQL:       query.HistogramSQL(p.Stream, where, interval),
 				StartTime: p.StartMicros,
 				EndTime:   p.EndMicros,
 				Size:      0,
