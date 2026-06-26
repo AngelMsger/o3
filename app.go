@@ -7,20 +7,20 @@ import (
 
 	api "github.com/angelmsger/openobserve-cli/pkg/apiclient"
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
+	cfgshared "github.com/angelmsger/openobserve-cli/pkg/config"
 
 	"github.com/angelmsger/openobserve-desktop/internal/apperr"
 	"github.com/angelmsger/openobserve-desktop/internal/config"
 	"github.com/angelmsger/openobserve-desktop/internal/query"
 )
 
-// App is the Wails-bound application. It owns the loaded connection config and
-// a lazily-built, shared API client.
+// App is the Wails-bound application. It owns a lazily-built client for the
+// current context in the shared config.
 type App struct {
 	ctx context.Context
 
 	mu     sync.Mutex
-	cfg    config.Config
-	client api.Client // nil until a credential is configured
+	client api.Client // nil until built for the current context
 }
 
 // NewApp creates a new App application struct.
@@ -28,38 +28,40 @@ func NewApp() *App {
 	return &App{}
 }
 
-// startup loads any saved connection and builds the client if a secret exists.
+// startup records the Wails context and best-effort builds the client for the
+// current context.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	dir, err := config.DataDir()
-	if err != nil {
-		return
-	}
-	cfg, err := config.Load(dir)
-	if err != nil || cfg.URL == "" {
-		return
-	}
-	a.mu.Lock()
-	a.cfg = cfg
-	a.mu.Unlock()
 	_ = a.rebuildClient() // best-effort; data methods re-report if it fails
 }
 
-// ConnConfig is the connection settings exchanged with the frontend. Secret is
-// inbound only (Save/Test); it is never returned by LoadConnection.
+// ConnConfig is a connection's settings exchanged with the frontend. Secret is
+// inbound only (Save/Test).
 type ConnConfig struct {
-	URL       string `json:"url"`
-	Org       string `json:"org"`
-	Scheme    string `json:"scheme"`
-	Username  string `json:"username"`
-	Secret    string `json:"secret"`
-	HasSecret bool   `json:"hasSecret"` // outbound only: whether a secret exists in the keychain
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	Org      string `json:"org"`
+	Scheme   string `json:"scheme"`
+	Username string `json:"username"`
+	Secret   string `json:"secret"`
 }
 
 // ConnInfo summarizes a verified connection.
 type ConnInfo struct {
 	OrgCount    int `json:"orgCount"`
 	StreamCount int `json:"streamCount"`
+}
+
+// ContextInfo describes one context for the switcher/manager. Secrets are never
+// included; HasSecret reports keychain presence.
+type ContextInfo struct {
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	Org       string `json:"org"`
+	Scheme    string `json:"scheme"`
+	Username  string `json:"username"`
+	HasSecret bool   `json:"hasSecret"`
+	IsCurrent bool   `json:"isCurrent"`
 }
 
 // StreamInfo describes one stream for the picker.
@@ -76,27 +78,11 @@ type Field struct {
 	Type string `json:"type"`
 }
 
-// credentialOf builds a pkgauth.Credential from a ConnConfig, defaulting the
-// scheme to basic.
-func credentialOf(c ConnConfig) pkgauth.Credential {
-	scheme := c.Scheme
-	if scheme == "" {
-		scheme = pkgauth.SchemeBasic
+func schemeOrBasic(s string) string {
+	if s == "" {
+		return pkgauth.SchemeBasic
 	}
-	return pkgauth.Credential{Scheme: scheme, Username: c.Username, Secret: c.Secret}
-}
-
-// buildClient assembles an authenticated client for c (with secret present).
-func buildClient(c ConnConfig) (api.Client, error) {
-	cred := credentialOf(c)
-	if err := cred.Validate(); err != nil {
-		return nil, err
-	}
-	return api.Build(api.BuildParams{
-		BaseURL:       c.URL,
-		Org:           orgOrDefault(c.Org),
-		AuthDecorator: cred.Decorator(),
-	})
+	return s
 }
 
 func orgOrDefault(org string) string {
@@ -106,27 +92,71 @@ func orgOrDefault(org string) string {
 	return org
 }
 
-// rebuildClient rebuilds a.client from a.cfg plus the stored secret. It returns
-// a not-configured error when no secret is available.
-func (a *App) rebuildClient() error {
-	a.mu.Lock()
-	cfg := a.cfg
-	a.mu.Unlock()
+// configDir returns the shared config directory (~/.angelmsger/openobserve).
+func configDir() (string, error) { return cfgshared.DefaultConfigDir() }
 
-	scheme := cfg.Scheme
-	if scheme == "" {
-		scheme = pkgauth.SchemeBasic
+// contextInfos maps a config File to ContextInfo values; has reports whether a
+// keychain secret exists for a (url, scheme). Pure, so it is unit-tested.
+func contextInfos(f cfgshared.File, has func(url, scheme string) bool) []ContextInfo {
+	out := make([]ContextInfo, 0, len(f.Contexts))
+	for _, c := range f.Contexts {
+		scheme := schemeOrBasic(c.Auth.Scheme)
+		out = append(out, ContextInfo{
+			Name:      c.Name,
+			URL:       c.BaseURL,
+			Org:       c.Org,
+			Scheme:    scheme,
+			Username:  c.Auth.Username,
+			HasSecret: has(c.BaseURL, scheme),
+			IsCurrent: c.Name == f.CurrentContext,
+		})
 	}
-	secret, ok, err := config.LoadSecret(cfg.URL, scheme)
+	return out
+}
+
+// buildClient assembles an authenticated client for a context with a secret.
+func buildClient(url, org, scheme, username, secret string, def cfgshared.Defaults) (api.Client, error) {
+	cred := pkgauth.Credential{Scheme: schemeOrBasic(scheme), Username: username, Secret: secret}
+	if err := cred.Validate(); err != nil {
+		return nil, err
+	}
+	return api.Build(api.BuildParams{
+		BaseURL:       url,
+		Org:           orgOrDefault(org),
+		AuthDecorator: cred.Decorator(),
+		Timeout:       def.Timeout,
+		MaxRetries:    def.MaxRetries,
+	})
+}
+
+// rebuildClient rebuilds a.client from the current context plus its keychain
+// secret. Returns a not-configured error when there is no current context or
+// no stored secret.
+func (a *App) rebuildClient() error {
+	dir, err := configDir()
 	if err != nil {
 		return apperr.Wrap(err)
 	}
-	if !ok {
-		return apperr.NotConfigured("no stored credential")
+	f, ok, err := cfgshared.ReadFile(dir)
+	if err != nil {
+		return apperr.Wrap(err)
 	}
-	client, err := buildClient(ConnConfig{
-		URL: cfg.URL, Org: cfg.Org, Scheme: scheme, Username: cfg.Username, Secret: secret,
-	})
+	if !ok || len(f.Contexts) == 0 {
+		return apperr.NotConfigured("no contexts configured")
+	}
+	cur, ok := f.Context(f.CurrentContext)
+	if !ok {
+		cur = f.Contexts[0]
+	}
+	scheme := schemeOrBasic(cur.Auth.Scheme)
+	secret, has, err := config.LoadSecret(cur.BaseURL, scheme)
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	if !has {
+		return apperr.NotConfigured("no stored credential for the current context")
+	}
+	client, err := buildClient(cur.BaseURL, cur.Org, scheme, cur.Auth.Username, secret, f.Defaults)
 	if err != nil {
 		return apperr.Wrap(err)
 	}
@@ -155,10 +185,139 @@ func (a *App) requireClient() (api.Client, error) {
 	return client, nil
 }
 
-// TestConnection verifies credentials against the server without persisting
-// them. It pings (lists orgs) and counts streams in the target org.
+// ListContexts returns every context in the shared config, with keychain
+// presence and which is current.
+func (a *App) ListContexts() ([]ContextInfo, error) {
+	dir, err := configDir()
+	if err != nil {
+		return nil, apperr.Wrap(err)
+	}
+	f, ok, err := cfgshared.ReadFile(dir)
+	if err != nil {
+		return nil, apperr.Wrap(err)
+	}
+	if !ok {
+		return []ContextInfo{}, nil
+	}
+	has := func(url, scheme string) bool {
+		_, present, _ := config.LoadSecret(url, scheme)
+		return present
+	}
+	return contextInfos(f, has), nil
+}
+
+// SwitchContext sets the current context and rebuilds the client.
+func (a *App) SwitchContext(name string) error {
+	dir, err := configDir()
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	f, ok, err := cfgshared.ReadFile(dir)
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	if !ok {
+		return apperr.NotConfigured("no contexts configured")
+	}
+	if _, found := f.Context(name); !found {
+		return apperr.Wrap(fmt.Errorf("unknown context %q", name))
+	}
+	f.CurrentContext = name
+	if err := cfgshared.WriteFile(dir, f); err != nil {
+		return apperr.Wrap(err)
+	}
+	a.mu.Lock()
+	a.client = nil
+	a.mu.Unlock()
+	return apperr.Wrap(a.rebuildClient())
+}
+
+// SaveContext upserts a context into the shared config (and its secret into the
+// keychain when provided), then rebuilds the client if the saved context is
+// current.
+func (a *App) SaveContext(c ConnConfig) error {
+	if c.Name == "" || c.URL == "" {
+		return apperr.Wrap(fmt.Errorf("context name and URL are required"))
+	}
+	scheme := schemeOrBasic(c.Scheme)
+	dir, err := configDir()
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	f, _, err := cfgshared.ReadFile(dir) // missing file -> empty File, ok ignored
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	f.Upsert(cfgshared.NamedContext{
+		Name:    c.Name,
+		BaseURL: c.URL,
+		Org:     orgOrDefault(c.Org),
+		Auth:    cfgshared.AuthConfig{Scheme: scheme, Username: c.Username},
+	})
+	if f.CurrentContext == "" {
+		f.CurrentContext = c.Name // first context becomes current
+	}
+	if err := cfgshared.WriteFile(dir, f); err != nil {
+		return apperr.Wrap(err)
+	}
+	if c.Secret != "" {
+		if err := config.SaveSecret(c.URL, scheme, c.Secret); err != nil {
+			return apperr.Wrap(err)
+		}
+	}
+	if c.Name == f.CurrentContext {
+		a.mu.Lock()
+		a.client = nil
+		a.mu.Unlock()
+		return apperr.Wrap(a.rebuildClient())
+	}
+	return nil
+}
+
+// RemoveContext deletes a context (and its keychain secret). It refuses to
+// remove the last context.
+func (a *App) RemoveContext(name string) error {
+	dir, err := configDir()
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	f, ok, err := cfgshared.ReadFile(dir)
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	if !ok || len(f.Contexts) <= 1 {
+		return apperr.Wrap(fmt.Errorf("cannot remove the last context"))
+	}
+	ctx, found := f.Context(name)
+	if !found {
+		return apperr.Wrap(fmt.Errorf("unknown context %q", name))
+	}
+	f.Remove(name)
+	if f.CurrentContext == name && len(f.Contexts) > 0 {
+		f.CurrentContext = f.Contexts[0].Name
+	}
+	if err := cfgshared.WriteFile(dir, f); err != nil {
+		return apperr.Wrap(err)
+	}
+	_ = config.DeleteSecret(ctx.BaseURL, schemeOrBasic(ctx.Auth.Scheme))
+	a.mu.Lock()
+	a.client = nil
+	a.mu.Unlock()
+	return apperr.Wrap(a.rebuildClient())
+}
+
+// TestConnection verifies a connection without persisting it. When Secret is
+// empty it falls back to the stored keychain secret, so Test works on an
+// existing context the user did not re-type.
 func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
-	client, err := buildClient(c)
+	scheme := schemeOrBasic(c.Scheme)
+	secret := c.Secret
+	if secret == "" {
+		if stored, has, _ := config.LoadSecret(c.URL, scheme); has {
+			secret = stored
+		}
+	}
+	client, err := buildClient(c.URL, c.Org, scheme, c.Username, secret, cfgshared.Defaults{})
 	if err != nil {
 		return ConnInfo{}, apperr.Wrap(err)
 	}
@@ -171,51 +330,6 @@ func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
 		info.StreamCount = len(streams)
 	}
 	return info, nil
-}
-
-// SaveConnection persists the config (JSON) and secret (keychain), then
-// rebuilds the client.
-func (a *App) SaveConnection(c ConnConfig) error {
-	cred := credentialOf(c)
-	if err := cred.Validate(); err != nil {
-		return apperr.Wrap(err)
-	}
-	dir, err := config.DataDir()
-	if err != nil {
-		return apperr.Wrap(err)
-	}
-	cfg := config.Config{URL: c.URL, Org: orgOrDefault(c.Org), Scheme: cred.Scheme, Username: c.Username}
-	if err := config.Save(dir, cfg); err != nil {
-		return apperr.Wrap(err)
-	}
-	if err := config.SaveSecret(c.URL, cred.Scheme, c.Secret); err != nil {
-		return apperr.Wrap(err)
-	}
-	a.mu.Lock()
-	a.cfg = cfg
-	a.client = nil
-	a.mu.Unlock()
-	return apperr.Wrap(a.rebuildClient())
-}
-
-// LoadConnection returns the saved config without the secret. A zero URL means
-// the app is unconfigured (the UI opens the setup wizard). HasSecret is set so
-// the UI can detect a saved-config-but-missing-secret state and open the wizard.
-func (a *App) LoadConnection() (ConnConfig, error) {
-	dir, err := config.DataDir()
-	if err != nil {
-		return ConnConfig{}, apperr.Wrap(err)
-	}
-	cfg, err := config.Load(dir)
-	if err != nil {
-		return ConnConfig{}, apperr.Wrap(err)
-	}
-	scheme := cfg.Scheme
-	if scheme == "" {
-		scheme = pkgauth.SchemeBasic
-	}
-	_, hasSecret, _ := config.LoadSecret(cfg.URL, scheme)
-	return ConnConfig{URL: cfg.URL, Org: cfg.Org, Scheme: cfg.Scheme, Username: cfg.Username, HasSecret: hasSecret}, nil
 }
 
 // ListStreams returns the logs streams in the configured org.

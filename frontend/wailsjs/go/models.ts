@@ -1,12 +1,12 @@
 export namespace main {
 	
 	export class ConnConfig {
+	    name: string;
 	    url: string;
 	    org: string;
 	    scheme: string;
 	    username: string;
 	    secret: string;
-	    hasSecret: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ConnConfig(source);
@@ -14,12 +14,12 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
 	        this.url = source["url"];
 	        this.org = source["org"];
 	        this.scheme = source["scheme"];
 	        this.username = source["username"];
 	        this.secret = source["secret"];
-	        this.hasSecret = source["hasSecret"];
 	    }
 	}
 	export class ConnInfo {
@@ -34,6 +34,30 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.orgCount = source["orgCount"];
 	        this.streamCount = source["streamCount"];
+	    }
+	}
+	export class ContextInfo {
+	    name: string;
+	    url: string;
+	    org: string;
+	    scheme: string;
+	    username: string;
+	    hasSecret: boolean;
+	    isCurrent: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContextInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.url = source["url"];
+	        this.org = source["org"];
+	        this.scheme = source["scheme"];
+	        this.username = source["username"];
+	        this.hasSecret = source["hasSecret"];
+	        this.isCurrent = source["isCurrent"];
 	    }
 	}
 	export class Field {

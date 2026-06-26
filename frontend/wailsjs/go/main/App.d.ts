@@ -5,12 +5,16 @@ import {query} from '../models';
 
 export function GetFields(arg1:string):Promise<Array<main.Field>>;
 
+export function ListContexts():Promise<Array<main.ContextInfo>>;
+
 export function ListStreams():Promise<Array<main.StreamInfo>>;
 
-export function LoadConnection():Promise<main.ConnConfig>;
+export function RemoveContext(arg1:string):Promise<void>;
 
 export function RunQuery(arg1:query.SearchParams):Promise<query.SearchResult>;
 
-export function SaveConnection(arg1:main.ConnConfig):Promise<void>;
+export function SaveContext(arg1:main.ConnConfig):Promise<void>;
+
+export function SwitchContext(arg1:string):Promise<void>;
 
 export function TestConnection(arg1:main.ConnConfig):Promise<main.ConnInfo>;

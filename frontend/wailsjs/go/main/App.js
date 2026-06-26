@@ -6,20 +6,28 @@ export function GetFields(arg1) {
   return window['go']['main']['App']['GetFields'](arg1);
 }
 
+export function ListContexts() {
+  return window['go']['main']['App']['ListContexts']();
+}
+
 export function ListStreams() {
   return window['go']['main']['App']['ListStreams']();
 }
 
-export function LoadConnection() {
-  return window['go']['main']['App']['LoadConnection']();
+export function RemoveContext(arg1) {
+  return window['go']['main']['App']['RemoveContext'](arg1);
 }
 
 export function RunQuery(arg1) {
   return window['go']['main']['App']['RunQuery'](arg1);
 }
 
-export function SaveConnection(arg1) {
-  return window['go']['main']['App']['SaveConnection'](arg1);
+export function SaveContext(arg1) {
+  return window['go']['main']['App']['SaveContext'](arg1);
+}
+
+export function SwitchContext(arg1) {
+  return window['go']['main']['App']['SwitchContext'](arg1);
 }
 
 export function TestConnection(arg1) {
