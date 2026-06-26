@@ -4,4 +4,4 @@ node_modules
 frontend/dist
 .superpowers/
 go.work.sum
-openobserve-desktop
+o3
