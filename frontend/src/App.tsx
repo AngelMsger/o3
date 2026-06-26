@@ -417,6 +417,9 @@ function App() {
     setActiveTab(id);
   };
 
+  const handleRenameTab = (id: string, name: string) =>
+    setTabs((ts) => ts.map((t) => (t.id === id ? { ...t, name } : t)));
+
   const handleCloseTab = (id: string) => {
     if (tabs.length <= 1) return; // keep at least one tab open
     const idx = tabs.findIndex((t) => t.id === id);
@@ -492,6 +495,7 @@ function App() {
               onPick={setActiveTab}
               onNew={handleNewTab}
               onClose={handleCloseTab}
+              onRename={handleRenameTab}
             />
 
             {/* QueryEditor — design lines 93-207 */}

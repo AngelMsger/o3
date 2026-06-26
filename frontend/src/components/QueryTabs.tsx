@@ -1,22 +1,33 @@
 /* QueryTabs — design/Observe.dc.html lines 77–91 */
+import { useState } from 'react';
 import styles from './QueryTabs.module.css';
 import { STREAMS } from '../data/mock';
 import type { QueryTab } from '../types';
 import type { ReactElement } from 'react';
 
-// Build stream-name → color lookup from STREAMS array
+// Build stream-name -> color lookup from STREAMS array
 const STREAM_COLORS: Record<string, string> = Object.fromEntries(
   STREAMS.map(s => [s.name, s.color])
 );
 
-export function QueryTabs({ tabs, activeId, onPick, onNew, onClose }: {
+export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: {
   tabs: QueryTab[];
   activeId: string;
   onPick: (id: string) => void;
   onNew: () => void;
   onClose: (id: string) => void;
+  onRename: (id: string, name: string) => void;
 }): ReactElement {
   const closable = tabs.length > 1;
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<string>('');
+
+  const commit = (id: string, fallback: string) => {
+    const name = draft.trim() || fallback;
+    onRename(id, name);
+    setEditingId(null);
+  };
+
   return (
     /* design line 78 — saved-query tabs container */
     <div className={`${styles.strip} oo-scroll`}>
@@ -29,7 +40,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose }: {
             key={t.id}
             className={`${styles.tab} ${active ? styles.active : ''}`}
             onClick={() => onPick(t.id)}
-            onDoubleClick={() => {/* rename deferred in M1 */}}
+            onDoubleClick={() => { setEditingId(t.id); setDraft(t.name); }}
             title={`stream: ${t.stream} — double-click to rename`}
           >
             {/* design line 81 — stream color dot */}
@@ -37,8 +48,23 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose }: {
               className={styles.dot}
               style={{ background: color, boxShadow: `0 0 6px -1px ${color}` }}
             />
-            {/* design lines 85-87 — tab name (static, editing deferred) */}
-            <span className={styles.name}>{t.name}</span>
+            {/* design lines 85-87 — tab name (inline rename on double-click) */}
+            {editingId === t.id ? (
+              <input
+                className={styles.nameEdit}
+                value={draft}
+                autoFocus
+                onChange={(e) => setDraft(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') { e.preventDefault(); commit(t.id, t.name); }
+                  else if (e.key === 'Escape') { e.preventDefault(); setEditingId(null); }
+                }}
+                onBlur={() => commit(t.id, t.name)}
+              />
+            ) : (
+              <span className={styles.name}>{t.name}</span>
+            )}
             {/* close affordance (added beyond the static design); hidden when only one tab */}
             {closable && (
               <button
