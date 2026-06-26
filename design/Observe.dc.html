@@ -54,6 +54,40 @@
 
       <div style="flex: 1;"></div>
 
+      <div style="position: relative;">
+        <button onClick="{{ toggleCtxSwitch }}" title="Active context — click to switch" style="display: flex; align-items: center; gap: 8px; height: 27px; padding: 0 8px 0 10px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; cursor: pointer;" style-hover="border-color:rgba(255,255,255,.24);">
+          <span style="font-size: 9px; text-transform: uppercase; letter-spacing: .7px; color: #5b6371; font-weight: 700;">ctx</span>
+          <span style="{{ curCtxDotStyle }}"></span>
+          <span style="font-size: 11.5px; color: #d7dce6; font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap;">{{ curCtxName }}</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6b7282" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <sc-if value="{{ ctxSwitchOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeCtxSwitch }}" style="position: fixed; inset: 0; z-index: 70;"></div>
+          <div style="position: absolute; right: 0; top: 34px; width: 288px; background: #0f131a; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 71; animation: ooFade .1s ease;">
+            <div style="padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.07); background: #0b0e13; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 700;">Switch context</span>
+              <span style="font-size: 10px; color: #4b5362; font-family:'JetBrains Mono',monospace;">{{ ctxCount }} configured</span>
+            </div>
+            <div style="padding: 5px;">
+              <sc-for list="{{ ctxMenu }}" as="c" hint-placeholder-count="3">
+                <div onClick="{{ c.onPick }}" style="{{ c.style }}" style-hover="background:#161b22;">
+                  <span style="{{ c.dotStyle }}"></span>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 12.5px; color: #dde3ee; font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</div>
+                    <div style="font-size: 10.5px; color: #6b7282; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
+                  </div>
+                  <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="color: var(--accent,#2dd4bf); font-size: 13px;">✓</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding: 6px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 6px;">
+              <button onClick="{{ addContextFromMenu }}" style="flex: 1; height: 32px; border-radius: 8px; border: 1px dashed rgba(255,255,255,.16); background: transparent; color: #aeb6c4; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:#e6eaf2;">+ Add context</button>
+              <button onClick="{{ openContextSettings }}" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="color:#e6eaf2;">Manage…</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
       <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,#3a4252,#222833); border: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aeb6c4; font-weight: 600;">JD</div>
     </div>
 
@@ -401,6 +435,34 @@
                 <div style="font-size: 19px; font-weight: 600; color: #e6eaf2; margin-bottom: 5px;">Connection</div>
                 <div style="font-size: 13px; color: #6b7282; margin-bottom: 22px; line-height: 1.55;">Where this desktop client sends its queries. Self-hosted OpenObserve authenticates with an endpoint + service account — there is no hosted OAuth in the OSS edition.</div>
 
+                <!-- CONTEXTS MANAGER (kubectl-style) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
+                  <div style="display: flex; align-items: baseline; gap: 9px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 700;">Contexts</div><div style="font-size: 11px; color: #4b5362;">switch the active instance any time</div></div>
+                  <button onClick="{{ addContext }}" style="height: 28px; padding: 0 11px; border-radius: 7px; border: 1px dashed rgba(255,255,255,.16); background: transparent; color: #aeb6c4; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:#e6eaf2;">+ Add context</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+                  <sc-for list="{{ ctxRows }}" as="c" hint-placeholder-count="3">
+                    <div onClick="{{ c.onUse }}" style="{{ c.rowStyle }}">
+                      <span style="{{ c.dotStyle }}"></span>
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-size: 13px; color: #e6eaf2; font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
+                          <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--accent,#2dd4bf); background: rgba(45,212,191,.12); padding: 2px 6px; border-radius: 4px; flex: none;">active</span></sc-if>
+                        </div>
+                        <div style="font-size: 11px; color: #6b7282; font-family:'JetBrains Mono',monospace; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
+                      </div>
+                      <span style="font-size: 10.5px; color: #5b6371; white-space: nowrap; flex: none;">{{ c.meta }}</span>
+                      <sc-if value="{{ c.notActive }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ c.onUse }}" style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.12); background: #0e1116; color: #aeb6c4; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; flex: none;" style-hover="color:#e6eaf2;border-color:rgba(255,255,255,.25);">Use</button>
+                      </sc-if>
+                      <sc-if value="{{ canRemoveCtx }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ c.onRemove }}" title="Delete context" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(255,255,255,.08); background: transparent; color: #5b6371; font-size: 12px; cursor: pointer; flex: none;" style-hover="color:#f4685f;border-color:rgba(244,104,95,.4);">✕</button>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 700; margin-bottom: 11px;">Edit active context</div>
+
                 <div style="display: flex; align-items: center; gap: 13px; background: #0c0e13; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
                   <span style="width: 9px; height: 9px; border-radius: 50%; background: #34e0a1; box-shadow: 0 0 10px #34e0a1; flex: none;"></span>
                   <div style="flex: 1; min-width: 0;">
@@ -411,6 +473,10 @@
                 </div>
 
                 <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                  <div style="margin-bottom: 16px;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Context name</div>
+                    <input value="{{ conn.name }}" onChange="{{ onName }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                  </div>
                   <div style="margin-bottom: 16px;">
                     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Server URL</div>
                     <input value="{{ conn.url }}" onChange="{{ onUrl }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
@@ -575,6 +641,19 @@
             <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: #14181f; border: 1px solid rgba(255,255,255,.1); color: #6b7282; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">2</span><span style="font-size: 13px; color: #6b7282;">Pick a stream</span></div>
             <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: #14181f; border: 1px solid rgba(255,255,255,.1); color: #6b7282; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">3</span><span style="font-size: 13px; color: #6b7282;">Run your first query</span></div>
           </div>
+          <div style="margin-top: 30px;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6b67; font-weight: 700; margin-bottom: 10px;">Your contexts</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <sc-for list="{{ ctxMenu }}" as="c" hint-placeholder-count="3">
+                <div onClick="{{ c.onPick }}" style="{{ c.wizStyle }}">
+                  <span style="{{ c.dotStyle }}"></span>
+                  <span style="flex: 1; min-width: 0; font-size: 12px; color: #cfe3de; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
+                  <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="color: var(--accent,#2dd4bf); font-size: 12px;">✓</span></sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ addContext }}" style="margin-top: 4px; height: 32px; border-radius: 8px; border: 1px dashed rgba(255,255,255,.16); background: transparent; color: #9fb4ae; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:#e6eaf2;">+ New context</button>
+            </div>
+          </div>
           <div style="flex: 1;"></div>
           <div style="font-size: 11px; color: #4b5b57;">No telemetry · everything runs locally on your machine.</div>
         </div>
@@ -582,8 +661,12 @@
         <div class="oo-scroll" style="flex: 1; overflow-y: auto; display: flex; align-items: center; justify-content: center; padding: 40px;">
           <div style="width: 100%; max-width: 440px;">
             <div style="font-size: 20px; font-weight: 600; color: #e6eaf2; margin-bottom: 6px;">Connect to OpenObserve</div>
-            <div style="font-size: 13px; color: #6b7282; margin-bottom: 24px;">Enter the endpoint and a service account. Self-hosted OSS uses basic auth — no hosted OAuth.</div>
+            <div style="font-size: 13px; color: #6b7282; margin-bottom: 24px;">Name this context and point it at your instance. Switch between contexts any time from the title bar. Self-hosted OSS uses basic auth — no hosted OAuth.</div>
 
+            <div style="margin-bottom: 15px;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Context name</div>
+              <input value="{{ conn.name }}" onChange="{{ onName }}" placeholder="prod, staging, local…" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+            </div>
             <div style="margin-bottom: 15px;">
               <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Server URL</div>
               <input value="{{ conn.url }}" onChange="{{ onUrl }}" placeholder="http://localhost:5080" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
@@ -807,7 +890,13 @@ class Component extends DCLogic {
       testStatus: 'ok',
       mcpOn: true,
       agentMode: 'propose',
-      conn: { url: 'https://observe.example.internal', org: 'default', auth: 'password', email: 'ops@example.com', password: 'svc-7f3a-corp-key-2f9d', token: '', selfSigned: true }
+      contexts: [
+        { id: 'ctx-prod', name: 'prod', color: '#34e0a1', url: 'https://observe.example.internal', org: 'default', auth: 'password', email: 'ops@example.com', password: 'svc-7f3a-corp-key-2f9d', token: '', selfSigned: true },
+        { id: 'ctx-staging', name: 'staging', color: '#f5b340', url: 'https://observe.staging.example.internal', org: 'default', auth: 'token', email: '', password: '', token: 'oo_sa_St4g1ng_b7f2e9d14a', selfSigned: true },
+        { id: 'ctx-local', name: 'local-dev', color: '#7c83ff', url: 'http://localhost:5080', org: 'dev', auth: 'password', email: 'root@example.com', password: 'Complexpass#123', token: '', selfSigned: false }
+      ],
+      currentContextId: 'ctx-prod',
+      ctxSwitchOpen: false
     };
   }
 
@@ -1004,7 +1093,28 @@ class Component extends DCLogic {
   closeSettings = () => this.setState({ view: 'app' });
   openSetup = () => this.setState({ setupOpen: true });
   closeSetup = () => this.setState({ setupOpen: false });
-  setConn = (k, v) => this.setState(s => ({ conn: { ...s.conn, [k]: v } }));
+  currentContext() { return this.state.contexts.find(c => c.id === this.state.currentContextId) || this.state.contexts[0]; }
+  setConn = (k, v) => this.setState(s => ({ contexts: s.contexts.map(c => c.id === s.currentContextId ? { ...c, [k]: v } : c) }));
+  useContext = (id) => this.setState({ currentContextId: id, ctxSwitchOpen: false, testStatus: 'idle' });
+  toggleCtxSwitch = () => this.setState(s => ({ ctxSwitchOpen: !s.ctxSwitchOpen }));
+  closeCtxSwitch = () => this.setState({ ctxSwitchOpen: false });
+  openContextSettings = () => this.setState({ view: 'settings', setTab: 'connection', ctxSwitchOpen: false });
+  addContext = () => {
+    const id = 'ctx-' + Date.now();
+    const palette = ['#34e0a1', '#f5b340', '#7c83ff', '#5b9dff', '#f4685f', '#2dd4bf', '#f5a86a', '#b58bff'];
+    const nc = { id, name: 'new-context', color: palette[this.state.contexts.length % palette.length], url: '', org: 'default', auth: 'password', email: '', password: '', token: '', selfSigned: false };
+    this.setState(s => ({ contexts: [...s.contexts, nc], currentContextId: id, testStatus: 'idle' }));
+    return id;
+  };
+  addContextFromMenu = () => { this.addContext(); this.setState({ ctxSwitchOpen: false, view: 'settings', setTab: 'connection' }); };
+  removeContext = (id, e) => {
+    if (e) e.stopPropagation();
+    this.setState(s => {
+      if (s.contexts.length <= 1) return {};
+      const remaining = s.contexts.filter(c => c.id !== id);
+      return { contexts: remaining, currentContextId: s.currentContextId === id ? remaining[0].id : s.currentContextId };
+    });
+  };
   testConn = () => { this.setState({ testStatus: 'testing' }); setTimeout(() => this.setState({ testStatus: 'ok' }), 780); };
   toggleMcp = () => this.setState(s => ({ mcpOn: !s.mcpOn }));
   toggleSidebar = () => this.setState(s => ({ sidebarCollapsed: !s.sidebarCollapsed }));
@@ -1205,7 +1315,8 @@ class Component extends DCLogic {
     if (fm) { const f = this.FUNCS.find(x => x[0] === fm[1].toLowerCase()); if (f) caretHint = f[1]; }
 
     // ---- settings + setup ----
-    const conn = st.conn;
+    const cur = this.currentContext();
+    const conn = cur;
     const settingsOpen = st.view === 'settings';
     const ST = [['connection', 'Connection'], ['appearance', 'Appearance'], ['agent', 'Agent · MCP'], ['about', 'About']];
     const setTabs = ST.map(([id, label]) => ({
@@ -1238,6 +1349,31 @@ class Component extends DCLogic {
       style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-weight:500;font-family:inherit;${st.agentMode === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`
     }));
     const agentDesc = { observe: 'Agent can read your session, schema and results \u2014 but runs nothing. Pure analysis and suggestions.', propose: 'Agent stages rewritten queries into the editor; you review the diff and hit Run.', autorun: 'Agent runs queries itself within the guardrails below. Watch the activity stream and stop anytime.' }[st.agentMode];
+
+    // ---- contexts (kubectl-style) ----
+    const authShort = { password: 'basic auth', token: 'token', sso: 'SSO' };
+    const ctxRows = st.contexts.map(c => {
+      const active = c.id === st.currentContextId;
+      return {
+        id: c.id, name: c.name, sub: c.url || 'no endpoint set', meta: c.org + ' \u00b7 ' + (authShort[c.auth] || c.auth),
+        active, isActive: active, notActive: !active,
+        dotStyle: `width:9px;height:9px;border-radius:50%;flex:none;background:${c.color};box-shadow:0 0 8px -1px ${c.color}`,
+        rowStyle: `display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;cursor:pointer;transition:border-color .12s;border:1px solid ${active ? this.hexA(c.color, 0.45) : 'rgba(255,255,255,.07)'};background:${active ? this.hexA(c.color, 0.08) : '#0c0e13'}`,
+        onUse: () => this.useContext(c.id),
+        onRemove: (e) => this.removeContext(c.id, e)
+      };
+    });
+    const ctxMenu = st.contexts.map(c => {
+      const active = c.id === st.currentContextId;
+      return {
+        id: c.id, name: c.name, sub: c.url || 'no endpoint', active, isActive: active,
+        dotStyle: `width:8px;height:8px;border-radius:50%;flex:none;background:${c.color};box-shadow:0 0 6px -1px ${c.color}`,
+        style: `display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;cursor:pointer;${active ? 'background:' + this.hexA(accent, 0.1) : ''}`,
+        wizStyle: `display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;border:1px solid ${active ? this.hexA(c.color, 0.5) : 'rgba(255,255,255,.07)'};background:${active ? this.hexA(c.color, 0.1) : 'rgba(255,255,255,.02)'}`,
+        onPick: () => this.useContext(c.id)
+      };
+    });
+    const curCtxDotStyle = `width:8px;height:8px;border-radius:50%;flex:none;background:${cur.color};box-shadow:0 0 7px -1px ${cur.color}`;
 
     return {
       nav, tabItems, newTab: this.newTab,
@@ -1274,7 +1410,11 @@ class Component extends DCLogic {
       accentSwatches, densityTabs,
       mcpOn: st.mcpOn, toggleMcp: this.toggleMcp, mcpToggleStyle, mcpKnobStyle,
       ssToggleStyle, ssKnobStyle, toggleSelfSigned: () => this.setConn('selfSigned', !conn.selfSigned),
-      agentTabs, agentDesc
+      agentTabs, agentDesc,
+      curCtxName: cur.name, curCtxDotStyle, ctxCount: st.contexts.length,
+      ctxSwitchOpen: st.ctxSwitchOpen, toggleCtxSwitch: this.toggleCtxSwitch, closeCtxSwitch: this.closeCtxSwitch, ctxMenu,
+      ctxRows, canRemoveCtx: st.contexts.length > 1, addContext: this.addContext, addContextFromMenu: this.addContextFromMenu,
+      openContextSettings: this.openContextSettings, onName: (e) => this.setConn('name', e.target.value)
     };
   }
 }
