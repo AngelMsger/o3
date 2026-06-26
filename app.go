@@ -10,9 +10,9 @@ import (
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
 	cfgshared "github.com/angelmsger/openobserve-cli/pkg/config"
 
-	"github.com/angelmsger/openobserve-desktop/internal/apperr"
-	"github.com/angelmsger/openobserve-desktop/internal/config"
-	"github.com/angelmsger/openobserve-desktop/internal/query"
+	"github.com/angelmsger/o3/internal/apperr"
+	"github.com/angelmsger/o3/internal/config"
+	"github.com/angelmsger/o3/internal/query"
 )
 
 // App is the Wails-bound application. It owns a lazily-built client for the

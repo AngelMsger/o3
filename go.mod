@@ -1,4 +1,4 @@
-module github.com/angelmsger/openobserve-desktop
+module github.com/angelmsger/o3
 
 go 1.24.0
 
