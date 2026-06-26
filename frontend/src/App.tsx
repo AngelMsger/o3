@@ -261,7 +261,13 @@ function App() {
     } as any);
     setConfigured(true);
     setSetupOpen(false);
-    const s = await ListStreams();
+    const s = await ListStreams().catch((e) => {
+      if (parseAppError(e).category === 'not_configured') {
+        setConfigured(false);
+        setSetupOpen(true);
+      }
+      return [];
+    });
     const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
     setLiveStreams(mapped);
     if (mapped.length > 0) setStream(mapped[0].name);
