@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	api "github.com/angelmsger/openobserve-cli/pkg/apiclient"
@@ -35,8 +36,8 @@ func (a *App) startup(ctx context.Context) {
 	_ = a.rebuildClient() // best-effort; data methods re-report if it fails
 }
 
-// ConnConfig is a connection's settings exchanged with the frontend. Secret is
-// inbound only (Save/Test).
+// ConnConfig is a connection's settings exchanged with the frontend. Secret and
+// OrigName are inbound only (Save/Test).
 type ConnConfig struct {
 	Name     string `json:"name"`
 	URL      string `json:"url"`
@@ -44,6 +45,7 @@ type ConnConfig struct {
 	Scheme   string `json:"scheme"`
 	Username string `json:"username"`
 	Secret   string `json:"secret"`
+	OrigName string `json:"origName"` // inbound only: the name before a rename
 }
 
 // ConnInfo summarizes a verified connection.
@@ -248,6 +250,14 @@ func (a *App) SaveContext(c ConnConfig) error {
 	if err != nil {
 		return apperr.Wrap(err)
 	}
+	// I1: when the context was renamed, remove the old entry before upserting
+	// the new name so the shared config.yaml never accumulates duplicates.
+	if c.OrigName != "" && !strings.EqualFold(c.OrigName, c.Name) {
+		f.Remove(c.OrigName)
+		if strings.EqualFold(f.CurrentContext, c.OrigName) {
+			f.CurrentContext = c.Name // keep the current pointer following the rename
+		}
+	}
 	f.Upsert(cfgshared.NamedContext{
 		Name:    c.Name,
 		BaseURL: c.URL,
@@ -308,7 +318,8 @@ func (a *App) RemoveContext(name string) error {
 
 // TestConnection verifies a connection without persisting it. When Secret is
 // empty it falls back to the stored keychain secret, so Test works on an
-// existing context the user did not re-type.
+// existing context the user did not re-type. It uses the file Defaults so the
+// timeout and retry settings match the live client (I2).
 func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
 	scheme := schemeOrBasic(c.Scheme)
 	secret := c.Secret
@@ -317,7 +328,14 @@ func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
 			secret = stored
 		}
 	}
-	client, err := buildClient(c.URL, c.Org, scheme, c.Username, secret, cfgshared.Defaults{})
+	// I2: read Defaults from the shared config so Test matches the live client.
+	var fileDef cfgshared.Defaults
+	if dir, dirErr := configDir(); dirErr == nil {
+		if f, _, readErr := cfgshared.ReadFile(dir); readErr == nil {
+			fileDef = f.Defaults
+		}
+	}
+	client, err := buildClient(c.URL, c.Org, scheme, c.Username, secret, fileDef)
 	if err != nil {
 		return ConnInfo{}, apperr.Wrap(err)
 	}

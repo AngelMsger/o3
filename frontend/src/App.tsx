@@ -55,6 +55,7 @@ interface UICtx {
   color: string;
   password: string; token: string; // draft-only, never read back from backend
   draft: boolean;       // true until first successful SaveContext
+  origName: string;     // I1: the persisted name at load; sent to backend on save for rename tracking
 }
 
 // Context color palette — distinct from stream palette
@@ -67,6 +68,7 @@ const toUICtx = (infos: { name: string; url: string; org: string; scheme: string
     hasSecret: c.hasSecret, isCurrent: c.isCurrent,
     color: CTX_PALETTE[i % CTX_PALETTE.length],
     password: '', token: '', draft: false,
+    origName: c.name, // I1: track the persisted name so backend can detect renames
   }));
 
 function App() {
@@ -288,7 +290,18 @@ function App() {
       setLiveStreams(mapped);
       if (mapped.length > 0) setStream(mapped[0].name);
     } catch (e: any) {
-      setWizardError(parseAppError(e).message);
+      const ae = parseAppError(e);
+      if (ae.category === 'not_configured') {
+        // C1: the switch persisted on disk but the context has no keychain secret.
+        // Update the title bar to the new context and open the wizard so the user
+        // can supply credentials — do NOT leave the UI showing the old context.
+        setCurrentName(name);
+        await refreshContexts();
+        setConfigured(false);
+        setSetupOpen(true);
+      } else {
+        setWizardError(ae.message);
+      }
     }
   };
 
@@ -305,6 +318,7 @@ function App() {
     const draft: UICtx = {
       name: draftName, url: '', org: 'default', scheme: 'basic', username: '',
       hasSecret: false, isCurrent: false, color, password: '', token: '', draft: true,
+      origName: '', // I1: never persisted yet, so no old entry to remove
     };
     setContexts((cs) => [...cs, draft]);
     setCurrentName(draftName);
@@ -313,9 +327,10 @@ function App() {
   // handleSaveContext persists the named context (upsert + secret) then refreshes.
   const handleSaveContext = async (ctx: UICtx): Promise<void> => {
     const secret = ctx.scheme === 'token' ? ctx.token : ctx.password;
-    await SaveContext({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret } as any);
+    // I1: pass origName so the backend can remove the old entry when the context was renamed.
+    await SaveContext({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret, origName: ctx.origName } as any);
     setConfigured(true);
-    await refreshContexts();
+    await refreshContexts(); // reloads from disk; toUICtx re-sets origName to the new persisted name
   };
 
   // handleTestContext tests the connection for the given context draft.

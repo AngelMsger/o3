@@ -13,6 +13,7 @@ interface UICtx {
   color: string;
   password: string; token: string;
   draft: boolean;
+  origName: string; // I1: persisted name at load, used to detect renames on save
 }
 
 interface SetupWizardProps {

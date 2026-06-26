@@ -7,6 +7,7 @@ export namespace main {
 	    scheme: string;
 	    username: string;
 	    secret: string;
+	    origName: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ConnConfig(source);
@@ -20,6 +21,7 @@ export namespace main {
 	        this.scheme = source["scheme"];
 	        this.username = source["username"];
 	        this.secret = source["secret"];
+	        this.origName = source["origName"];
 	    }
 	}
 	export class ConnInfo {
