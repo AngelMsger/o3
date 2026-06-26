@@ -1,11 +1,14 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "openobserve-desktop",
-  "outputfilename": "openobserve-desktop",
+  "outputfilename": "o3",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
+  "info": {
+    "productName": "o3"
+  },
   "author": {
     "name": "AngelMsger",
     "email": "haruya1@proton.me"

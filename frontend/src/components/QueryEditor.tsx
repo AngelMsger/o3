@@ -72,7 +72,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             className={`${styles.modePill} ${queryMode === 'search' ? styles.modeActive : ''}`}
             onClick={() => onModeChange('search')}
           >
-            search
+            Search
           </span>
         </div>
 

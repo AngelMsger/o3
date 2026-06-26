@@ -65,13 +65,6 @@ export function SetupWizard({
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
       {/* ===== Left brand panel — design line 563 ===== */}
       <div className={styles.left}>
-        {/* Traffic lights — design line 564 */}
-        <div className={styles.trafficLights}>
-          <span className={`${styles.dot} ${styles.dotRed}`} />
-          <span className={`${styles.dot} ${styles.dotYellow}`} />
-          <span className={`${styles.dot} ${styles.dotGreen}`} />
-        </div>
-
         {/* Logo icon — design line 569 */}
         <span className={styles.logoIcon}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
