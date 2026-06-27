@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hexA, histogramBars, setFromStream, fromStream, computeSuggestions } from './format';
+import { hexA, histogramBars, setFromStream, fromStream, computeSuggestions, addCondition, aggregateBy } from './format';
 import type { Field } from '../types';
 
 describe('hexA', () => {
@@ -42,6 +42,30 @@ describe('setFromStream', () => {
   });
   it('leaves a non-empty buffer without FROM unchanged', () => {
     expect(setFromStream('SELECT 1', 'logs')).toBe('SELECT 1');
+  });
+});
+
+describe('addCondition', () => {
+  it('inserts a new WHERE before the ORDER BY / LIMIT tail', () => {
+    const out = addCondition('SELECT *\nFROM "x"\nORDER BY t DESC\nLIMIT 100', 'svc', 'api', '=');
+    expect(out).toBe('SELECT *\nFROM "x" WHERE svc = \'api\'\nORDER BY t DESC\nLIMIT 100');
+  });
+  it('appends with AND when a WHERE already exists', () => {
+    const out = addCondition('SELECT * FROM "x" WHERE a = 1 ORDER BY t', 'svc', 'api', '!=');
+    expect(out).toBe('SELECT * FROM "x" WHERE a = 1 AND svc != \'api\'\nORDER BY t');
+  });
+  it('appends a WHERE to a query with no tail clause', () => {
+    expect(addCondition('SELECT * FROM "x"', 'svc', 'api', '=')).toBe('SELECT * FROM "x" WHERE svc = \'api\'');
+  });
+  it('leaves numeric values unquoted and escapes quotes in strings', () => {
+    expect(addCondition('SELECT * FROM "x"', 'status', '200', '=')).toBe('SELECT * FROM "x" WHERE status = 200');
+    expect(addCondition('SELECT * FROM "x"', 'msg', "o'brien", '=')).toBe('SELECT * FROM "x" WHERE msg = \'o\'\'brien\'');
+  });
+});
+
+describe('aggregateBy', () => {
+  it('builds a frequency query with the given limit', () => {
+    expect(aggregateBy('logs', 'service', 10)).toBe('SELECT service, count(*) AS count\nFROM "logs"\nGROUP BY service\nORDER BY count DESC\nLIMIT 10');
   });
 });
 

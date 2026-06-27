@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { LogRow } from '../types';
 import { hexA } from '../lib/format';
+import { copyText } from '../lib/clipboard';
 import styles from './DrawerInspector.module.css';
 
 // Level → color map — design line 750
@@ -54,7 +55,13 @@ export function DrawerInspector({ row, visible, onClose, onKvCtx }: DrawerInspec
           <span style={levelStyle}>{row.level}</span>
           <span className={styles.title}>Log record</span>
           <span className={styles.spacer} />
-          <button className={styles.copyBtn}>⧉ copy</button>
+          <button
+            className={styles.copyBtn}
+            title="Copy this record as JSON"
+            onClick={() => copyText(JSON.stringify(Object.fromEntries(row.json.map((kv) => [kv.k, kv.v])), null, 2))}
+          >
+            ⧉ copy
+          </button>
           <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 

@@ -8,8 +8,8 @@ interface ValueActionMenuProps {
   value: string;
   x: number;
   y: number;
-  items: { icon: string; label: string }[];
-  onPick: (label: string) => void;
+  items: { icon: string; label: string; action: string }[];
+  onPick: (action: string) => void;
   onClose: () => void;
 }
 
@@ -43,9 +43,9 @@ export function ValueActionMenu({
         <div className={styles.items}>
           {items.map((m) => (
             <div
-              key={m.label}
+              key={m.action}
               className={styles.item}
-              onClick={() => onPick(m.label)}
+              onClick={() => onPick(m.action)}
             >
               <span className={styles.icon}>{m.icon}</span>
               <span className={styles.label}>{m.label}</span>

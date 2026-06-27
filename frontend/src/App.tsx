@@ -20,7 +20,8 @@ import { SetupWizard } from './components/SetupWizard';
 import { ValueActionMenu } from './components/ValueActionMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
-import { fromStream, setFromStream } from './lib/format';
+import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
+import { copyText } from './lib/clipboard';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
@@ -131,14 +132,33 @@ function App() {
   /* Histogram delayed-unmount */
   const histoT = useDelayedUnmount(showHistogram);
 
-  /* ctxItems — design lines 1173-1179, verbatim icons + labels */
+  /* ctxItems — design lines 1173-1179, verbatim icons + labels, each with an action id */
   const ctxItems = [
-    { icon: '=',    label: 'Filter for value' },
-    { icon: '≠', label: 'Exclude value' },
-    { icon: '⊞', label: `Group by ${ctxMenu?.field ?? 'field'}` },
-    { icon: '▦', label: 'Top 10 values' },
-    { icon: '⧉', label: 'Copy value' },
+    { icon: '=',    label: 'Filter for value', action: 'filter' },
+    { icon: '≠', label: 'Exclude value', action: 'exclude' },
+    { icon: '⊞', label: `Group by ${ctxMenu?.field ?? 'field'}`, action: 'groupby' },
+    { icon: '▦', label: 'Top 10 values', action: 'top10' },
+    { icon: '⧉', label: 'Copy value', action: 'copy' },
   ];
+
+  // handleValueAction runs a value-action-menu item against the row's field/value:
+  // copy to clipboard, or rewrite the SQL buffer (filter/exclude/group/top-N) and
+  // switch to SQL mode so the change is visible in the editor.
+  const handleValueAction = (action: string) => {
+    const cm = ctxMenu;
+    if (cm) {
+      const { field, value } = cm;
+      if (action === 'copy') {
+        copyText(value);
+      } else if (action === 'filter' || action === 'exclude') {
+        const base = activeTabData.sql.trim() ? activeTabData.sql : setFromStream('', stream);
+        patchActive({ sql: addCondition(base, field, value, action === 'filter' ? '=' : '!='), mode: 'sql' });
+      } else if (action === 'groupby' || action === 'top10') {
+        patchActive({ sql: aggregateBy(stream, field, action === 'top10' ? 10 : 100), mode: 'sql' });
+      }
+    }
+    setCtxMenu((m) => (m ? { ...m, open: false } : m));
+  };
 
   /* openCtx — clamp to viewport like design lines 948-950 */
   const openCtx = (field: string, value: string, e: React.MouseEvent) => {
@@ -715,7 +735,7 @@ function App() {
             x={ctxMenu.x}
             y={ctxMenu.y}
             items={ctxItems}
-            onPick={() => setCtxMenu((m) => (m ? { ...m, open: false } : m))}
+            onPick={handleValueAction}
             onClose={() => setCtxMenu((m) => (m ? { ...m, open: false } : m))}
           />
         )}

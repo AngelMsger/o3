@@ -56,6 +56,30 @@ export function setFromStream(sql: string, stream: string): string {
   return sql;
 }
 
+const TAIL_RE = /\b(group\s+by|order\s+by|having|limit)\b/i;
+
+// addCondition injects `field <op> value` into a query's WHERE clause: it appends
+// with AND when a WHERE already exists, otherwise inserts a new WHERE before any
+// GROUP BY / ORDER BY / HAVING / LIMIT tail. Numeric values are left unquoted;
+// strings are single-quoted with '' escaping. Used by the value-action menu.
+export function addCondition(sql: string, field: string, value: string, op: '=' | '!='): string {
+  const lit = /^-?\d+(\.\d+)?$/.test(value) ? value : `'${value.replace(/'/g, "''")}'`;
+  const cond = `${field} ${op} ${lit}`;
+  const m = sql.match(TAIL_RE);
+  const splitAt = m ? m.index! : sql.length;
+  const head = sql.slice(0, splitAt).trimEnd();
+  const tail = sql.slice(splitAt);
+  const newHead = /\bwhere\b/i.test(head) ? `${head} AND ${cond}` : `${head} WHERE ${cond}`;
+  return tail ? `${newHead}\n${tail}` : newHead;
+}
+
+// aggregateBy rewrites the query to count occurrences of one field, ordered by
+// frequency. limit caps the rows (e.g. 10 for "Top 10 values"). Powers the
+// value-action menu's "Group by" / "Top N" actions.
+export function aggregateBy(stream: string, field: string, limit: number): string {
+  return `SELECT ${field}, count(*) AS count\nFROM "${stream}"\nGROUP BY ${field}\nORDER BY count DESC\nLIMIT ${limit}`;
+}
+
 /**
  * Compute autocomplete suggestions for a given word prefix.
  * Ported from design lines 868-877.
