@@ -1,6 +1,8 @@
 /* ResultsHeader — design lines 306–322 */
 
-/* Outer bar — design line 307 */
+/* Outer bar — design line 307. nowrap keeps the bar a single row when the
+   center column narrows (e.g. the detail drawer is open) instead of letting the
+   item text wrap onto extra lines. */
 .header {
   flex: none;
   display: flex;
@@ -10,11 +12,16 @@
   background: #090b0f;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 11px;
+  white-space: nowrap;
 }
 
-/* "Showing 1–N of total events" — design line 308 */
+/* "Showing 1–N of total events" — design line 308. It is the long item, so it
+   absorbs the squeeze by ellipsizing rather than forcing the row to overflow. */
 .showing {
   color: #99a2b2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Bold count numbers — design line 308 */
@@ -51,10 +58,12 @@
   font-size: 10px;
 }
 
-/* Pagination container — design line 315 */
+/* Pagination container — design line 315. Pinned so the pager keeps its size
+   and stays on one line no matter how narrow the column gets. */
 .pages {
   display: flex;
   gap: 2px;
+  flex: none;
 }
 
 /* Prev/next arrow buttons — design lines 316, 320 */
