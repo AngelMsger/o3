@@ -18,6 +18,10 @@ export function RemoveContext(arg1) {
   return window['go']['main']['App']['RemoveContext'](arg1);
 }
 
+export function RunMetricsQuery(arg1) {
+  return window['go']['main']['App']['RunMetricsQuery'](arg1);
+}
+
 export function RunQuery(arg1) {
   return window['go']['main']['App']['RunQuery'](arg1);
 }

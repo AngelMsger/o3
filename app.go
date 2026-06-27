@@ -12,6 +12,7 @@ import (
 
 	"github.com/angelmsger/o3/internal/apperr"
 	"github.com/angelmsger/o3/internal/config"
+	"github.com/angelmsger/o3/internal/metrics"
 	"github.com/angelmsger/o3/internal/query"
 )
 
@@ -432,6 +433,37 @@ func (a *App) RunQuery(p query.SearchParams) (query.SearchResult, error) {
 		}
 	}
 	return result, nil
+}
+
+// RunMetricsQuery runs a PromQL range query (the Metrics explorer) and maps the
+// Prometheus matrix result into chart-ready series. The step is derived from the
+// window. PromQL works in seconds; the _search API uses microseconds, so we
+// convert here.
+func (a *App) RunMetricsQuery(p metrics.Params) (metrics.Result, error) {
+	client, err := a.requireClient()
+	if err != nil {
+		return metrics.Result{}, err
+	}
+	step := metrics.PromStep(p.StartMicros, p.EndMicros)
+	resp, err := client.QueryMetricsRange(
+		a.ctx, client.DefaultOrg(), p.PromQL,
+		float64(p.StartMicros)/1e6, float64(p.EndMicros)/1e6, step,
+	)
+	if err != nil {
+		return metrics.Result{}, apperr.Wrap(err)
+	}
+	if resp.Status != "success" {
+		msg := resp.Error
+		if msg == "" {
+			msg = "metrics query failed"
+		}
+		return metrics.Result{}, apperr.Wrap(fmt.Errorf("%s", msg))
+	}
+	series, err := metrics.MapMatrix(resp.Data)
+	if err != nil {
+		return metrics.Result{}, apperr.Wrap(err)
+	}
+	return metrics.Result{Series: series, Step: step}, nil
 }
 
 // humanBytes formats a byte count as a short human string (e.g. "1.2 MB").

@@ -10,6 +10,7 @@ import { TimeRangePicker } from './components/TimeRangePicker';
 import { HistoryDropdown } from './components/HistoryDropdown';
 import { FieldsPanel } from './components/FieldsPanel';
 import { PlaceholderView } from './components/views/PlaceholderView';
+import { MetricsView } from './components/views/MetricsView';
 import { Histogram } from './components/Histogram';
 import { ResultsHeader } from './components/ResultsHeader';
 import { ResultsTable } from './components/ResultsTable';
@@ -466,7 +467,9 @@ function App() {
           {/* main column — design line 75. Nav routing: Logs renders the query
               workspace; other sections render their scaffold placeholder. */}
           <div className={styles.main}>
-            {activeNav !== 'Logs' ? (
+            {activeNav === 'Metrics' ? (
+              <MetricsView accent={accent} />
+            ) : activeNav !== 'Logs' ? (
               <PlaceholderView title={activeNav} />
             ) : (
               <>

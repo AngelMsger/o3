@@ -1,0 +1,163 @@
+/* MetricsView — PromQL explorer: a query header + a multi-series ECharts panel. */
+.view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #0a0c11;
+}
+
+/* Query header */
+.header {
+  flex: none;
+  padding: 11px 12px;
+  background: linear-gradient(#0c0e13, #0a0c11);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #dde3ee;
+}
+
+.sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: #4b5362;
+}
+
+/* Range segmented control */
+.rangeSeg {
+  display: flex;
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.rangePill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5b6371;
+  padding: 4px 10px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+}
+
+.rangePill:hover {
+  color: #aeb6c4;
+}
+
+.runBtn {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #06181a;
+  box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--accent, #2dd4bf) 60%, transparent);
+}
+
+.runBtn:hover {
+  opacity: 0.88;
+}
+
+/* PromQL editor frame (the CodeMirror view lives inside) */
+.editorWrap {
+  background: #0e1116;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hintRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: #4b5362;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hintKey {
+  color: #6b7282;
+}
+
+.example code {
+  color: #7dd3fc;
+}
+
+.stepNote {
+  color: #5b6371;
+}
+
+/* Chart area */
+.chartArea {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 8px 8px 4px;
+}
+
+.chart {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Loading / empty / error states */
+.state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #5b6371;
+  font-size: 12px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--accent, #2dd4bf);
+  animation: ooSpin 0.7s linear infinite;
+}
+
+@keyframes ooSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+
+.error {
+  margin: 10px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #f4685f 12%, transparent);
+  border: 1px solid color-mix(in srgb, #f4685f 40%, transparent);
+  color: #f4a39c;
+  font-size: 12px;
+  align-self: flex-start;
+}
