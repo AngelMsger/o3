@@ -1,12 +1,15 @@
 /* QueryEditor — design/Observe.dc.html lines 93–207 */
 import type { ReactElement, ReactNode, RefObject } from 'react';
 import styles from './QueryEditor.module.css';
-import { highlight } from '../lib/format';
-import type { QueryMode } from '../types';
+import { SqlEditor } from './SqlEditor';
+import type { SqlEditorHandle } from './SqlEditor';
+import type { Field, QueryMode } from '../types';
 
 export interface QueryEditorProps {
   query: string;
   queryMode: QueryMode;
+  fields: Field[];
+  accent: string;
   showHistogram: boolean;
   running: boolean;
   timeRange: string;
@@ -17,25 +20,17 @@ export interface QueryEditorProps {
   onToggleHistory: () => void;
   onToggleGuide: () => void;
   onQueryChange: (s: string) => void;
-  onEditorFocus?: () => void;
-  onEditorBlur?: () => void;
+  editorRef?: RefObject<SqlEditorHandle>;
   timePicker?: ReactNode;
   historyPanel?: ReactNode;
-  autocomplete?: ReactNode;
-  caretHint?: string;
-  textareaRef?: RefObject<HTMLTextAreaElement>;
-  onCaretChange?: (pos: number) => void;
-  acOpen?: boolean;
-  acActiveIndex?: number;
-  onAcMove?: (delta: number) => void;
-  onAcAccept?: () => void;
-  onAcClose?: () => void;
 }
 
 export function QueryEditor(props: QueryEditorProps): ReactElement {
   const {
     query,
     queryMode,
+    fields,
+    accent,
     showHistogram,
     running,
     timeRange,
@@ -46,25 +41,10 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     onToggleHistory,
     onToggleGuide,
     onQueryChange,
-    onEditorFocus,
-    onEditorBlur,
+    editorRef,
     timePicker,
     historyPanel,
-    autocomplete,
-    caretHint,
-    textareaRef,
-    onCaretChange,
-    acOpen,
-    onAcMove,
-    onAcAccept,
-    onAcClose,
   } = props;
-
-  /* line-number gutter — design line 163 */
-  const lineNos = query.split('\n').map((_, i) => i + 1);
-
-  /* syntax-highlighted spans — design line 165 */
-  const highlighted = highlight(query);
 
   return (
     /* design line 94 — query editor row outer wrapper */
@@ -141,54 +121,25 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
 
       {/* design line 160 — editor row */}
       <div className={styles.editorWrap}>
+        {/* CodeMirror 6 editor — gutter, highlighting, and native autocomplete
+            are owned by the library; the .editorInner keeps the bordered frame. */}
         <div className={styles.editorInner}>
-
-          {/* design lines 162–164 — line-number gutter */}
-          <div className={styles.gutter}>
-            {lineNos.map((ln) => (
-              <span key={ln} className={styles.lineNo}>{ln}</span>
-            ))}
-          </div>
-
-          {/* design line 165 — syntax-highlighted pre */}
-          <pre className={styles.pre}>
-            {highlighted.map((part, i) => (
-              <span key={i} style={{ color: part.color }}>{part.txt}</span>
-            ))}
-          </pre>
-
-          {/* design line 166 — transparent overlaid textarea */}
-          <textarea
-            ref={textareaRef}
-            className={styles.textarea}
+          <SqlEditor
+            ref={editorRef}
             value={query}
-            onChange={(e) => { onQueryChange(e.target.value); onCaretChange?.(e.target.selectionStart); }}
-            onFocus={onEditorFocus}
-            onBlur={onEditorBlur}
-            onSelect={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
-            onKeyUp={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
-            onClick={(e) => onCaretChange?.((e.target as HTMLTextAreaElement).selectionStart)}
-            onKeyDown={(e) => {
-              if (!acOpen) return;
-              if (e.key === 'ArrowDown') { e.preventDefault(); onAcMove?.(1); }
-              else if (e.key === 'ArrowUp') { e.preventDefault(); onAcMove?.(-1); }
-              else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); onAcAccept?.(); }
-              else if (e.key === 'Escape') { e.preventDefault(); onAcClose?.(); }
-            }}
-            spellCheck={false}
-            wrap="soft"
+            mode={queryMode}
+            fields={fields}
+            accent={accent}
+            onChange={onQueryChange}
+            onRun={onRun}
           />
         </div>
-
-        {/* autocomplete anchor — design lines 208–214 (Task 7 slot) */}
-        {autocomplete}
 
         {/* design lines 168–206 — hint line */}
         <div className={styles.hintLine}>
           <span><b className={styles.hintKey}>⌘↵</b> run</span>
           <span><b className={styles.hintKey}>Tab</b> accept</span>
           <span><b className={styles.hintKey}>↑↓</b> navigate</span>
-          <span style={{ color: 'var(--accent,#2dd4bf)' }}>{caretHint ?? ''}</span>
           {/* flex spacer */}
           <span style={{ flex: 1 }} />
 

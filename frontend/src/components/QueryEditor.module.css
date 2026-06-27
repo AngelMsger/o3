@@ -171,7 +171,7 @@
   position: relative;
 }
 
-/* design line 161 — editor inner container */
+/* design line 161 — editor inner container (now holds the CodeMirror view) */
 .editorInner {
   position: relative;
   background: #0e1116;
@@ -179,65 +179,6 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
-}
-
-/* design line 162 — line-number gutter */
-.gutter {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 34px;
-  background: #0b0d12;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  line-height: 19px;
-  color: #3a4150;
-}
-
-/* design line 163 — individual line number */
-.lineNo {
-  padding-right: 9px;
-}
-
-/* design line 165 — highlighted pre */
-.pre {
-  margin: 0;
-  padding: 10px 12px 10px 44px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12.5px;
-  line-height: 19px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: #cfd6e4;
-  min-height: 76px;
-  pointer-events: none;
-}
-
-/* design line 166 — transparent overlaid textarea */
-.textarea {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  padding: 10px 12px 10px 44px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12.5px;
-  line-height: 19px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  background: transparent;
-  color: transparent;
-  caret-color: var(--accent, #2dd4bf);
-  border: none;
-  outline: none;
-  resize: none;
-  overflow: hidden;
 }
 
 /* design lines 168–169 — hint line */

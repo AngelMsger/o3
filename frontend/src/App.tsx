@@ -5,9 +5,9 @@ import { TitleBar } from './components/TitleBar';
 import { NavRail } from './components/NavRail';
 import { QueryTabs } from './components/QueryTabs';
 import { QueryEditor } from './components/QueryEditor';
+import type { SqlEditorHandle } from './components/SqlEditor';
 import { TimeRangePicker } from './components/TimeRangePicker';
 import { HistoryDropdown } from './components/HistoryDropdown';
-import { Autocomplete } from './components/Autocomplete';
 import { FieldsPanel } from './components/FieldsPanel';
 import { Histogram } from './components/Histogram';
 import { ResultsHeader } from './components/ResultsHeader';
@@ -18,7 +18,7 @@ import { SetupWizard } from './components/SetupWizard';
 import { ValueActionMenu } from './components/ValueActionMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
-import { computeSuggestions, wordBeforeCaret, fromStream, setFromStream } from './lib/format';
+import { fromStream, setFromStream } from './lib/format';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import {
@@ -72,8 +72,7 @@ const toUICtx = (infos: { name: string; url: string; org: string; scheme: string
   }));
 
 function App() {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [caret, setCaret] = useState<number>(0);
+  const editorRef = useRef<SqlEditorHandle>(null);
   const [activeNav, setActiveNav] = useState<string>('Logs');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
@@ -116,9 +115,6 @@ function App() {
   const [running, setRunning] = useState<boolean>(false);
   const [timeRange, setTimeRange] = useState<string>('Past 15 Minutes');
   const [historyOpen, setHistoryOpen] = useState<boolean>(false);
-  const [editorFocused, setEditorFocused] = useState<boolean>(false);
-  const [acDismissed, setAcDismissed] = useState(false);
-  const [acActiveIndex, setAcActiveIndex] = useState<number>(0);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
 
   /* Delayed-unmount hooks for animated overlays */
@@ -188,10 +184,6 @@ function App() {
   const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
   const [liveFields, setLiveFields] = useState<TField[]>([]);
 
-  /* context-aware autocomplete — caret-driven, SQL-mode-gated, live-field suggestions */
-  const currentWord = mode === 'sql' ? wordBeforeCaret(editorText, caret) : '';
-  const suggestions = mode === 'sql' ? computeSuggestions(currentWord, liveFields) : [];
-  const acOpen = mode === 'sql' && editorFocused && !acDismissed && currentWord.length > 0 && suggestions.length > 0;
   const [liveStreams, setLiveStreams] = useState<{ name: string; size: string; color: string }[]>([]);
   const [liveBars, setLiveBars] = useState<HistoBucket[]>([]);
   const [liveMeta, setLiveMeta] = useState<{ total: number; tookMs: number; shown: number }>({ total: 0, tookMs: 0, shown: 0 });
@@ -441,36 +433,10 @@ function App() {
     }
   };
 
-  const acceptSuggestion = (label: string) => {
-    const start = caret - currentWord.length;
-    const next = editorText.slice(0, start) + label + editorText.slice(caret);
-    setEditorText(next);
-    const newCaret = start + label.length;
-    setCaret(newCaret);
-    setAcActiveIndex(0);
-    setAcDismissed(true);
-    requestAnimationFrame(() => {
-      const t = textareaRef.current;
-      if (!t) return;
-      t.focus();
-      t.selectionStart = t.selectionEnd = newCaret;
-    });
-  };
-
+  // Field-click insertion now goes through the editor's imperative handle, which
+  // inserts at the live caret and refocuses — CodeMirror owns the doc + cursor.
   const handleInsertField = (name: string) => {
-    const ta = textareaRef.current;
-    const pos = ta ? ta.selectionStart : editorText.length;
-    const end = ta ? ta.selectionEnd : editorText.length;
-    const next = editorText.slice(0, pos) + name + editorText.slice(end);
-    setEditorText(next);
-    const newCaret = pos + name.length;
-    setCaret(newCaret);
-    requestAnimationFrame(() => {
-      const t = textareaRef.current;
-      if (!t) return;
-      t.focus();
-      t.selectionStart = t.selectionEnd = newCaret;
-    });
+    editorRef.current?.insertAtCursor(name);
   };
 
   return (
@@ -512,29 +478,19 @@ function App() {
             <QueryEditor
               query={editorText}
               queryMode={mode}
+              fields={configured ? liveFields : FIELDS}
+              accent={accent}
               showHistogram={showHistogram}
               running={running}
               timeRange={timeRange}
               onModeChange={setMode}
               onToggleHisto={() => setShowHistogram((v) => !v)}
-              onQueryChange={(t) => { setEditorText(t); setAcDismissed(false); }}
+              onQueryChange={(t) => setEditorText(t)}
               onRun={runQuery}
               onToggleTime={() => setTimeOpen((v) => !v)}
               onToggleHistory={() => setHistoryOpen((v) => !v)}
               onToggleGuide={() => setGuideOpen((v) => !v)}
-              onEditorFocus={() => setEditorFocused(true)}
-              onEditorBlur={() => setEditorFocused(false)}
-              textareaRef={textareaRef}
-              onCaretChange={setCaret}
-              acOpen={acOpen}
-              acActiveIndex={Math.min(acActiveIndex, Math.max(0, suggestions.length - 1))}
-              onAcMove={(delta) => setAcActiveIndex((i) => {
-                const n = suggestions.length;
-                if (n === 0) return 0;
-                return (Math.min(i, n - 1) + delta + n) % n;
-              })}
-              onAcAccept={() => { const s = suggestions[Math.min(acActiveIndex, suggestions.length - 1)]; if (s) acceptSuggestion(s.label); }}
-              onAcClose={() => setAcDismissed(true)}
+              editorRef={editorRef}
               timePicker={
                 <TimeRangePicker
                   open={timeOpen}
@@ -568,16 +524,6 @@ function App() {
                   onClose={() => setHistoryOpen(false)}
                 />
               }
-              autocomplete={
-                <Autocomplete
-                  open={acOpen}
-                  currentWord={currentWord}
-                  suggestions={suggestions}
-                  activeIndex={Math.min(acActiveIndex, Math.max(0, suggestions.length - 1))}
-                  onSelect={(s) => acceptSuggestion(s.label)}
-                  onHover={(i) => setAcActiveIndex(i)}
-                />
-              }
             />
 
             {/* workspace — design line ~230 */}
@@ -596,7 +542,7 @@ function App() {
                     ? { stream: name, sql: setFromStream(activeTabData.sql, name) }
                     : { stream: name });
                   setStreamOpen(false);
-                  requestAnimationFrame(() => textareaRef.current?.focus());
+                  requestAnimationFrame(() => editorRef.current?.focus());
                 }}
                 onFieldFilter={setFieldFilter}
                 onInsertField={handleInsertField}

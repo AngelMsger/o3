@@ -1,17 +1,6 @@
 import type { Field, HistoBar, Suggestion } from '../types';
 import { KEYWORDS, FUNCS } from '../data/mock';
 
-// Keywords and functions mirrored from the design script (lines 694-699) for the highlight tokenizer.
-const KW_SET = new Set([
-  'select','from','where','and','or','not','in','like','ilike','order','by','group',
-  'limit','offset','as','on','join','left','inner','having','distinct','asc','desc',
-  'between','is','null','case','when','then','else','end','union','match_all'
-]);
-const FN_SET = new Set([
-  'count','histogram','approx_count_distinct','min','max','avg','sum',
-  'str_match','re_match','date_bin','to_timestamp','coalesce','lower','upper'
-]);
-
 /**
  * Convert a hex color + alpha to an rgba() string.
  * Design lines 827-830.
@@ -35,36 +24,6 @@ export function histogramBars(): HistoBar[] {
     seeds.push(Math.min(1, v));
   }
   return seeds.map(v => ({ h: v }));
-}
-
-/**
- * Tokenize a SQL string into colored spans.
- * Design lines 879-899.
- * Returns an array of { txt, color } — no React elements (pure).
- */
-export function highlight(sql: string): { txt: string; color: string }[] {
-  const re = /('(?:[^']|'')*'|"[^"]*")|(\d+(?:\.\d+)?)|([A-Za-z_][A-Za-z0-9_]*)|(\s+)|([^\s])/g;
-  const parts: { txt: string; color: string }[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(sql))) {
-    let color = '#cfd6e4';
-    const txt = m[0];
-    if (m[1]) {
-      color = '#a3e08c';
-    } else if (m[2]) {
-      color = '#f6c177';
-    } else if (m[3]) {
-      const lw = m[3].toLowerCase();
-      const rest = sql.slice(re.lastIndex).match(/^\s*\(/);
-      if (KW_SET.has(lw)) color = '#ff7b9c';
-      else if (FN_SET.has(lw) && rest) color = '#7dd3fc';
-      else color = '#cfd6e4';
-    } else if (m[5]) {
-      color = '#7b8496';
-    }
-    parts.push({ txt, color });
-  }
-  return parts;
 }
 
 /**
@@ -95,13 +54,6 @@ export function setFromStream(sql: string, stream: string): string {
     return sql.replace(FROM_RE, `FROM "${stream}"`);
   }
   return sql;
-}
-
-// wordBeforeCaret returns the identifier token ending at the caret ('' if none).
-export function wordBeforeCaret(text: string, caret: number): string {
-  const left = text.slice(0, caret);
-  const m = left.match(/[\w.]+$/);
-  return m ? m[0] : '';
 }
 
 /**

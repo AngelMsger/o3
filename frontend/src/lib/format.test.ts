@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hexA, histogramBars, highlight, setFromStream, fromStream, wordBeforeCaret, computeSuggestions } from './format';
+import { hexA, histogramBars, setFromStream, fromStream, computeSuggestions } from './format';
 import type { Field } from '../types';
 
 describe('hexA', () => {
@@ -15,17 +15,6 @@ describe('histogramBars', () => {
     expect(a).toEqual(b);
     expect(Math.max(...a.map(x => x.h))).toBeLessThanOrEqual(1);
     expect(Math.min(...a.map(x => x.h))).toBeGreaterThan(0);
-  });
-});
-
-describe('highlight', () => {
-  it('colors SQL keywords distinctly from identifiers', () => {
-    const parts = highlight('SELECT body FROM demo_logs');
-    const kw = parts.find(p => p.txt === 'SELECT');
-    const id = parts.find(p => p.txt === 'demo_logs');
-    expect(kw).toBeDefined();
-    expect(id).toBeDefined();
-    expect(kw!.color).not.toBe(id!.color);
   });
 });
 
@@ -53,19 +42,6 @@ describe('setFromStream', () => {
   });
   it('leaves a non-empty buffer without FROM unchanged', () => {
     expect(setFromStream('SELECT 1', 'logs')).toBe('SELECT 1');
-  });
-});
-
-describe('wordBeforeCaret', () => {
-  it('returns the token ending at the caret', () => {
-    expect(wordBeforeCaret('SELECT ser', 10)).toBe('ser');
-  });
-  it('includes dotted identifiers', () => {
-    // 'WHERE k8s.name'.slice(0, 13) === 'WHERE k8s.nam', so token is 'k8s.nam'
-    expect(wordBeforeCaret('WHERE k8s.name', 13)).toBe('k8s.nam');
-  });
-  it('returns empty after a space', () => {
-    expect(wordBeforeCaret('SELECT ', 7)).toBe('');
   });
 });
 
