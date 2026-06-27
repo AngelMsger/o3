@@ -48,29 +48,9 @@
   color: #99a2b2;
 }
 
-/* Bar container — design script line 910 */
-.bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 92px;
-}
-
-/* Individual bar — design script lines 914-918 */
-.bar {
-  flex: 1;
-  min-height: 3px;
-  border-radius: 2px 2px 0 0;
-  cursor: pointer;
-  transition: opacity var(--motion-fast) var(--motion-ease);
-}
-
-/* X-axis labels — design script lines 921-922 */
-.axis {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  color: #4b5362;
+/* ECharts canvas — replaces the hand-drawn bars + axis. Height covers the 92px
+   bar area plus the ~18px x-axis label band (grid bottom in buildHistogramOption). */
+.chart {
+  width: 100%;
+  height: 110px;
 }
