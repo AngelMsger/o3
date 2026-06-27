@@ -45,18 +45,7 @@
   color: var(--accent, #2dd4bf);
 }
 
-/* soon items — muted, non-interactive */
-.soon {
-  color: #3a4150;
-  cursor: default;
-}
-
-.soon:hover {
-  background: transparent;
-  color: #3a4150;
-}
-
-/* small dot for soon items — design line 66 inner sc-if span */
+/* small dot marking sections that are scaffolded but not yet built — design line 66 inner sc-if span */
 .dot {
   position: absolute;
   top: 5px;

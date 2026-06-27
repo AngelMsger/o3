@@ -49,8 +49,8 @@ export function NavRail({ activeNav, onPick, onOpenSettings }: {
         <button
           key={n.name}
           title={n.soon ? `${n.name} · coming soon` : n.name}
-          className={`${styles.btn} ${activeNav === n.name ? styles.active : ''} ${n.soon ? styles.soon : ''}`}
-          onClick={() => !n.soon && onPick(n.name)}
+          className={`${styles.btn} ${activeNav === n.name ? styles.active : ''}`}
+          onClick={() => onPick(n.name)}
         >
           {ICONS[n.icon]}
           {n.soon && <span className={styles.dot} />}

@@ -9,6 +9,7 @@ import type { SqlEditorHandle } from './components/SqlEditor';
 import { TimeRangePicker } from './components/TimeRangePicker';
 import { HistoryDropdown } from './components/HistoryDropdown';
 import { FieldsPanel } from './components/FieldsPanel';
+import { PlaceholderView } from './components/views/PlaceholderView';
 import { Histogram } from './components/Histogram';
 import { ResultsHeader } from './components/ResultsHeader';
 import { ResultsTable } from './components/ResultsTable';
@@ -462,8 +463,13 @@ function App() {
             onOpenSettings={() => setSettingsOpen(true)}
           />
 
-          {/* main column — design line 75 */}
+          {/* main column — design line 75. Nav routing: Logs renders the query
+              workspace; other sections render their scaffold placeholder. */}
           <div className={styles.main}>
+            {activeNav !== 'Logs' ? (
+              <PlaceholderView title={activeNav} />
+            ) : (
+              <>
             {/* QueryTabs — design lines 77-91 */}
             <QueryTabs
               tabs={tabs}
@@ -603,6 +609,8 @@ function App() {
                 />
               )}
             </div>
+              </>
+            )}
           </div>
         </div>
 
