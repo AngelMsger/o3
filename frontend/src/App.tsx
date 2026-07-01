@@ -681,6 +681,7 @@ function App() {
             tab={settingsTab}
             accent={accent}
             density={density}
+            themePref={themePref}
             mcpOn={mcpOn}
             showHistogram={showHistogram}
             conn={conn}
@@ -688,6 +689,7 @@ function App() {
             onTab={setSettingsTab}
             onPickAccent={handlePickAccent}
             onPickDensity={setDensity}
+            onPickTheme={setThemePref}
             onToggleHisto={() => setShowHistogram((v) => !v)}
             onToggleMcp={() => setMcpOn((v) => !v)}
             onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}

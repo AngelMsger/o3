@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
-import type { SettingsTab, Density } from '../types';
+import type { SettingsTab, Density, ThemePref } from '../types';
 import { hexA } from '../lib/format';
 import styles from './SettingsModal.module.css';
 
@@ -22,6 +22,7 @@ interface SettingsModalProps extends SettingsContextsProps {
   tab: SettingsTab;
   accent: string;
   density: Density;
+  themePref: ThemePref;
   mcpOn: boolean;
   showHistogram: boolean;
   conn: { url: string; org: string; email?: string; password?: string; token?: string };
@@ -29,6 +30,7 @@ interface SettingsModalProps extends SettingsContextsProps {
   onTab: (t: SettingsTab) => void;
   onPickAccent: (c: string) => void;
   onPickDensity: (d: Density) => void;
+  onPickTheme: (t: ThemePref) => void;
   onToggleHisto: () => void;
   onToggleMcp: () => void;
   onConnField: (key: string, value: string) => void;
@@ -52,6 +54,13 @@ const DENSITY_OPTS: [Density, string][] = [
   ['comfortable', 'Comfortable'],
 ];
 
+// Theme segment icons — design lines 1665-1669
+const THEME_ICONS: Record<ThemePref, string> = {
+  light: 'M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4',
+  dark: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
+  system: 'M3 5h18v10H3zM8 19h8M12 15v4',
+};
+
 // Agent leash options — design line 1235
 const AGENT_TABS: [string, string][] = [
   ['observe', 'Observe'],
@@ -70,6 +79,7 @@ export function SettingsModal({
   tab,
   accent,
   density,
+  themePref,
   mcpOn,
   showHistogram,
   conn,
@@ -77,6 +87,7 @@ export function SettingsModal({
   onTab,
   onPickAccent,
   onPickDensity,
+  onPickTheme,
   onToggleHisto,
   onToggleMcp,
   onConnField,
@@ -344,6 +355,50 @@ export function SettingsModal({
                   <div className={styles.panelTitle}>Appearance</div>
                   <div className={styles.panelSub} style={{ lineHeight: undefined }}>
                     Tune the look and density of the workspace.
+                  </div>
+
+                  {/* Theme card — design lines 621-635 */}
+                  <div style={{ background: 'var(--sf-05)', border: '1px solid rgba(var(--ink),.06)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                    <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 4 }}>Theme</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--tx-09)', marginBottom: 14 }}>Choose a look, or let it follow your macOS appearance automatically.</div>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      {(['light', 'dark', 'system'] as ThemePref[]).map((k) => {
+                        const active = themePref === k;
+                        const label = k === 'system' ? 'System' : k[0].toUpperCase() + k.slice(1);
+                        const title = k === 'system' ? 'Sync with system' : label + ' theme';
+                        return (
+                          <button
+                            key={k}
+                            type="button"
+                            title={title}
+                            onClick={() => onPickTheme(k)}
+                            style={{
+                              flex: 1,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6,
+                              padding: '14px 6px',
+                              border: active ? `1px solid ${hexA(accent, 0.5)}` : '1px solid rgba(var(--ink),.08)',
+                              borderRadius: 10,
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: 12,
+                              fontWeight: 600,
+                              background: active ? hexA(accent, 0.1) : 'var(--sf-02)',
+                              color: active ? accent : 'var(--tx-06)',
+                            }}
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                              {k === 'light' && <circle cx="12" cy="12" r="4" />}
+                              <path d={THEME_ICONS[k]} />
+                            </svg>
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Accent swatches — design line 467 */}
