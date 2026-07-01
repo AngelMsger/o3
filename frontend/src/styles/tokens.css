@@ -1,4 +1,4 @@
-/* Design tokens — sourced from design/Observe.dc.html lines 14-26 */
+/* Design tokens — sourced from design/Observe.dc.html lines 15-84 */
 
 :root {
   --accent: #2dd4bf;
@@ -9,6 +9,62 @@
   --motion-slow: 240ms; /* full-screen surfaces: setup wizard */
   --motion-ease: cubic-bezier(0.2, 0, 0, 1); /* standard / enter (decelerate) */
   --motion-ease-in: cubic-bezier(0.4, 0, 1, 1); /* exit (accelerate) */
+
+  /* ===== THEME TOKENS — dark (default) ===== */
+  --ink: 255,255,255;              /* hairline / overlay base */
+  --glow: 45,212,191;             /* body ambient tint */
+  /* surfaces */
+  --sf-desk:#050608; --sf-void:#070809; --sf-rail:#08090d; --sf-tabs:#090b0f;
+  --sf-main:#0a0c11; --sf-01:#0b0d11; --sf-02:#0b0d12; --sf-03:#0b0e13;
+  --sf-04:#0c0e12; --sf-05:#0c0e13; --sf-modal:#0c0f15; --sf-ctrl:#0e1116;
+  --sf-pop:#0f131a; --sf-hov:#11141a; --sf-06:#141821; --sf-07:#14181f;
+  --sf-hov2:#161b22; --sf-track:#1c2230; --sf-atint:#0e2320; --sf-atint2:#08120f;
+  --sf-titl:#101319;
+  /* neutral text */
+  --tx-max:#f0f3f8; --tx-glow:#eafdf8; --tx-hi:#e6eaf2; --tx-01:#dde3ee;
+  --tx-02:#d7dce6; --tx-03:#cfd6e4; --tx-04:#c3cad7; --tx-05:#aeb6c4;
+  --tx-06:#99a2b2; --tx-07:#8b93a3; --tx-7b:#7b8496; --tx-09:#6b7282;
+  --tx-10:#5b6371; --tx-11:#555d6b; --tx-12:#4b5362; --tx-13:#3f4756;
+  --tx-14:#3a4150; --tx-15:#39404d;
+  /* green-gray neutrals */
+  --gg-1:#cfe3de; --gg-2:#9fb4ae; --gg-3:#8b9a96; --gg-4:#5b6b67; --gg-5:#4b5b57;
+  /* avatar chrome */
+  --av-1:#3a4252; --av-2:#222833;
+  /* syntax (query editor + JSON viewer) */
+  --sy-str:#a3e08c; --sy-num:#f6c177; --sy-key:#8fb7ff; --sy-bool:#5b9dff;
+  --sy-null:#f4685f; --sy-kw:#ff7b9c; --sy-fn:#7dd3fc;
+  /* liquid glass (translucent chrome + overlays) */
+  --glass-titl: rgba(17,20,27,.66); --glass-bar: rgba(12,14,19,.60);
+  --glass-pop: rgba(16,20,28,.74); --glass-modal: rgba(13,16,22,.80);
+  --glass-drawer: rgba(11,13,18,.72); --glass-hi: rgba(255,255,255,.06);
+  --glass-blur: saturate(180%) blur(22px);
+  color-scheme: dark;
+}
+
+/* ===== THEME TOKENS — light ===== */
+:root[data-oo-theme="light"] {
+  --ink: 22,30,44;
+  --glow: 45,180,165;
+  --sf-desk:#e6eaf1; --sf-void:#e1e6ee; --sf-rail:#eef1f6; --sf-tabs:#eef1f6;
+  --sf-main:#ffffff; --sf-01:#f6f8fb; --sf-02:#f6f8fb; --sf-03:#f1f4f9;
+  --sf-04:#f6f8fb; --sf-05:#f8fafc; --sf-modal:#ffffff; --sf-ctrl:#eef2f7;
+  --sf-pop:#ffffff; --sf-hov:#eef1f6; --sf-06:#e8edf4; --sf-07:#e8edf4;
+  --sf-hov2:#e7ecf3; --sf-track:#cfd5df; --sf-atint:#d3f3ec; --sf-atint2:#e0f5f0;
+  --sf-titl:#f4f7fb;
+  --tx-max:#0d141c; --tx-glow:#0a4a41; --tx-hi:#101820; --tx-01:#1b2431;
+  --tx-02:#202836; --tx-03:#28313f; --tx-04:#313b48; --tx-05:#4a5361;
+  --tx-06:#5b6573; --tx-07:#6b7381; --tx-7b:#6e7785; --tx-09:#79818e;
+  --tx-10:#89909c; --tx-11:#8d94a0; --tx-12:#949ca7; --tx-13:#a6adb6;
+  --tx-14:#adb3bd; --tx-15:#b5bac3;
+  --gg-1:#2b4a43; --gg-2:#4b6b63; --gg-3:#5d6f6a; --gg-4:#79857f; --gg-5:#8a938e;
+  --av-1:#c1c9d6; --av-2:#99a2b1;
+  --sy-str:#2f8f3a; --sy-num:#b0741a; --sy-key:#2f5fc4; --sy-bool:#2563eb;
+  --sy-null:#d33a30; --sy-kw:#d23a66; --sy-fn:#0e83ad;
+  --glass-titl: rgba(247,249,252,.68); --glass-bar: rgba(240,243,248,.62);
+  --glass-pop: rgba(252,253,255,.76); --glass-modal: rgba(255,255,255,.82);
+  --glass-drawer: rgba(250,251,253,.74); --glass-hi: rgba(255,255,255,.55);
+  --glass-blur: saturate(180%) blur(22px);
+  color-scheme: light;
 }
 
 /* Accessibility: honor the OS "reduce motion" setting by collapsing durations. */
@@ -37,8 +93,9 @@ body {
 }
 
 body {
-  background: radial-gradient(120% 120% at 80% -10%, #11141b 0%, #06070a 55%, #04050700 100%), #050608;
+  background: radial-gradient(120% 120% at 80% -10%, rgba(var(--glow),.10) 0%, transparent 55%), var(--sf-desk);
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  transition: background .25s ease;
 }
 
 #root {
@@ -57,14 +114,14 @@ body {
 }
 
 .oo-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(var(--ink), .14);
   border-radius: 6px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 .oo-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(var(--ink), .24);
   background-clip: padding-box;
 }
 
