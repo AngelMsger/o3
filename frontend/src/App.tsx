@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDelayedUnmount } from './lib/useDelayedUnmount';
 import styles from './App.module.css';
 import { TitleBar } from './components/TitleBar';
+import { ContextSwitcher } from './components/ContextSwitcher';
 import { NavRail } from './components/NavRail';
 import { QueryTabs } from './components/QueryTabs';
 import { QueryEditor } from './components/QueryEditor';
@@ -502,15 +503,7 @@ function App() {
     <div className={styles.shell}>
       <div className={styles.card}>
         {/* TitleBar — design line 41; context switcher added in task 3 */}
-        <TitleBar
-          contexts={contexts.map((c) => ({ name: c.name, url: c.url, color: c.color, isCurrent: c.name === currentName }))}
-          currentName={currentName}
-          switchOpen={ctxSwitchOpen}
-          onToggleSwitch={() => setCtxSwitchOpen((v) => !v)}
-          onSwitch={(name) => { setCtxSwitchOpen(false); handleSwitchContext(name); }}
-          onAddContext={() => { setCtxSwitchOpen(false); handleAddContext(); setSettingsOpen(true); setSettingsTab('connection'); }}
-          onManage={() => { setCtxSwitchOpen(false); setSettingsOpen(true); setSettingsTab('connection'); }}
-        />
+        <TitleBar />
 
         {/* BODY flex row — design line 61 */}
         <div className={styles.body}>
@@ -558,6 +551,17 @@ function App() {
               onToggleHistory={() => setHistoryOpen((v) => !v)}
               onToggleGuide={() => setGuideOpen((v) => !v)}
               editorRef={editorRef}
+              contextSwitcher={
+                <ContextSwitcher
+                  contexts={contexts.map((c) => ({ name: c.name, url: c.url, color: c.color, isCurrent: c.name === currentName }))}
+                  currentName={currentName}
+                  open={ctxSwitchOpen}
+                  onToggle={() => setCtxSwitchOpen((v) => !v)}
+                  onSwitch={(name) => { setCtxSwitchOpen(false); handleSwitchContext(name); }}
+                  onAddContext={() => { setCtxSwitchOpen(false); handleAddContext(); setSettingsOpen(true); setSettingsTab('connection'); }}
+                  onManage={() => { setCtxSwitchOpen(false); setSettingsOpen(true); setSettingsTab('connection'); }}
+                />
+              }
               timePicker={
                 <TimeRangePicker
                   open={timeOpen}

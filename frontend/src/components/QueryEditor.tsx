@@ -24,6 +24,8 @@ export interface QueryEditorProps {
   editorRef?: RefObject<SqlEditorHandle>;
   timePicker?: ReactNode;
   historyPanel?: ReactNode;
+  /** context switcher, relocated into the control row (design lines 168-208) */
+  contextSwitcher?: ReactNode;
 }
 
 export function QueryEditor(props: QueryEditorProps): ReactElement {
@@ -46,6 +48,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     editorRef,
     timePicker,
     historyPanel,
+    contextSwitcher,
   } = props;
 
   return (
@@ -85,8 +88,12 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
           </button>
         </div>
 
-        {/* design line 106 — divider */}
+        {/* design line 167 — divider */}
         <div className={styles.divider} />
+
+        {/* design lines 168-208 — context switcher (relocated from title bar) */}
+        {contextSwitcher}
+        {contextSwitcher && <div className={styles.divider} />}
 
         {/* design lines 107–151 — time range button + picker slot */}
         <div className={styles.timeWrap}>
