@@ -12,13 +12,71 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  /* ===== THEME TOKENS — dark (default) ===== */
+  :root {
+    --ink: 255,255,255;              /* hairline / overlay base */
+    --glow: 45,212,191;             /* body ambient tint */
+    /* surfaces */
+    --sf-desk:#050608; --sf-void:#070809; --sf-rail:#08090d; --sf-tabs:#090b0f;
+    --sf-main:#0a0c11; --sf-01:#0b0d11; --sf-02:#0b0d12; --sf-03:#0b0e13;
+    --sf-04:#0c0e12; --sf-05:#0c0e13; --sf-modal:#0c0f15; --sf-ctrl:#0e1116;
+    --sf-pop:#0f131a; --sf-hov:#11141a; --sf-06:#141821; --sf-07:#14181f;
+    --sf-hov2:#161b22; --sf-track:#1c2230; --sf-atint:#0e2320; --sf-atint2:#08120f;
+    --sf-titl:#101319;
+    /* neutral text */
+    --tx-max:#f0f3f8; --tx-glow:#eafdf8; --tx-hi:#e6eaf2; --tx-01:#dde3ee;
+    --tx-02:#d7dce6; --tx-03:#cfd6e4; --tx-04:#c3cad7; --tx-05:#aeb6c4;
+    --tx-06:#99a2b2; --tx-07:#8b93a3; --tx-7b:#7b8496; --tx-09:#6b7282;
+    --tx-10:#5b6371; --tx-11:#555d6b; --tx-12:#4b5362; --tx-13:#3f4756;
+    --tx-14:#3a4150; --tx-15:#39404d;
+    /* green-gray neutrals */
+    --gg-1:#cfe3de; --gg-2:#9fb4ae; --gg-3:#8b9a96; --gg-4:#5b6b67; --gg-5:#4b5b57;
+    /* avatar chrome */
+    --av-1:#3a4252; --av-2:#222833;
+    /* syntax (query editor + JSON viewer) */
+    --sy-str:#a3e08c; --sy-num:#f6c177; --sy-key:#8fb7ff; --sy-bool:#5b9dff;
+    --sy-null:#f4685f; --sy-kw:#ff7b9c; --sy-fn:#7dd3fc;
+    /* liquid glass (translucent chrome + overlays) */
+    --glass-titl: rgba(17,20,27,.66); --glass-bar: rgba(12,14,19,.60);
+    --glass-pop: rgba(16,20,28,.74); --glass-modal: rgba(13,16,22,.80);
+    --glass-drawer: rgba(11,13,18,.72); --glass-hi: rgba(255,255,255,.06);
+    --glass-blur: saturate(180%) blur(22px);
+  }
+  /* ===== THEME TOKENS — light ===== */
+  :root[data-oo-theme="light"] {
+    --ink: 22,30,44;
+    --glow: 45,180,165;
+    --sf-desk:#e6eaf1; --sf-void:#e1e6ee; --sf-rail:#eef1f6; --sf-tabs:#eef1f6;
+    --sf-main:#ffffff; --sf-01:#f6f8fb; --sf-02:#f6f8fb; --sf-03:#f1f4f9;
+    --sf-04:#f6f8fb; --sf-05:#f8fafc; --sf-modal:#ffffff; --sf-ctrl:#eef2f7;
+    --sf-pop:#ffffff; --sf-hov:#eef1f6; --sf-06:#e8edf4; --sf-07:#e8edf4;
+    --sf-hov2:#e7ecf3; --sf-track:#cfd5df; --sf-atint:#d3f3ec; --sf-atint2:#e0f5f0;
+    --sf-titl:#f4f7fb;
+    --tx-max:#0d141c; --tx-glow:#0a4a41; --tx-hi:#101820; --tx-01:#1b2431;
+    --tx-02:#202836; --tx-03:#28313f; --tx-04:#313b48; --tx-05:#4a5361;
+    --tx-06:#5b6573; --tx-07:#6b7381; --tx-7b:#6e7785; --tx-09:#79818e;
+    --tx-10:#89909c; --tx-11:#8d94a0; --tx-12:#949ca7; --tx-13:#a6adb6;
+    --tx-14:#adb3bd; --tx-15:#b5bac3;
+    --gg-1:#2b4a43; --gg-2:#4b6b63; --gg-3:#5d6f6a; --gg-4:#79857f; --gg-5:#8a938e;
+    --av-1:#c1c9d6; --av-2:#99a2b1;
+    --sy-str:#2f8f3a; --sy-num:#b0741a; --sy-key:#2f5fc4; --sy-bool:#2563eb;
+    --sy-null:#d33a30; --sy-kw:#d23a66; --sy-fn:#0e83ad;
+    --glass-titl: rgba(247,249,252,.68); --glass-bar: rgba(240,243,248,.62);
+    --glass-pop: rgba(252,253,255,.76); --glass-modal: rgba(255,255,255,.82);
+    --glass-drawer: rgba(250,251,253,.74); --glass-hi: rgba(255,255,255,.55);
+    --glass-blur: saturate(180%) blur(22px);
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; }
-  body { background: radial-gradient(120% 120% at 80% -10%, #11141b 0%, #06070a 55%, #04050700 100%), #050608; font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  body {
+    background: radial-gradient(120% 120% at 80% -10%, rgba(var(--glow),.10) 0%, transparent 55%), var(--sf-desk);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    transition: background .25s ease;
+  }
   ::selection { background: rgba(45,212,191,.28); }
   .oo-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
-  .oo-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.09); border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
-  .oo-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.16); background-clip: padding-box; }
+  .oo-scroll::-webkit-scrollbar-thumb { background: rgba(var(--ink),.14); border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+  .oo-scroll::-webkit-scrollbar-thumb:hover { background: rgba(var(--ink),.24); background-clip: padding-box; }
   .oo-scroll::-webkit-scrollbar-corner { background: transparent; }
   @keyframes ooPulse { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
   @keyframes ooDrawer { from { transform: translateX(14px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -35,10 +93,10 @@
 </template>
 
 <div style="height: 100vh; padding: 12px; display: flex;">
-  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: #0a0c11; border: 1px solid rgba(255,255,255,.07); border-radius: 11px; overflow: hidden; position: relative; box-shadow: 0 28px 80px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.02) inset;">
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--sf-main); border: 1px solid rgba(var(--ink),.07); border-radius: 11px; overflow: hidden; position: relative; box-shadow: 0 28px 80px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(var(--ink),.02) inset;">
 
     <!-- ===== TITLEBAR ===== -->
-    <div style="height: 42px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: linear-gradient(#101319, #0c0e13); border-bottom: 1px solid rgba(255,255,255,.06);">
+    <div style="height: 42px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: var(--glass-titl); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-bottom: 1px solid rgba(var(--ink),.06); box-shadow: inset 0 1px 0 var(--glass-hi); position: relative; z-index: 40;">
       <div style="display: flex; gap: 8px; align-items: center;">
         <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></span>
         <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
@@ -48,121 +106,124 @@
         <span style="width: 18px; height: 18px; border-radius: 5px; background: var(--accent, #2dd4bf); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 14px -2px var(--accent, #2dd4bf);">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#06181a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg>
         </span>
-        <span style="font-size: 13px; font-weight: 700; color: #d7dce6; letter-spacing: .3px;">o3</span>
-        <span style="font-size: 11px; color: #555d6b; font-weight: 500;">/ Logs</span>
+        <span style="font-size: 13px; font-weight: 700; color: var(--tx-02); letter-spacing: .3px;">o3</span>
+        <span style="font-size: 11px; color: var(--tx-11); font-weight: 500;">/ Logs</span>
       </div>
 
       <div style="flex: 1;"></div>
 
-      <div style="position: relative;">
-        <button onClick="{{ toggleCtxSwitch }}" title="Active context — click to switch" style="display: flex; align-items: center; gap: 8px; height: 27px; padding: 0 8px 0 10px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; cursor: pointer;" style-hover="border-color:rgba(255,255,255,.24);">
-          <span style="font-size: 9px; text-transform: uppercase; letter-spacing: .7px; color: #5b6371; font-weight: 700;">ctx</span>
-          <span style="{{ curCtxDotStyle }}"></span>
-          <span style="font-size: 11.5px; color: #d7dce6; font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap;">{{ curCtxName }}</span>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6b7282" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <sc-if value="{{ ctxSwitchOpen }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ closeCtxSwitch }}" style="position: fixed; inset: 0; z-index: 70;"></div>
-          <div style="position: absolute; right: 0; top: 34px; width: 288px; background: #0f131a; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 71; animation: ooFade .1s ease;">
-            <div style="padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.07); background: #0b0e13; display: flex; align-items: center; justify-content: space-between;">
-              <span style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 700;">Switch context</span>
-              <span style="font-size: 10px; color: #4b5362; font-family:'JetBrains Mono',monospace;">{{ ctxCount }} configured</span>
-            </div>
-            <div style="padding: 5px;">
-              <sc-for list="{{ ctxMenu }}" as="c" hint-placeholder-count="3">
-                <div onClick="{{ c.onPick }}" style="{{ c.style }}" style-hover="background:#161b22;">
-                  <span style="{{ c.dotStyle }}"></span>
-                  <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 12.5px; color: #dde3ee; font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</div>
-                    <div style="font-size: 10.5px; color: #6b7282; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
-                  </div>
-                  <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="color: var(--accent,#2dd4bf); font-size: 13px;">✓</span></sc-if>
-                </div>
-              </sc-for>
-            </div>
-            <div style="padding: 6px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 6px;">
-              <button onClick="{{ addContextFromMenu }}" style="flex: 1; height: 32px; border-radius: 8px; border: 1px dashed rgba(255,255,255,.16); background: transparent; color: #aeb6c4; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:#e6eaf2;">+ Add context</button>
-              <button onClick="{{ openContextSettings }}" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="color:#e6eaf2;">Manage…</button>
-            </div>
-          </div>
-        </sc-if>
-      </div>
-
-      <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,#3a4252,#222833); border: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aeb6c4; font-weight: 600;">JD</div>
+      <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,var(--av-1),var(--av-2)); border: 1px solid rgba(var(--ink),.08); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--tx-05); font-weight: 600;">JD</div>
     </div>
 
     <!-- ===== BODY ===== -->
     <div style="flex: 1; min-height: 0; display: flex;">
 
       <!-- nav rail -->
-      <div style="width: 52px; flex: none; background: #08090d; border-right: 1px solid rgba(255,255,255,.05); display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 3px;">
+      <div style="width: 52px; flex: none; background: var(--sf-rail); border-right: 1px solid rgba(var(--ink),.05); display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 3px;">
         <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
-          <button onClick="{{ n.onPick }}" title="{{ n.title }}" style="{{ n.style }}" data-comment-anchor="60a1cddae6-button">{{ n.icon }}<sc-if value="{{ n.soon }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: #39404d;"></span></sc-if></button>
+          <button onClick="{{ n.onPick }}" title="{{ n.title }}" style="{{ n.style }}" data-comment-anchor="60a1cddae6-button">{{ n.icon }}<sc-if value="{{ n.soon }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--tx-15);"></span></sc-if></button>
         </sc-for>
         <div style="flex: 1;"></div>
-        <button onClick="{{ openSettings }}" title="Settings" style="width: 36px; height: 36px; border-radius: 9px; border: none; background: transparent; color: #4b5362; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:#11141a;color:#aeb6c4;">
+        <button onClick="{{ openSettings }}" title="Settings" style="width: 36px; height: 36px; border-radius: 9px; border: none; background: transparent; color: var(--tx-12); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:var(--sf-hov);color:var(--tx-05);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" data-comment-anchor="f0fb2d4841-path"/></svg>
         </button>
       </div>
 
       <!-- main column -->
-      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: #0a0c11;">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--sf-main);">
 
         <!-- saved-query tabs -->
-        <div class="oo-scroll" style="height: 34px; flex: none; display: flex; align-items: stretch; gap: 1px; padding: 0 10px; background: #090b0f; border-bottom: 1px solid rgba(255,255,255,.06); overflow-x: auto; overflow-y: hidden;" data-comment-anchor="df3a0a2b19-div">
+        <div class="oo-scroll" style="height: 42px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: var(--glass-bar); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-bottom: 1px solid rgba(var(--ink),.06); box-shadow: inset 0 1px 0 var(--glass-hi); position: relative; z-index: 35; overflow-x: auto; overflow-y: hidden;" data-comment-anchor="df3a0a2b19-div">
           <sc-for list="{{ tabItems }}" as="t" hint-placeholder-count="4">
-            <div onClick="{{ t.onPick }}" onDoubleClick="{{ t.onRename }}" title="stream: {{ t.streamName }} — double-click to rename" style="{{ t.tabStyle }}">
+            <div onClick="{{ t.onPick }}" onDoubleClick="{{ t.onRename }}" title="stream: {{ t.streamName }} — double-click to rename" style="{{ t.tabStyle }}" style-hover="background:var(--sf-hov2);color:var(--tx-02);">
               <span style="{{ t.dotStyle }}"></span>
               <sc-if value="{{ t.editing }}" hint-placeholder-val="{{ false }}">
-                <input ref="{{ t.editRef }}" value="{{ t.name }}" onChange="{{ t.onNameChange }}" onKeyDown="{{ t.onNameKey }}" onBlur="{{ t.onNameBlur }}" onClick="{{ stop }}" spellcheck="false" style="width: 96px; background: #0e1116; border: 1px solid var(--accent,#2dd4bf); border-radius: 4px; color: #e6eaf2; font-size: 11.5px; font-family: inherit; padding: 1px 5px; outline: none;">
+                <input ref="{{ t.editRef }}" value="{{ t.name }}" onChange="{{ t.onNameChange }}" onKeyDown="{{ t.onNameKey }}" onBlur="{{ t.onNameBlur }}" onClick="{{ stop }}" spellcheck="false" style="width: 96px; background: var(--sf-ctrl); border: 1px solid var(--accent,#2dd4bf); border-radius: 4px; color: var(--tx-hi); font-size: 11.5px; font-family: inherit; padding: 1px 5px; outline: none;">
               </sc-if>
               <sc-if value="{{ t.notEditing }}" hint-placeholder-val="{{ true }}">
                 <span style="white-space: nowrap;">{{ t.name }}</span>
               </sc-if>
+              <sc-if value="{{ t.canClose }}" hint-placeholder-val="{{ true }}">
+                <span onClick="{{ t.onClose }}" title="Close tab" style="display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 1px; margin-right: -3px; border-radius: 4px; color: var(--tx-11); font-size: 14px; line-height: 1;" style-hover="background:var(--sf-hov2);color:var(--tx-01);">×</span>
+              </sc-if>
             </div>
           </sc-for>
-          <button onClick="{{ newTab }}" title="New query" style="align-self: center; margin-left: 4px; width: 22px; height: 22px; border-radius: 6px; border: 1px dashed rgba(255,255,255,.14); background: transparent; color: #5b6371; font-size: 15px; line-height: 1; cursor: pointer; flex: none;" style-hover="color:#d7dce6;border-color:rgba(255,255,255,.3);">+</button>
+          <button onClick="{{ newTab }}" title="New query" style="align-self: center; margin-left: 2px; width: 24px; height: 24px; border-radius: 7px; border: 1px dashed rgba(var(--ink),.14); background: transparent; color: var(--tx-10); font-size: 15px; line-height: 1; cursor: pointer; flex: none;" style-hover="color:var(--tx-02);border-color:rgba(var(--ink),.3);">+</button>
         </div>
 
         <!-- query editor row -->
-        <div style="flex: none; padding: 11px 12px; background: linear-gradient(#0c0e13,#0a0c11); border-bottom: 1px solid rgba(255,255,255,.06); position: relative; z-index: 30;">
+        <div style="flex: none; padding: 11px 12px; background: linear-gradient(var(--sf-05),var(--sf-main)); border-bottom: 1px solid rgba(var(--ink),.06); position: relative; z-index: 30;">
           <!-- control row -->
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 9px;">
-            <div style="flex: none; display: flex; background: #0e1116; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; padding: 2px;">
+            <div style="flex: none; display: flex; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 2px;">
               <span style="font-family:'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; color: #06181a; background: var(--accent,#2dd4bf); padding: 5px 13px; border-radius: 5px;">SQL</span>
-              <span style="font-family:'JetBrains Mono',monospace; font-size: 11px; color: #5b6371; padding: 5px 13px; cursor: pointer;">search</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--tx-10); padding: 5px 13px; cursor: pointer;">Search</span>
             </div>
             <span style="flex: 1;"></span>
-            <div style="display: flex; align-items: center; gap: 7px; font-family:'JetBrains Mono',monospace; font-size: 10.5px; color: #5b6371;">
-              <span>histogram</span>
+            <div style="display: flex; align-items: center; gap: 7px; font-family:'JetBrains Mono',monospace; font-size: 10.5px; color: var(--tx-10);">
+              <span>Histogram</span>
               <button onClick="{{ toggleHisto }}" style="{{ histoToggle }}"><span style="{{ histoKnob }}"></span></button>
             </div>
-            <div style="width: 1px; height: 20px; background: rgba(255,255,255,.08);"></div>
+            <div style="width: 1px; height: 20px; background: rgba(var(--ink),.08);"></div>
+            <!-- context (scoped to the active query tab) -->
+            <div style="position: relative; flex: none;">
+              <button onClick="{{ toggleCtxSwitch }}" title="Context for this query — click to switch" style="display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 10px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; cursor: pointer;" style-hover="border-color:rgba(var(--ink),.24);">
+                <span style="font-size: 9px; text-transform: uppercase; letter-spacing: .7px; color: var(--tx-10); font-weight: 700;">ctx</span>
+                <span style="{{ curCtxDotStyle }}"></span>
+                <span style="font-size: 12px; color: var(--tx-02); font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap;">{{ curCtxName }}</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx-09)" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <sc-if value="{{ ctxSwitchOpen }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ closeCtxSwitch }}" style="position: fixed; inset: 0; z-index: 70;"></div>
+                <div style="position: absolute; right: 0; top: 40px; width: 288px; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.6), inset 0 1px 0 var(--glass-hi); overflow: hidden; z-index: 71; animation: ooFade .1s ease;">
+                  <div style="padding: 9px 12px; border-bottom: 1px solid rgba(var(--ink),.07); display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700;">Context · This Tab</span>
+                    <span style="font-size: 10px; color: var(--tx-12); font-family:'JetBrains Mono',monospace;">{{ ctxCount }} configured</span>
+                  </div>
+                  <div style="padding: 5px;">
+                    <sc-for list="{{ ctxMenu }}" as="c" hint-placeholder-count="3">
+                      <div onClick="{{ c.onPick }}" style="{{ c.style }}" style-hover="background:var(--sf-hov2);">
+                        <span style="{{ c.dotStyle }}"></span>
+                        <div style="flex: 1; min-width: 0;">
+                          <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</div>
+                          <div style="font-size: 10.5px; color: var(--tx-09); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
+                        </div>
+                        <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="color: var(--accent,#2dd4bf); font-size: 13px;">✓</span></sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="padding: 6px; border-top: 1px solid rgba(var(--ink),.07); display: flex; gap: 6px;">
+                    <button onClick="{{ addContextFromMenu }}" style="flex: 1; height: 32px; border-radius: 8px; border: 1px dashed rgba(var(--ink),.16); background: transparent; color: var(--tx-05); font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:var(--tx-hi);">+ Add Context</button>
+                    <button onClick="{{ openContextSettings }}" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="color:var(--tx-hi);">Manage…</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
             <div style="position: relative;">
-              <button onClick="{{ toggleTime }}" style="display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 11px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #c3cad7; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;" style-hover="border-color:rgba(255,255,255,.22);">
+              <button onClick="{{ toggleTime }}" style="display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 11px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-04); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;" style-hover="border-color:rgba(var(--ink),.22);">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#2dd4bf)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
                 {{ timeRange }}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6b7282" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx-09)" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
               </button>
               <sc-if value="{{ timeOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="position: absolute; right: 0; top: 38px; width: 432px; background: #0f131a; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 60; display: flex; animation: ooFade .1s ease;">
-                  <div class="oo-scroll" style="width: 168px; flex: none; border-right: 1px solid rgba(255,255,255,.07); padding: 8px 7px; max-height: 320px; overflow-y: auto;">
-                    <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #4b5362; font-weight: 700; padding: 3px 8px 6px;">Quick ranges</div>
+                <div style="position: absolute; right: 0; top: 38px; width: 432px; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 60; display: flex; animation: ooFade .1s ease;">
+                  <div class="oo-scroll" style="width: 168px; flex: none; border-right: 1px solid rgba(var(--ink),.07); padding: 8px 7px; max-height: 320px; overflow-y: auto;">
+                    <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--tx-12); font-weight: 700; padding: 3px 8px 6px;">Quick ranges</div>
                     <sc-for list="{{ quickRanges }}" as="q" hint-placeholder-count="9">
                       <div onClick="{{ q.onPick }}" style="{{ q.style }}">{{ q.label }}</div>
                     </sc-for>
                   </div>
                   <div style="flex: 1; min-width: 0; padding: 12px 14px;">
-                    <div style="display: flex; gap: 3px; background: #0b0d12; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 3px; margin-bottom: 14px;">
+                    <div style="display: flex; gap: 3px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px; margin-bottom: 14px;">
                       <button onClick="{{ setTimeRel }}" style="{{ relTabStyle }}">Relative</button>
                       <button onClick="{{ setTimeAbs }}" style="{{ absTabStyle }}">Absolute</button>
                     </div>
                     <sc-if value="{{ timeTabRel }}" hint-placeholder-val="{{ true }}">
                       <div>
-                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Last…</div>
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Last…</div>
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 11px;">
-                          <input value="{{ relAmount }}" onChange="{{ onRelAmount }}" inputmode="numeric" style="width: 64px; height: 36px; padding: 0 10px; background: #0e1116; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; color: #dde3ee; font-size: 15px; font-family:'JetBrains Mono',monospace; outline: none; text-align: center; box-sizing: border-box;" style-focus="border-color:var(--accent,#2dd4bf);">
-                          <div style="flex: 1; display: flex; gap: 2px; background: #0b0d12; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 3px;">
+                          <input value="{{ relAmount }}" onChange="{{ onRelAmount }}" inputmode="numeric" style="width: 64px; height: 36px; padding: 0 10px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.12); border-radius: 8px; color: var(--tx-01); font-size: 15px; font-family:'JetBrains Mono',monospace; outline: none; text-align: center; box-sizing: border-box;" style-focus="border-color:var(--accent,#2dd4bf);">
+                          <div style="flex: 1; display: flex; gap: 2px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
                             <sc-for list="{{ relUnits }}" as="u" hint-placeholder-count="5"><button onClick="{{ u.onPick }}" style="{{ u.style }}">{{ u.label }}</button></sc-for>
                           </div>
                         </div>
@@ -171,11 +232,11 @@
                     </sc-if>
                     <sc-if value="{{ timeTabAbs }}" hint-placeholder-val="{{ false }}">
                       <div>
-                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 6px;">From</div>
-                        <input value="{{ absFrom }}" onChange="{{ onAbsFrom }}" spellcheck="false" style="width: 100%; height: 34px; padding: 0 10px; background: #0e1116; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; color: #dde3ee; font-size: 12.5px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box; margin-bottom: 11px;" style-focus="border-color:var(--accent,#2dd4bf);">
-                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 6px;">To</div>
-                        <input value="{{ absTo }}" onChange="{{ onAbsTo }}" spellcheck="false" style="width: 100%; height: 34px; padding: 0 10px; background: #0e1116; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; color: #dde3ee; font-size: 12.5px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box; margin-bottom: 7px;" style-focus="border-color:var(--accent,#2dd4bf);">
-                        <div style="font-size: 10px; color: #4b5362; margin-bottom: 12px; font-family:'JetBrains Mono',monospace;">YYYY-MM-DD HH:mm:ss · Asia/Shanghai</div>
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 6px;">From</div>
+                        <input value="{{ absFrom }}" onChange="{{ onAbsFrom }}" spellcheck="false" style="width: 100%; height: 34px; padding: 0 10px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.12); border-radius: 8px; color: var(--tx-01); font-size: 12.5px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box; margin-bottom: 11px;" style-focus="border-color:var(--accent,#2dd4bf);">
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 6px;">To</div>
+                        <input value="{{ absTo }}" onChange="{{ onAbsTo }}" spellcheck="false" style="width: 100%; height: 34px; padding: 0 10px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.12); border-radius: 8px; color: var(--tx-01); font-size: 12.5px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box; margin-bottom: 7px;" style-focus="border-color:var(--accent,#2dd4bf);">
+                        <div style="font-size: 10px; color: var(--tx-12); margin-bottom: 12px; font-family:'JetBrains Mono',monospace;">YYYY-MM-DD HH:mm:ss · Asia/Shanghai</div>
                         <button onClick="{{ applyAbsolute }}" style="width: 100%; height: 36px; border: none; border-radius: 8px; background: var(--accent,#2dd4bf); color: #06181a; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit;">Apply</button>
                       </div>
                     </sc-if>
@@ -192,40 +253,40 @@
 
           <!-- editor row -->
           <div style="position: relative;">
-              <div style="position: relative; background: #0e1116; border: 1px solid var(--editborder, rgba(255,255,255,.1)); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 0 rgba(255,255,255,.02) inset;">
-                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 34px; background: #0b0d12; border-right: 1px solid rgba(255,255,255,.05); padding-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 0; font-family:'JetBrains Mono',monospace; font-size: 12px; line-height: 19px; color: #3a4150;">
+              <div style="position: relative; background: var(--sf-ctrl); border: 1px solid var(--editborder, rgba(var(--ink),.1)); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 0 rgba(var(--ink),.02) inset;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 34px; background: var(--sf-02); border-right: 1px solid rgba(var(--ink),.05); padding-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 0; font-family:'JetBrains Mono',monospace; font-size: 12px; line-height: 19px; color: var(--tx-14);">
                   <sc-for list="{{ lineNos }}" as="ln" hint-placeholder-count="3"><span style="padding-right: 9px;">{{ ln }}</span></sc-for>
                 </div>
-                <pre style="margin: 0; padding: 10px 12px 10px 44px; font-family:'JetBrains Mono',monospace; font-size: 12.5px; line-height: 19px; white-space: pre-wrap; word-break: break-word; color: #cfd6e4; min-height: 76px; pointer-events: none;">{{ queryHighlight }}</pre>
+                <pre style="margin: 0; padding: 10px 12px 10px 44px; font-family:'JetBrains Mono',monospace; font-size: 12.5px; line-height: 19px; white-space: pre-wrap; word-break: break-word; color: var(--tx-03); min-height: 76px; pointer-events: none;">{{ queryHighlight }}</pre>
                 <textarea ref="{{ taRef }}" value="{{ query }}" onChange="{{ onQueryChange }}" onKeyDown="{{ onEditorKey }}" onKeyUp="{{ onEditorSelect }}" onClick="{{ onEditorSelect }}" onBlur="{{ onEditorBlur }}" spellcheck="false" wrap="soft" style="position: absolute; inset: 0; margin: 0; padding: 10px 12px 10px 44px; font-family:'JetBrains Mono',monospace; font-size: 12.5px; line-height: 19px; white-space: pre-wrap; word-break: break-word; background: transparent; color: transparent; caret-color: var(--accent,#2dd4bf); border: none; outline: none; resize: none; overflow: hidden;"></textarea>
               </div>
               <!-- hint line -->
-              <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px; font-size: 10.5px; color: #4b5362; font-family:'JetBrains Mono',monospace;">
-                <span><b style="color:#6b7282;">⌘↵</b> run</span>
-                <span><b style="color:#6b7282;">Tab</b> accept</span>
-                <span><b style="color:#6b7282;">↑↓</b> navigate</span>
+              <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px; font-size: 10.5px; color: var(--tx-12); font-family:'JetBrains Mono',monospace;">
+                <span><b style="color:var(--tx-09);">⌘↵</b> Run</span>
+                <span><b style="color:var(--tx-09);">Tab</b> Accept</span>
+                <span><b style="color:var(--tx-09);">↑↓</b> Navigate</span>
                 <span style="color: var(--accent,#2dd4bf);">{{ caretHint }}</span>
                 <span style="flex: 1;"></span>
                 <div style="position: relative;">
-                  <button onClick="{{ toggleHistory }}" title="Query history" style="display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; background: #0e1116; border: 1px solid rgba(255,255,255,.08); border-radius: 6px; color: #99a2b2; font-family:'JetBrains Mono',monospace; font-size: 10.5px; cursor: pointer;" style-hover="background:#141821;color:#d7dce6;border-color:var(--accent,#2dd4bf);">
+                  <button onClick="{{ toggleHistory }}" title="Query history" style="display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 6px; color: var(--tx-06); font-family:'JetBrains Mono',monospace; font-size: 10.5px; cursor: pointer;" style-hover="background:var(--sf-06);color:var(--tx-02);border-color:var(--accent,#2dd4bf);">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3 2"/></svg>
-                    history
+                    History
                   </button>
                   <sc-if value="{{ historyOpen }}" hint-placeholder-val="{{ false }}">
                     <div onClick="{{ closeHistory }}" style="position: fixed; inset: 0; z-index: 55;"></div>
-                    <div style="position: absolute; right: 0; top: 30px; width: 408px; max-height: 320px; display: flex; flex-direction: column; background: #0f131a; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 60; animation: ooFade .1s ease;">
-                      <div style="flex: none; display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.07);">
-                        <span style="font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; color: #5b6371; font-weight: 700;">Recent queries</span>
-                        <span style="font-family:'JetBrains Mono',monospace; font-size: 10px; color: #4b5362;">{{ historyCount }} saved</span>
+                    <div style="position: absolute; right: 0; top: 30px; width: 408px; max-height: 320px; display: flex; flex-direction: column; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 11px; box-shadow: 0 24px 56px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 60; animation: ooFade .1s ease;">
+                      <div style="flex: none; display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid rgba(var(--ink),.07);">
+                        <span style="font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--tx-10); font-weight: 700;">Recent queries</span>
+                        <span style="font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--tx-12);">{{ historyCount }} saved</span>
                       </div>
                       <div class="oo-scroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: 5px;">
                         <sc-for list="{{ history }}" as="h" hint-placeholder-count="5">
-                          <div onClick="{{ h.onPick }}" style="padding: 9px 10px; border-radius: 8px; cursor: pointer;" style-hover="background:#161b22;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                              <span style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: #cfd6e4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;">{{ h.preview }}</span>
-                              <span style="font-size: 10px; color: #5b6371; white-space: nowrap; flex: none;">{{ h.ago }}</span>
+                          <div onClick="{{ h.onPick }}" title="{{ h.full }}" style="padding: 9px 10px; border-radius: 8px; cursor: pointer;" style-hover="background:var(--sf-hov2);">
+                            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px;">
+                              <span style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; line-height: 1.45; color: var(--tx-03); flex: 1; min-width: 0; white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ h.preview }}</span>
+                              <span style="font-size: 10px; color: var(--tx-10); white-space: nowrap; flex: none; padding-top: 1px;">{{ h.ago }}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; font-family:'JetBrains Mono',monospace; font-size: 10px; color: #4b5362;">
+                            <div style="display: flex; align-items: center; gap: 8px; font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--tx-12);">
                               <span style="color: var(--accent,#2dd4bf);">{{ h.stream }}</span>
                               <span>·</span>
                               <span>{{ h.meta }}</span>
@@ -236,22 +297,22 @@
                     </div>
                   </sc-if>
                 </div>
-                <button onClick="{{ toggleGuide }}" style="display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; background: #0e1116; border: 1px solid rgba(255,255,255,.08); border-radius: 6px; color: #99a2b2; font-family:'JetBrains Mono',monospace; font-size: 10.5px; cursor: pointer;" style-hover="background:#141821;color:#d7dce6;border-color:var(--accent,#2dd4bf);"><span style="color: var(--accent,#2dd4bf); font-weight: 700;">?</span> syntax guide</button>
+                <button onClick="{{ toggleGuide }}" style="display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 6px; color: var(--tx-06); font-family:'JetBrains Mono',monospace; font-size: 10.5px; cursor: pointer;" style-hover="background:var(--sf-06);color:var(--tx-02);border-color:var(--accent,#2dd4bf);"><span style="color: var(--accent,#2dd4bf); font-weight: 700;">?</span> Syntax Guide</button>
               </div>
 
               <!-- autocomplete dropdown -->
               <sc-if value="{{ suggestOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="position: absolute; left: 44px; top: 78px; width: 340px; background: #0f131a; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.8); overflow: hidden; z-index: 60; animation: ooFade .1s ease;">
-                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,.06); font-family:'JetBrains Mono',monospace; font-size: 9.5px; color: #5b6371; letter-spacing: .5px;">
+                <div style="position: absolute; left: 44px; top: 78px; width: 340px; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 9px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.8); overflow: hidden; z-index: 60; animation: ooFade .1s ease;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-bottom: 1px solid rgba(var(--ink),.06); font-family:'JetBrains Mono',monospace; font-size: 9.5px; color: var(--tx-10); letter-spacing: .5px;">
                     <span>SUGGESTIONS · "{{ currentWord }}"</span><span>{{ suggestCount }}</span>
                   </div>
                   <div style="max-height: 252px; overflow-y: auto;" class="oo-scroll">
                     <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="5">
                       <div onMouseDown="{{ s.onSelect }}" onMouseEnter="{{ s.onHover }}" style="{{ s.style }}">
                         <span style="{{ s.badge }}">{{ s.tag }}</span>
-                        <span style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: #dde3ee; font-weight: 500;">{{ s.label }}</span>
+                        <span style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: var(--tx-01); font-weight: 500;">{{ s.label }}</span>
                         <span style="flex: 1;"></span>
-                        <span style="font-family:'JetBrains Mono',monospace; font-size: 10px; color: #5b6371; white-space: nowrap;">{{ s.detail }}</span>
+                        <span style="font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--tx-10); white-space: nowrap;">{{ s.detail }}</span>
                       </div>
                     </sc-for>
                   </div>
@@ -266,26 +327,26 @@
 
           <!-- fields panel -->
           <sc-if value="{{ showFields }}" hint-placeholder-val="{{ true }}">
-            <div style="width: 244px; flex: none; background: #090b0f; border-right: 1px solid rgba(255,255,255,.06); display: flex; flex-direction: column; min-height: 0;">
+            <div style="width: 244px; flex: none; background: var(--sf-tabs); border-right: 1px solid rgba(var(--ink),.06); display: flex; flex-direction: column; min-height: 0;">
               <!-- stream selector -->
-              <div style="flex: none; padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.05); position: relative;">
+              <div style="flex: none; padding: 9px 10px; border-bottom: 1px solid rgba(var(--ink),.05); position: relative;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                  <div style="font-size: 9.5px; text-transform: uppercase; letter-spacing: .9px; color: #4b5362; font-weight: 600;">Stream</div>
-                  <button onClick="{{ toggleSidebar }}" title="Collapse sidebar" style="width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(255,255,255,.08); background: #0e1116; color: #6b7282; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;" style-hover="color:#dde3ee;border-color:rgba(255,255,255,.2);">«</button>
+                  <div style="font-size: 9.5px; text-transform: uppercase; letter-spacing: .9px; color: var(--tx-12); font-weight: 600;">Stream</div>
+                  <button onClick="{{ toggleSidebar }}" title="Collapse sidebar" style="width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(var(--ink),.08); background: var(--sf-ctrl); color: var(--tx-09); cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;" style-hover="color:var(--tx-01);border-color:rgba(var(--ink),.2);">«</button>
                 </div>
-                <button onClick="{{ toggleStream }}" style="width: 100%; display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 9px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-family:'JetBrains Mono',monospace; font-size: 12.5px; cursor: pointer;" style-hover="border-color:rgba(255,255,255,.22);">
+                <button onClick="{{ toggleStream }}" style="width: 100%; display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 9px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-family:'JetBrains Mono',monospace; font-size: 12.5px; cursor: pointer;" style-hover="border-color:rgba(var(--ink),.22);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#2dd4bf)" stroke-width="1.9"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
                   <span style="flex: 1; text-align: left; font-weight: 600;">{{ stream }}</span>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6b7282" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx-09)" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 <sc-if value="{{ streamOpen }}" hint-placeholder-val="{{ false }}">
-                  <div style="position: absolute; left: 10px; right: 10px; top: 70px; background: #0f131a; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 50; padding: 4px; animation: ooFade .1s ease;">
+                  <div style="position: absolute; left: 10px; right: 10px; top: 70px; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 9px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 50; padding: 4px; animation: ooFade .1s ease;">
                     <sc-for list="{{ streams }}" as="s" hint-placeholder-count="5">
                       <div onClick="{{ s.onPick }}" style="{{ s.style }}">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg>
                         <span style="font-family:'JetBrains Mono',monospace; font-size: 12px;">{{ s.name }}</span>
                         <span style="flex: 1;"></span>
-                        <span style="font-family:'JetBrains Mono',monospace; font-size: 9.5px; color: #4b5362;">{{ s.size }}</span>
+                        <span style="font-family:'JetBrains Mono',monospace; font-size: 9.5px; color: var(--tx-12);">{{ s.size }}</span>
                       </div>
                     </sc-for>
                   </div>
@@ -293,19 +354,19 @@
               </div>
               <!-- field search -->
               <div style="flex: none; padding: 9px 10px 6px;">
-                <div style="display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 9px; background: #0c0e12; border: 1px solid rgba(255,255,255,.07); border-radius: 7px;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4b5362" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-                  <input value="{{ fieldFilter }}" onChange="{{ onFieldFilter }}" placeholder="Filter fields" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: #dde3ee; font-size: 12px; font-family:'JetBrains Mono',monospace;">
-                  <span style="font-size: 10px; color: #4b5362; font-family:'JetBrains Mono',monospace;">{{ fieldCount }}</span>
+                <div style="display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 9px; background: var(--sf-04); border: 1px solid rgba(var(--ink),.07); border-radius: 7px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx-12)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                  <input value="{{ fieldFilter }}" onChange="{{ onFieldFilter }}" placeholder="Filter Fields" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--tx-01); font-size: 12px; font-family:'JetBrains Mono',monospace;">
+                  <span style="font-size: 10px; color: var(--tx-12); font-family:'JetBrains Mono',monospace;">{{ fieldCount }}</span>
                 </div>
               </div>
               <!-- field list -->
               <div class="oo-scroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: 2px 6px 10px;">
                 <sc-for list="{{ fields }}" as="f" hint-placeholder-count="12">
-                  <div onClick="{{ f.onInsert }}" style="display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 6px; cursor: pointer; group: 1;" style-hover="background:#11141a;">
+                  <div onClick="{{ f.onInsert }}" style="display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 6px; cursor: pointer; group: 1;" style-hover="background:var(--sf-hov);">
                     <span style="{{ f.icon }}">{{ f.glyph }}</span>
-                    <span style="flex: 1; min-width: 0; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: #c3cad7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ f.name }}</span>
-                    <span style="font-size: 9px; color: #4b5362; font-family:'JetBrains Mono',monospace;">{{ f.type }}</span>
+                    <span style="flex: 1; min-width: 0; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--tx-04); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ f.name }}</span>
+                    <span style="font-size: 9px; color: var(--tx-12); font-family:'JetBrains Mono',monospace;">{{ f.type }}</span>
                   </div>
                 </sc-for>
               </div>
@@ -314,9 +375,9 @@
 
           <!-- collapsed sidebar strip -->
           <sc-if value="{{ sidebarCollapsed }}" hint-placeholder-val="{{ false }}">
-            <div style="width: 34px; flex: none; background: #090b0f; border-right: 1px solid rgba(255,255,255,.06); display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 12px;">
-              <button onClick="{{ toggleSidebar }}" title="Expand fields" style="width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(255,255,255,.08); background: #0e1116; color: #99a2b2; cursor: pointer; line-height: 1;" style-hover="color:#dde3ee;">»</button>
-              <div style="writing-mode: vertical-rl; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: #4b5362; font-family:'JetBrains Mono',monospace;">Stream &amp; fields</div>
+            <div style="width: 34px; flex: none; background: var(--sf-tabs); border-right: 1px solid rgba(var(--ink),.06); display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 12px;">
+              <button onClick="{{ toggleSidebar }}" title="Expand fields" style="width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(var(--ink),.08); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer; line-height: 1;" style-hover="color:var(--tx-01);">»</button>
+              <div style="writing-mode: vertical-rl; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--tx-12); font-family:'JetBrains Mono',monospace;">Stream &amp; fields</div>
             </div>
           </sc-if>
 
@@ -325,38 +386,46 @@
 
             <!-- histogram -->
             <sc-if value="{{ showHisto }}" hint-placeholder-val="{{ true }}">
-              <div style="flex: none; padding: 12px 16px 8px; border-bottom: 1px solid rgba(255,255,255,.05);">
-                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;">
+              <div style="flex: none; padding: 12px 16px 8px; border-bottom: 1px solid rgba(var(--ink),.05);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                   <div style="display: flex; align-items: baseline; gap: 9px;">
-                    <span style="font-size: 11px; color: #99a2b2; font-weight: 600;">Event volume</span>
-                    <span style="font-family:'JetBrains Mono',monospace; font-size: 10.5px; color: #4b5362;">30s buckets</span>
+                    <span style="font-size: 11px; color: var(--tx-06); font-weight: 600;">Event Volume</span>
+                    <span style="font-family:'JetBrains Mono',monospace; font-size: 10.5px; color: var(--tx-12);">30s buckets</span>
                   </div>
-                  <span style="font-family:'JetBrains Mono',monospace; font-size: 10.5px; color: #4b5362;">peak <b style="color:#99a2b2;">7,323</b></span>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <sc-if value="{{ histoSelActive }}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; align-items: center; gap: 7px; height: 21px; padding: 0 4px 0 9px; background: var(--accentdim, rgba(45,212,191,.12)); border: 1px solid rgba(45,212,191,.3); border-radius: 6px;">
+                        <span style="font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--accent,#2dd4bf);">{{ histoSelLabel }}</span>
+                        <button onClick="{{ clearHistoSel }}" title="Clear selection" style="width: 15px; height: 15px; border-radius: 4px; border: none; background: transparent; color: var(--accent,#2dd4bf); cursor: pointer; font-size: 11px; line-height: 1; display: flex; align-items: center; justify-content: center;" style-hover="background:rgba(45,212,191,.2);">✕</button>
+                      </div>
+                    </sc-if>
+                    <span style="font-family:'JetBrains Mono',monospace; font-size: 10.5px; color: var(--tx-12);">peak <b style="color:var(--tx-06);">{{ histoPeak }}</b></span>
+                  </div>
                 </div>
                 {{ histogram }}
               </div>
             </sc-if>
 
             <!-- results header -->
-            <div style="flex: none; display: flex; align-items: center; gap: 14px; padding: 7px 16px; background: #090b0f; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 11px;">
-              <span style="color: #99a2b2;">Showing <b style="color:#dde3ee;">1–{{ shownCount }}</b> of <b style="color:#dde3ee;">{{ totalEvents }}</b> events</span>
-              <span style="color: #3a4150;">·</span>
+            <div style="flex: none; display: flex; align-items: center; gap: 14px; padding: 7px 16px; background: var(--sf-tabs); border-bottom: 1px solid rgba(var(--ink),.06); font-size: 11px;">
+              <span style="color: var(--tx-06);">Showing <b style="color:var(--tx-01);">1–{{ shownCount }}</b> of <b style="color:var(--tx-01);">{{ totalEvents }}</b> events</span>
+              <span style="color: var(--tx-14);">·</span>
               <span style="font-family:'JetBrains Mono',monospace; color: var(--accent,#2dd4bf);">{{ queryMs }} ms</span>
-              <span style="color: #3a4150;">·</span>
-              <span style="font-family:'JetBrains Mono',monospace; color: #6b7282;">scan 1.74 GB</span>
+              <span style="color: var(--tx-14);">·</span>
+              <span style="font-family:'JetBrains Mono',monospace; color: var(--tx-09);">scan 1.74 GB</span>
               <span style="flex: 1;"></span>
-              <span style="font-family:'JetBrains Mono',monospace; color: #4b5362; font-size: 10px;">Asia/Shanghai</span>
+              <span style="font-family:'JetBrains Mono',monospace; color: var(--tx-12); font-size: 10px;">Asia/Shanghai</span>
               <div style="display: flex; gap: 2px;">
-                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,.08); background: #0e1116; color: #6b7282; cursor: pointer;">‹</button>
-                <span style="display: flex; align-items: center; padding: 0 9px; font-family:'JetBrains Mono',monospace; font-size: 11px; color: #c3cad7; background: var(--accent,#2dd4bf); border-radius: 5px; color: #06181a; font-weight: 700;">1</span>
-                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,.08); background: #0e1116; color: #99a2b2; cursor: pointer;">2</button>
-                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,.08); background: #0e1116; color: #99a2b2; cursor: pointer;">3</button>
-                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,.08); background: #0e1116; color: #6b7282; cursor: pointer;">›</button>
+                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(var(--ink),.08); background: var(--sf-ctrl); color: var(--tx-09); cursor: pointer;">‹</button>
+                <span style="display: flex; align-items: center; padding: 0 9px; font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--tx-04); background: var(--accent,#2dd4bf); border-radius: 5px; color: #06181a; font-weight: 700;">1</span>
+                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(var(--ink),.08); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer;">2</button>
+                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(var(--ink),.08); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer;">3</button>
+                <button style="width: 24px; height: 22px; border-radius: 5px; border: 1px solid rgba(var(--ink),.08); background: var(--sf-ctrl); color: var(--tx-09); cursor: pointer;">›</button>
               </div>
             </div>
 
             <!-- column header -->
-            <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 5px 16px; background: #0b0d11; border-bottom: 1px solid rgba(255,255,255,.05); font-family:'JetBrains Mono',monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: .8px; color: #4b5362;">
+            <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 5px 16px; background: var(--sf-01); border-bottom: 1px solid rgba(var(--ink),.05); font-family:'JetBrains Mono',monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-12);">
               <span style="width: 14px;"></span>
               <span style="width: 168px;">timestamp</span>
               <span style="width: 52px;">level</span>
@@ -367,13 +436,13 @@
             <!-- rows -->
             <div class="oo-scroll" style="flex: 1; min-height: 0; overflow-y: auto;">
               <sc-for list="{{ logs }}" as="row" hint-placeholder-count="14">
-                <div style="border-bottom: 1px solid rgba(255,255,255,.035);">
+                <div style="border-bottom: 1px solid rgba(var(--ink),.035);">
                   <div onClick="{{ row.onSelect }}" style="{{ row.rowStyle }}">
-                    <span style="width: 14px; color: #4b5362; font-size: 10px; display: flex; justify-content: center;">{{ row.chevron }}</span>
+                    <span style="width: 14px; color: var(--tx-12); font-size: 10px; display: flex; justify-content: center;">{{ row.chevron }}</span>
                     <span style="width: 168px; font-family:'JetBrains Mono',monospace; font-size: 11px; color: #7c8696; white-space: nowrap;">{{ row.time }}</span>
                     <span style="width: 52px;"><span onClick="{{ row.onLevelCtx }}" style="{{ row.levelStyle }}" style-hover="filter:brightness(1.35);">{{ row.level }}</span></span>
-                    <span style="width: 118px; min-width: 0;"><span onClick="{{ row.onServiceCtx }}" style="font-family:'JetBrains Mono',monospace; font-size: 11px; color: #99a2b2; white-space: nowrap; cursor: pointer; border-radius: 3px; padding: 1px 4px;" style-hover="background:#11141a;color:#dde3ee;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px;">{{ row.service }}</span></span>
-                    <span style="flex: 1; min-width: 0; font-family:'JetBrains Mono',monospace; font-size: 11px; color: #c3cad7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.body }}</span>
+                    <span style="width: 118px; min-width: 0;"><span onClick="{{ row.onServiceCtx }}" style="font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--tx-06); white-space: nowrap; cursor: pointer; border-radius: 3px; padding: 1px 4px;" style-hover="background:var(--sf-hov);color:var(--tx-01);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px;">{{ row.service }}</span></span>
+                    <span style="flex: 1; min-width: 0; font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--tx-04); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.body }}</span>
                   </div>
                 </div>
               </sc-for>
@@ -382,26 +451,26 @@
 
           <!-- drawer inspector -->
           <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="width: 432px; flex: none; background: #0b0e13; border-left: 1px solid rgba(255,255,255,.08); display: flex; flex-direction: column; min-height: 0; animation: ooDrawer .16s ease;">
-              <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,.06);">
+            <div style="width: 432px; flex: none; background: var(--glass-drawer); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-left: 1px solid rgba(var(--ink),.08); display: flex; flex-direction: column; min-height: 0; animation: ooDrawer .16s ease;">
+              <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid rgba(var(--ink),.06);">
                 <span style="{{ drawerLevelStyle }}">{{ drawerLevel }}</span>
-                <span style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: #dde3ee; font-weight: 600;">Log record</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: var(--tx-01); font-weight: 600;">Log record</span>
                 <span style="flex: 1;"></span>
-                <button style="height: 24px; padding: 0 9px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #99a2b2; font-size: 10.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">⧉ copy</button>
-                <button onClick="{{ closeDrawer }}" style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; cursor: pointer;">✕</button>
+                <button style="height: 24px; padding: 0 9px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 6px; color: var(--tx-06); font-size: 10.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">⧉ copy</button>
+                <button onClick="{{ closeDrawer }}" style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer;">✕</button>
               </div>
-              <div style="flex: none; padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.05); font-family:'JetBrains Mono',monospace; font-size: 11px; color: #7c8696;">{{ drawerTime }} · Asia/Shanghai</div>
+              <div style="flex: none; padding: 9px 14px; border-bottom: 1px solid rgba(var(--ink),.05); font-family:'JetBrains Mono',monospace; font-size: 11px; color: #7c8696;">{{ drawerTime }} · Asia/Shanghai</div>
               <div class="oo-scroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px;">
                 <div style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; line-height: 22px;">
-                  <span style="color:#5b6371;">{</span>
+                  <span style="color:var(--tx-10);">{</span>
                   <sc-for list="{{ drawerJson }}" as="kv" hint-placeholder-count="10">
-                    <div onClick="{{ kv.onClick }}" style="padding: 2px 8px 2px 16px; display: flex; gap: 7px; border-radius: 5px; cursor: pointer;" style-hover="background:#11141a;">
+                    <div onClick="{{ kv.onClick }}" style="padding: 2px 8px 2px 16px; display: flex; gap: 7px; border-radius: 5px; cursor: pointer;" style-hover="background:var(--sf-hov);">
                       <span style="color: #7c8696; white-space: nowrap;">{{ kv.k }}</span>
-                      <span style="color: #5b6371;">:</span>
+                      <span style="color: var(--tx-10);">:</span>
                       <span style="{{ kv.style }}; min-width: 0; word-break: break-all;">{{ kv.v }}</span>
                     </div>
                   </sc-for>
-                  <span style="color:#5b6371;">}</span>
+                  <span style="color:var(--tx-10);">}</span>
                 </div>
               </div>
             </div>
@@ -412,16 +481,16 @@
 
     <!-- ===== SETTINGS ===== -->
     <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
-      <div onClick="{{ closeSettings }}" style="position: absolute; inset: 0; background: rgba(4,5,7,.62); backdrop-filter: blur(3px); z-index: 80; display: flex; align-items: center; justify-content: center; padding: 38px;">
-        <div onClick="{{ stop }}" style="width: 800px; max-width: 100%; height: 600px; max-height: 100%; background: #0c0f15; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.9); display: flex; flex-direction: column; overflow: hidden; animation: ooFade .14s ease;">
-          <div style="flex: none; display: flex; align-items: center; gap: 11px; padding: 15px 18px; border-bottom: 1px solid rgba(255,255,255,.07);">
+      <div onClick="{{ closeSettings }}" style="position: absolute; inset: 0; background: rgba(4,5,7,.5); backdrop-filter: saturate(150%) blur(9px); -webkit-backdrop-filter: saturate(150%) blur(9px); z-index: 80; display: flex; align-items: center; justify-content: center; padding: 38px;">
+        <div onClick="{{ stop }}" style="width: 800px; max-width: 100%; height: 600px; max-height: 100%; background: var(--glass-modal); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 14px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.9); display: flex; flex-direction: column; overflow: hidden; animation: ooFade .14s ease;">
+          <div style="flex: none; display: flex; align-items: center; gap: 11px; padding: 15px 18px; border-bottom: 1px solid rgba(var(--ink),.07);">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#2dd4bf)" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            <span style="font-size: 14px; font-weight: 600; color: #e6eaf2;">Settings</span>
+            <span style="font-size: 14px; font-weight: 600; color: var(--tx-hi);">Settings</span>
             <span style="flex: 1;"></span>
-            <button onClick="{{ closeSettings }}" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; cursor: pointer;">✕</button>
+            <button onClick="{{ closeSettings }}" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer;">✕</button>
           </div>
           <div style="flex: 1; min-height: 0; display: flex;">
-            <div style="width: 180px; flex: none; background: #090b0f; border-right: 1px solid rgba(255,255,255,.06); padding: 14px 10px; display: flex; flex-direction: column; gap: 2px;">
+            <div style="width: 180px; flex: none; background: var(--sf-tabs); border-right: 1px solid rgba(var(--ink),.06); padding: 14px 10px; display: flex; flex-direction: column; gap: 2px;">
               <sc-for list="{{ setTabs }}" as="t" hint-placeholder-count="4">
                 <button onClick="{{ t.onPick }}" style="{{ t.style }}">{{ t.label }}</button>
               </sc-for>
@@ -432,13 +501,13 @@
             <!-- CONNECTION -->
             <sc-if value="{{ tabConnection }}" hint-placeholder-val="{{ true }}">
               <div>
-                <div style="font-size: 19px; font-weight: 600; color: #e6eaf2; margin-bottom: 5px;">Connection</div>
-                <div style="font-size: 13px; color: #6b7282; margin-bottom: 22px; line-height: 1.55;">Where this desktop client sends its queries. Self-hosted OpenObserve authenticates with an endpoint + service account — there is no hosted OAuth in the OSS edition.</div>
+                <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">Connection</div>
+                <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px; line-height: 1.55;">Where this desktop client sends its queries. Self-hosted OpenObserve authenticates with an endpoint + service account — there is no hosted OAuth in the OSS edition.</div>
 
                 <!-- CONTEXTS MANAGER (kubectl-style) -->
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
-                  <div style="display: flex; align-items: baseline; gap: 9px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 700;">Contexts</div><div style="font-size: 11px; color: #4b5362;">switch the active instance any time</div></div>
-                  <button onClick="{{ addContext }}" style="height: 28px; padding: 0 11px; border-radius: 7px; border: 1px dashed rgba(255,255,255,.16); background: transparent; color: #aeb6c4; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:#e6eaf2;">+ Add context</button>
+                  <div style="display: flex; align-items: baseline; gap: 9px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700;">Contexts</div><div style="font-size: 11px; color: var(--tx-12);">switch the active instance any time</div></div>
+                  <button onClick="{{ addContext }}" style="height: 28px; padding: 0 11px; border-radius: 7px; border: 1px dashed rgba(var(--ink),.16); background: transparent; color: var(--tx-05); font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:var(--tx-hi);">+ Add Context</button>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
                   <sc-for list="{{ ctxRows }}" as="c" hint-placeholder-count="3">
@@ -446,59 +515,59 @@
                       <span style="{{ c.dotStyle }}"></span>
                       <div style="flex: 1; min-width: 0;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                          <span style="font-size: 13px; color: #e6eaf2; font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
+                          <span style="font-size: 13px; color: var(--tx-hi); font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
                           <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--accent,#2dd4bf); background: rgba(45,212,191,.12); padding: 2px 6px; border-radius: 4px; flex: none;">active</span></sc-if>
                         </div>
-                        <div style="font-size: 11px; color: #6b7282; font-family:'JetBrains Mono',monospace; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
+                        <div style="font-size: 11px; color: var(--tx-09); font-family:'JetBrains Mono',monospace; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
                       </div>
-                      <span style="font-size: 10.5px; color: #5b6371; white-space: nowrap; flex: none;">{{ c.meta }}</span>
+                      <span style="font-size: 10.5px; color: var(--tx-10); white-space: nowrap; flex: none;">{{ c.meta }}</span>
                       <sc-if value="{{ c.notActive }}" hint-placeholder-val="{{ true }}">
-                        <button onClick="{{ c.onUse }}" style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.12); background: #0e1116; color: #aeb6c4; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; flex: none;" style-hover="color:#e6eaf2;border-color:rgba(255,255,255,.25);">Use</button>
+                        <button onClick="{{ c.onUse }}" style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.12); background: var(--sf-ctrl); color: var(--tx-05); font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; flex: none;" style-hover="color:var(--tx-hi);border-color:rgba(var(--ink),.25);">Use</button>
                       </sc-if>
                       <sc-if value="{{ canRemoveCtx }}" hint-placeholder-val="{{ true }}">
-                        <button onClick="{{ c.onRemove }}" title="Delete context" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(255,255,255,.08); background: transparent; color: #5b6371; font-size: 12px; cursor: pointer; flex: none;" style-hover="color:#f4685f;border-color:rgba(244,104,95,.4);">✕</button>
+                        <button onClick="{{ c.onRemove }}" title="Delete context" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(var(--ink),.08); background: transparent; color: var(--tx-10); font-size: 12px; cursor: pointer; flex: none;" style-hover="color:#f4685f;border-color:rgba(244,104,95,.4);">✕</button>
                       </sc-if>
                     </div>
                   </sc-for>
                 </div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 700; margin-bottom: 11px;">Edit active context</div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700; margin-bottom: 11px;">Edit active context</div>
 
-                <div style="display: flex; align-items: center; gap: 13px; background: #0c0e13; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+                <div style="display: flex; align-items: center; gap: 13px; background: var(--sf-05); border: 1px solid rgba(var(--ink),.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
                   <span style="width: 9px; height: 9px; border-radius: 50%; background: #34e0a1; box-shadow: 0 0 10px #34e0a1; flex: none;"></span>
                   <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 13px; color: #dde3ee; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ conn.url }}</div>
-                    <div style="font-size: 11px; color: #6b7282; margin-top: 3px;">org <b style="color:#99a2b2;">{{ conn.org }}</b> · OpenObserve v0.14.1 · 6 streams</div>
+                    <div style="font-size: 13px; color: var(--tx-01); font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ conn.url }}</div>
+                    <div style="font-size: 11px; color: var(--tx-09); margin-top: 3px;">org <b style="color:var(--tx-06);">{{ conn.org }}</b> · OpenObserve v0.14.1 · 6 streams</div>
                   </div>
                   <button onClick="{{ testConn }}" style="height: 32px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.1); color: var(--accent,#2dd4bf); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;">{{ testLabel }}</button>
                 </div>
 
-                <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
                   <div style="margin-bottom: 16px;">
-                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Context name</div>
-                    <input value="{{ conn.name }}" onChange="{{ onName }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Context name</div>
+                    <input value="{{ conn.name }}" onChange="{{ onName }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
                   </div>
                   <div style="margin-bottom: 16px;">
-                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Server URL</div>
-                    <input value="{{ conn.url }}" onChange="{{ onUrl }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Server URL</div>
+                    <input value="{{ conn.url }}" onChange="{{ onUrl }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
                   </div>
                   <div style="margin-bottom: 16px;">
-                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Organization</div>
-                    <input value="{{ conn.org }}" onChange="{{ onOrg }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Organization</div>
+                    <input value="{{ conn.org }}" onChange="{{ onOrg }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
                   </div>
                   <div style="margin-bottom: 14px;">
-                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Authentication</div>
-                    <div style="display: flex; gap: 3px; background: #0b0d12; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 3px;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Authentication</div>
+                    <div style="display: flex; gap: 3px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
                       <sc-for list="{{ authTabs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onPick }}" style="{{ a.style }}">{{ a.label }}</button></sc-for>
                     </div>
                   </div>
                   <sc-if value="{{ authPassword }}" hint-placeholder-val="{{ true }}">
                     <div style="display: flex; gap: 12px;">
-                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
-                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
                     </div>
                   </sc-if>
                   <sc-if value="{{ authToken }}" hint-placeholder-val="{{ false }}">
-                    <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" placeholder="Paste a token from OpenObserve → IAM → Service Accounts" style="width: 100%; height: 36px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                    <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" placeholder="Paste a token from OpenObserve → IAM → Service Accounts" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
                   </sc-if>
                   <sc-if value="{{ authSSO }}" hint-placeholder-val="{{ false }}">
                     <div style="display: flex; gap: 11px; align-items: flex-start; background: rgba(245,179,64,.07); border: 1px solid rgba(245,179,64,.22); border-radius: 9px; padding: 12px 14px;">
@@ -506,20 +575,20 @@
                       <div style="font-size: 12.5px; color: #c8b083; line-height: 1.55;">OAuth / SSO requires <b style="color:#f5d9a0;">OpenObserve Enterprise</b>. The self-hosted OSS edition uses email + password or a service-account token — pick one of those above. SSO can be added later behind a capability flag.</div>
                     </div>
                   </sc-if>
-                  <div style="display: flex; align-items: center; gap: 11px; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.05);">
+                  <div style="display: flex; align-items: center; gap: 11px; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(var(--ink),.05);">
                     <button onClick="{{ toggleSelfSigned }}" style="{{ ssToggleStyle }}"><span style="{{ ssKnobStyle }}"></span></button>
-                    <div><div style="font-size: 12.5px; color: #dde3ee;">Trust self-signed certificate</div><div style="font-size: 11px; color: #6b7282; margin-top: 1px;">Common for internal HTTPS endpoints behind a private CA.</div></div>
+                    <div><div style="font-size: 12.5px; color: var(--tx-01);">Trust self-signed certificate</div><div style="font-size: 11px; color: var(--tx-09); margin-top: 1px;">Common for internal HTTPS endpoints behind a private CA.</div></div>
                   </div>
                 </div>
 
-                <div style="display: flex; align-items: flex-start; gap: 9px; font-size: 11.5px; color: #5b6371; margin-bottom: 18px; line-height: 1.5;">
+                <div style="display: flex; align-items: flex-start; gap: 9px; font-size: 11.5px; color: var(--tx-10); margin-bottom: 18px; line-height: 1.5;">
                   <span style="color: var(--accent,#2dd4bf);">🔒</span>
                   <span>Credentials are stored in your OS keychain through Tauri — never written to disk in plaintext.</span>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
                   <button onClick="{{ testConn }}" style="height: 38px; padding: 0 18px; border-radius: 9px; border: none; background: var(--accent,#2dd4bf); color: #06181a; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;">Test &amp; save</button>
-                  <button onClick="{{ openSetup }}" style="height: 38px; padding: 0 16px; border-radius: 9px; border: 1px solid rgba(255,255,255,.12); background: transparent; color: #aeb6c4; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;">Re-run setup wizard…</button>
+                  <button onClick="{{ openSetup }}" style="height: 38px; padding: 0 16px; border-radius: 9px; border: 1px solid rgba(var(--ink),.12); background: transparent; color: var(--tx-05); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;">Re-run setup wizard…</button>
                 </div>
               </div>
             </sc-if>
@@ -527,71 +596,85 @@
             <!-- APPEARANCE -->
             <sc-if value="{{ tabAppearance }}" hint-placeholder-val="{{ false }}">
               <div>
-                <div style="font-size: 19px; font-weight: 600; color: #e6eaf2; margin-bottom: 5px;">Appearance</div>
-                <div style="font-size: 13px; color: #6b7282; margin-bottom: 22px;">Tune the look and density of the workspace.</div>
+                <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">Appearance</div>
+                <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px;">Tune the look and density of the workspace.</div>
 
-                <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                  <div style="font-size: 12.5px; color: #dde3ee; font-weight: 600; margin-bottom: 12px;">Accent</div>
+                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                  <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 12px;">Accent</div>
                   <div style="display: flex; gap: 12px;">
                     <sc-for list="{{ accentSwatches }}" as="s" hint-placeholder-count="5"><button onClick="{{ s.onPick }}" style="{{ s.style }}"></button></sc-for>
                   </div>
                 </div>
 
-                <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                  <div style="font-size: 12.5px; color: #dde3ee; font-weight: 600; margin-bottom: 4px;">Row density</div>
-                  <div style="font-size: 11.5px; color: #6b7282; margin-bottom: 12px;">Ultra-dense fits the most rows on screen for power users.</div>
-                  <div style="display: flex; gap: 4px; background: #0b0d12; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 3px;">
+                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                  <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Row density</div>
+                  <div style="font-size: 11.5px; color: var(--tx-09); margin-bottom: 12px;">Ultra-dense fits the most rows on screen for power users.</div>
+                  <div style="display: flex; gap: 4px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
                     <sc-for list="{{ densityTabs }}" as="d" hint-placeholder-count="2"><button onClick="{{ d.onPick }}" style="{{ d.style }}">{{ d.label }}</button></sc-for>
                   </div>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 13px; background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 16px 20px;">
-                  <div style="flex: 1;"><div style="font-size: 12.5px; color: #dde3ee; font-weight: 600;">Show histogram by default</div><div style="font-size: 11.5px; color: #6b7282; margin-top: 2px;">The event-volume chart above the results.</div></div>
+                <div style="display: flex; align-items: center; gap: 13px; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px;">
+                  <div style="flex: 1;"><div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600;">Show histogram by default</div><div style="font-size: 11.5px; color: var(--tx-09); margin-top: 2px;">The event-volume chart above the results.</div></div>
                   <button onClick="{{ toggleHisto }}" style="{{ mcpToggleStyle }}"><span style="{{ mcpKnobStyle }}"></span></button>
                 </div>
-                <div style="font-size: 11.5px; color: #4b5362; margin-top: 14px;">Theme · <b style="color:#99a2b2;">Dark</b> — a light theme is on the roadmap.</div>
+                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                  <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Theme</div>
+                  <div style="font-size: 11.5px; color: var(--tx-09); margin-bottom: 14px;">Choose a look, or let it follow your macOS appearance automatically.</div>
+                  <div style="display: flex; gap: 10px;">
+                    <sc-for list="{{ themeSeg }}" as="th" hint-placeholder-count="3">
+                      <button onClick="{{ th.onPick }}" title="{{ th.title }}" style="{{ th.segStyle }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <sc-if value="{{ th.hasDot }}" hint-placeholder-val="{{ false }}"><circle cx="12" cy="12" r="4"></circle></sc-if>
+                          <path d="{{ th.path }}"></path>
+                        </svg>
+                        {{ th.label }}
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
               </div>
             </sc-if>
 
             <!-- AGENT / MCP -->
             <sc-if value="{{ tabAgent }}" hint-placeholder-val="{{ false }}">
               <div>
-                <div style="font-size: 19px; font-weight: 600; color: #e6eaf2; margin-bottom: 5px;">Agent · MCP</div>
-                <div style="font-size: 13px; color: #6b7282; margin-bottom: 22px; line-height: 1.55;">Let a local coding agent (Claude Code, Codex…) drive this same session through a Model Context Protocol server. The app stays the tool — your agent brings the reasoning.</div>
+                <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">Agent · MCP</div>
+                <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px; line-height: 1.55;">Let a local coding agent (Claude Code, Codex…) drive this same session through a Model Context Protocol server. The app stays the tool — your agent brings the reasoning.</div>
 
-                <div style="display: flex; align-items: center; gap: 13px; background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px;">
-                  <div style="flex: 1;"><div style="font-size: 13px; color: #dde3ee; font-weight: 600;">Expose local MCP server</div><div style="font-size: 11.5px; color: #6b7282; margin-top: 2px;">Loopback only · token-protected · shares your live query session.</div></div>
+                <div style="display: flex; align-items: center; gap: 13px; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px;">
+                  <div style="flex: 1;"><div style="font-size: 13px; color: var(--tx-01); font-weight: 600;">Expose local MCP server</div><div style="font-size: 11.5px; color: var(--tx-09); margin-top: 2px;">Loopback only · token-protected · shares your live query session.</div></div>
                   <button onClick="{{ toggleMcp }}" style="{{ mcpToggleStyle }}"><span style="{{ mcpKnobStyle }}"></span></button>
                 </div>
 
                 <sc-if value="{{ mcpOn }}" hint-placeholder-val="{{ true }}">
                   <div>
-                    <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Endpoint</div>
-                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;"><code style="flex: 1; background: #0e1116; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 12px; color: #a3e08c;">http://127.0.0.1:7878/sse</code><button style="height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; font-size: 11.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">⧉ copy</button></div>
-                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Access token</div>
-                      <div style="display: flex; align-items: center; gap: 8px;"><code style="flex: 1; background: #0e1116; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 12px; color: #7c8696;">oo_mcp_••••••••••••••3f9d</code><button style="height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; font-size: 11.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">↻ rotate</button></div>
+                    <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Endpoint</div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;"><code style="flex: 1; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 12px; color: #a3e08c;">http://127.0.0.1:7878/sse</code><button style="height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); font-size: 11.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">⧉ copy</button></div>
+                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Access token</div>
+                      <div style="display: flex; align-items: center; gap: 8px;"><code style="flex: 1; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 12px; color: #7c8696;">oo_mcp_••••••••••••••3f9d</code><button style="height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); font-size: 11.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">↻ rotate</button></div>
                     </div>
 
-                    <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                      <div style="font-size: 12.5px; color: #dde3ee; font-weight: 600; margin-bottom: 10px;">Connect your agent</div>
-                      <pre style="margin: 0; background: #08090d; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 12px 14px; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: #cfd6e4; white-space: pre-wrap; word-break: break-all; line-height: 1.6;"><span style="color:#7dd3fc;">claude</span> mcp add openobserve \
+                    <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                      <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 10px;">Connect your agent</div>
+                      <pre style="margin: 0; background: var(--sf-rail); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 12px 14px; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--tx-03); white-space: pre-wrap; word-break: break-all; line-height: 1.6;"><span style="color:#7dd3fc;">claude</span> mcp add openobserve \
   --transport sse http://127.0.0.1:7878/sse \
   --header <span style="color:#a3e08c;">"Authorization: Bearer $OO_MCP_TOKEN"</span></pre>
-                      <div style="font-size: 11px; color: #6b7282; margin-top: 9px;">Exposes tools: <b style="color:#99a2b2;">run_sql · get_schema · get_field_stats · summarize_results</b> + the live session as a resource.</div>
+                      <div style="font-size: 11px; color: var(--tx-09); margin-top: 9px;">Exposes tools: <b style="color:var(--tx-06);">run_sql · get_schema · get_field_stats · summarize_results</b> + the live session as a resource.</div>
                     </div>
 
-                    <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                      <div style="font-size: 12.5px; color: #dde3ee; font-weight: 600; margin-bottom: 4px;">Default leash</div>
-                      <div style="font-size: 11.5px; color: #6b7282; margin-bottom: 12px;">{{ agentDesc }}</div>
-                      <div style="display: flex; gap: 4px; background: #0b0d12; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 3px;">
+                    <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                      <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Default leash</div>
+                      <div style="font-size: 11.5px; color: var(--tx-09); margin-bottom: 12px;">{{ agentDesc }}</div>
+                      <div style="display: flex; gap: 4px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
                         <sc-for list="{{ agentTabs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onPick }}" style="{{ a.style }}">{{ a.label }}</button></sc-for>
                       </div>
                     </div>
 
                     <div style="display: flex; gap: 12px;">
-                      <div style="flex: 1; background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 14px 16px;"><div style="font-size: 11px; color: #6b7282; margin-bottom: 4px;">Max scan / query</div><div style="font-size: 14px; color: #dde3ee; font-family:'JetBrains Mono',monospace;">5.0 GB</div></div>
-                      <div style="flex: 1; background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 14px 16px;"><div style="font-size: 11px; color: #6b7282; margin-bottom: 4px;">Max rows returned</div><div style="font-size: 14px; color: #dde3ee; font-family:'JetBrains Mono',monospace;">10,000</div></div>
+                      <div style="flex: 1; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 10px; padding: 14px 16px;"><div style="font-size: 11px; color: var(--tx-09); margin-bottom: 4px;">Max scan / query</div><div style="font-size: 14px; color: var(--tx-01); font-family:'JetBrains Mono',monospace;">5.0 GB</div></div>
+                      <div style="flex: 1; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 10px; padding: 14px 16px;"><div style="font-size: 11px; color: var(--tx-09); margin-bottom: 4px;">Max rows returned</div><div style="font-size: 14px; color: var(--tx-01); font-family:'JetBrains Mono',monospace;">10,000</div></div>
                     </div>
                   </div>
                 </sc-if>
@@ -601,14 +684,14 @@
             <!-- ABOUT -->
             <sc-if value="{{ tabAbout }}" hint-placeholder-val="{{ false }}">
               <div>
-                <div style="font-size: 19px; font-weight: 600; color: #e6eaf2; margin-bottom: 5px;">About</div>
-                <div style="font-size: 13px; color: #6b7282; margin-bottom: 22px;">o3 — a native desktop client for OpenObserve.</div>
-                <div style="background: #0c0e13; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 22px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">About</div>
+                <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px;">o3 — a native desktop client for OpenObserve.</div>
+                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 22px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                   <span style="width: 44px; height: 44px; border-radius: 12px; background: var(--accent,#2dd4bf); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 22px -4px var(--accent,#2dd4bf); flex: none;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06181a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg></span>
-                  <div style="flex: 1;"><div style="font-size: 15px; color: #e6eaf2; font-weight: 600;">o3 <span style="font-size: 11px; color: #6b7282; font-weight: 400;">· OpenObserve desktop client</span></div><div style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--accent,#2dd4bf); margin-top: 4px;">SELECT signal FROM noise</div><div style="font-size: 12px; color: #6b7282; font-family:'JetBrains Mono',monospace; margin-top: 4px;">v0.1.0 · Tauri 2.0 · macOS arm64</div></div>
-                  <button style="height: 34px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: transparent; color: #aeb6c4; font-size: 12.5px; cursor: pointer; font-family: inherit;">Check for updates</button>
+                  <div style="flex: 1;"><div style="font-size: 15px; color: var(--tx-hi); font-weight: 600;">o3 <span style="font-size: 11px; color: var(--tx-09); font-weight: 400;">· OpenObserve desktop client</span></div><div style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--accent,#2dd4bf); margin-top: 4px;">SELECT signal FROM noise</div><div style="font-size: 12px; color: var(--tx-09); font-family:'JetBrains Mono',monospace; margin-top: 4px;">v0.1.0 · Tauri 2.0 · macOS arm64</div></div>
+                  <button style="height: 34px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(var(--ink),.12); background: transparent; color: var(--tx-05); font-size: 12.5px; cursor: pointer; font-family: inherit;">Check for updates</button>
                 </div>
-                <div style="display: flex; gap: 16px; font-size: 12px; color: #5b6371;">
+                <div style="display: flex; gap: 16px; font-size: 12px; color: var(--tx-10);">
                   <span style="cursor: pointer; color: var(--accent,#2dd4bf);">Documentation</span>
                   <span style="cursor: pointer; color: var(--accent,#2dd4bf);">Release notes</span>
                   <span style="cursor: pointer; color: var(--accent,#2dd4bf);">Report an issue</span>
@@ -625,70 +708,70 @@
 
     <!-- ===== FIRST-LAUNCH SETUP WIZARD ===== -->
     <sc-if value="{{ setupOpen }}" hint-placeholder-val="{{ false }}">
-      <div style="position: absolute; inset: 0; z-index: 100; display: flex; background: #070809;">
-        <div style="width: 38%; max-width: 400px; flex: none; background: linear-gradient(165deg, #0e2320 0%, #08120f 45%, #070809 100%); border-right: 1px solid rgba(255,255,255,.06); padding: 30px 34px; display: flex; flex-direction: column;">
+      <div style="position: absolute; inset: 0; z-index: 100; display: flex; background: var(--sf-void);">
+        <div style="width: 38%; max-width: 400px; flex: none; background: linear-gradient(165deg, var(--sf-atint) 0%, var(--sf-atint2) 45%, var(--sf-void) 100%); border-right: 1px solid rgba(var(--ink),.06); padding: 30px 34px; display: flex; flex-direction: column;">
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 44px;">
             <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></span>
             <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
             <span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></span>
           </div>
           <span style="width: 40px; height: 40px; border-radius: 11px; background: var(--accent,#2dd4bf); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 26px -4px var(--accent,#2dd4bf); margin-bottom: 22px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06181a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg></span>
-          <div style="font-size: 26px; font-weight: 700; color: #f0f3f8; line-height: 1.2; margin-bottom: 8px;">Welcome to o3</div>
+          <div style="font-size: 26px; font-weight: 700; color: var(--tx-max); line-height: 1.2; margin-bottom: 8px;">Welcome to o3</div>
           <div style="font-family:'JetBrains Mono',monospace; font-size: 13px; color: var(--accent,#2dd4bf); margin-bottom: 14px;">SELECT signal FROM noise</div>
-          <div style="font-size: 13px; color: #8b9a96; line-height: 1.6; margin-bottom: 30px;">A fast, native desktop client for OpenObserve. Point it at your self-hosted instance to begin.</div>
+          <div style="font-size: 13px; color: var(--gg-3); line-height: 1.6; margin-bottom: 30px;">A fast, native desktop client for OpenObserve. Point it at your self-hosted instance to begin.</div>
           <div style="display: flex; flex-direction: column; gap: 14px;">
-            <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: var(--accent,#2dd4bf); color: #06181a; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">1</span><span style="font-size: 13px; color: #dde3ee;">Connect your instance</span></div>
-            <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: #14181f; border: 1px solid rgba(255,255,255,.1); color: #6b7282; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">2</span><span style="font-size: 13px; color: #6b7282;">Pick a stream</span></div>
-            <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: #14181f; border: 1px solid rgba(255,255,255,.1); color: #6b7282; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">3</span><span style="font-size: 13px; color: #6b7282;">Run your first query</span></div>
+            <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: var(--accent,#2dd4bf); color: #06181a; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">1</span><span style="font-size: 13px; color: var(--tx-01);">Connect your instance</span></div>
+            <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: var(--sf-07); border: 1px solid rgba(var(--ink),.1); color: var(--tx-09); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">2</span><span style="font-size: 13px; color: var(--tx-09);">Pick a stream</span></div>
+            <div style="display: flex; gap: 11px; align-items: center;"><span style="width: 22px; height: 22px; border-radius: 50%; background: var(--sf-07); border: 1px solid rgba(var(--ink),.1); color: var(--tx-09); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">3</span><span style="font-size: 13px; color: var(--tx-09);">Run your first query</span></div>
           </div>
           <div style="margin-top: 30px;">
-            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #5b6b67; font-weight: 700; margin-bottom: 10px;">Your contexts</div>
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--gg-4); font-weight: 700; margin-bottom: 10px;">Your contexts</div>
             <div style="display: flex; flex-direction: column; gap: 6px;">
               <sc-for list="{{ ctxMenu }}" as="c" hint-placeholder-count="3">
                 <div onClick="{{ c.onPick }}" style="{{ c.wizStyle }}">
                   <span style="{{ c.dotStyle }}"></span>
-                  <span style="flex: 1; min-width: 0; font-size: 12px; color: #cfe3de; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
+                  <span style="flex: 1; min-width: 0; font-size: 12px; color: var(--gg-1); font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
                   <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="color: var(--accent,#2dd4bf); font-size: 12px;">✓</span></sc-if>
                 </div>
               </sc-for>
-              <button onClick="{{ addContext }}" style="margin-top: 4px; height: 32px; border-radius: 8px; border: 1px dashed rgba(255,255,255,.16); background: transparent; color: #9fb4ae; font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:#e6eaf2;">+ New context</button>
+              <button onClick="{{ addContext }}" style="margin-top: 4px; height: 32px; border-radius: 8px; border: 1px dashed rgba(var(--ink),.16); background: transparent; color: var(--gg-2); font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:var(--tx-hi);">+ New context</button>
             </div>
           </div>
           <div style="flex: 1;"></div>
-          <div style="font-size: 11px; color: #4b5b57;">No telemetry · everything runs locally on your machine.</div>
+          <div style="font-size: 11px; color: var(--gg-5);">No telemetry · everything runs locally on your machine.</div>
         </div>
 
         <div class="oo-scroll" style="flex: 1; overflow-y: auto; display: flex; align-items: center; justify-content: center; padding: 40px;">
           <div style="width: 100%; max-width: 440px;">
-            <div style="font-size: 20px; font-weight: 600; color: #e6eaf2; margin-bottom: 6px;">Connect to OpenObserve</div>
-            <div style="font-size: 13px; color: #6b7282; margin-bottom: 24px;">Name this context and point it at your instance. Switch between contexts any time from the title bar. Self-hosted OSS uses basic auth — no hosted OAuth.</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--tx-hi); margin-bottom: 6px;">Connect to OpenObserve</div>
+            <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 24px;">Name this context and point it at your instance. Switch between contexts any time from the title bar. Self-hosted OSS uses basic auth — no hosted OAuth.</div>
 
             <div style="margin-bottom: 15px;">
-              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Context name</div>
-              <input value="{{ conn.name }}" onChange="{{ onName }}" placeholder="prod, staging, local…" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Context name</div>
+              <input value="{{ conn.name }}" onChange="{{ onName }}" placeholder="prod, staging, local…" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
             </div>
             <div style="margin-bottom: 15px;">
-              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Server URL</div>
-              <input value="{{ conn.url }}" onChange="{{ onUrl }}" placeholder="http://localhost:5080" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Server URL</div>
+              <input value="{{ conn.url }}" onChange="{{ onUrl }}" placeholder="http://localhost:5080" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
             </div>
             <div style="margin-bottom: 15px;">
-              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Organization</div>
-              <input value="{{ conn.org }}" onChange="{{ onOrg }}" placeholder="default" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Organization</div>
+              <input value="{{ conn.org }}" onChange="{{ onOrg }}" placeholder="default" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
             </div>
             <div style="margin-bottom: 15px;">
-              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Authentication</div>
-              <div style="display: flex; gap: 3px; background: #0b0d12; border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 3px;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Authentication</div>
+              <div style="display: flex; gap: 3px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
                 <sc-for list="{{ authTabs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onPick }}" style="{{ a.style }}">{{ a.label }}</button></sc-for>
               </div>
             </div>
             <sc-if value="{{ authPassword }}" hint-placeholder-val="{{ true }}">
               <div style="display: flex; gap: 11px; margin-bottom: 15px;">
-                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
-                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
               </div>
             </sc-if>
             <sc-if value="{{ authToken }}" hint-placeholder-val="{{ false }}">
-              <div style="margin-bottom: 15px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #5b6371; font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" placeholder="oo_sa_…" style="width: 100%; height: 38px; padding: 0 12px; background: #0e1116; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #dde3ee; font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+              <div style="margin-bottom: 15px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" placeholder="oo_sa_…" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
             </sc-if>
             <sc-if value="{{ authSSO }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; gap: 11px; align-items: flex-start; background: rgba(245,179,64,.07); border: 1px solid rgba(245,179,64,.22); border-radius: 9px; padding: 12px 14px; margin-bottom: 15px;"><span style="color: #f5b340; font-size: 15px; line-height: 1;">⚠</span><div style="font-size: 12.5px; color: #c8b083; line-height: 1.55;">OAuth / SSO needs <b style="color:#f5d9a0;">OpenObserve Enterprise</b>. On the OSS edition, use email + password or a token.</div></div>
@@ -696,7 +779,7 @@
 
             <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 22px;">
               <button onClick="{{ toggleSelfSigned }}" style="{{ ssToggleStyle }}"><span style="{{ ssKnobStyle }}"></span></button>
-              <span style="font-size: 12.5px; color: #aeb6c4;">Trust self-signed certificate</span>
+              <span style="font-size: 12.5px; color: var(--tx-05);">Trust self-signed certificate</span>
             </div>
 
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 22px;">
@@ -706,9 +789,9 @@
 
             <div style="display: flex; gap: 11px;">
               <button onClick="{{ closeSetup }}" style="flex: 1; height: 42px; border-radius: 10px; border: none; background: var(--accent,#2dd4bf); color: #06181a; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;">Connect &amp; continue</button>
-              <button onClick="{{ closeSetup }}" style="height: 42px; padding: 0 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: transparent; color: #8b93a3; font-size: 13px; cursor: pointer; font-family: inherit;">Skip</button>
+              <button onClick="{{ closeSetup }}" style="height: 42px; padding: 0 18px; border-radius: 10px; border: 1px solid rgba(var(--ink),.12); background: transparent; color: var(--tx-07); font-size: 13px; cursor: pointer; font-family: inherit;">Skip</button>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 11px; color: #4b5362;"><span style="color: var(--accent,#2dd4bf);">🔒</span> Stored in your OS keychain via Tauri — never in plaintext.</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 11px; color: var(--tx-12);"><span style="color: var(--accent,#2dd4bf);">🔒</span> Stored in your OS keychain via Tauri — never in plaintext.</div>
           </div>
         </div>
       </div>
@@ -718,13 +801,13 @@
     <sc-if value="{{ ctxOpen }}" hint-placeholder-val="{{ false }}">
       <div onClick="{{ closeCtx }}" style="position: fixed; inset: 0; z-index: 95;"></div>
       <div style="{{ ctxStyle }}">
-        <div style="padding: 8px 11px; border-bottom: 1px solid rgba(255,255,255,.07); background: #0b0e13;">
+        <div style="padding: 8px 11px; border-bottom: 1px solid rgba(var(--ink),.07); background: var(--sf-03);">
           <div style="font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--accent,#2dd4bf); margin-bottom: 2px; letter-spacing: .3px;">{{ ctxField }}</div>
-          <div style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: #dde3ee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ ctxValue }}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: var(--tx-01); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ ctxValue }}</div>
         </div>
         <div style="padding: 4px;">
           <sc-for list="{{ ctxItems }}" as="m" hint-placeholder-count="5">
-            <div onClick="{{ m.onPick }}" style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; color: #c3cad7;" style-hover="background:#161b22;color:#fff;">
+            <div onClick="{{ m.onPick }}" style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--tx-04);" style-hover="background:var(--sf-hov2);color:#fff;">
               <span style="width: 15px; text-align: center; font-family:'JetBrains Mono',monospace; color: var(--accent,#2dd4bf); font-weight: 700; font-size: 13px;">{{ m.icon }}</span>
               <span style="flex: 1;">{{ m.label }}</span>
             </div>
@@ -733,25 +816,41 @@
       </div>
     </sc-if>
 
+    <!-- ===== JSON VALUE VIEWER ===== -->
+    <sc-if value="{{ jsonModalOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeJsonModal }}" style="position: absolute; inset: 0; background: rgba(4,5,7,.5); backdrop-filter: saturate(150%) blur(9px); -webkit-backdrop-filter: saturate(150%) blur(9px); z-index: 92; display: flex; align-items: center; justify-content: center; padding: 44px;">
+        <div onClick="{{ stop }}" style="width: 560px; max-width: 100%; max-height: 80%; display: flex; flex-direction: column; background: var(--glass-modal); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 13px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.9); overflow: hidden; animation: ooFade .14s ease;">
+          <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 15px; border-bottom: 1px solid rgba(var(--ink),.07);">
+            <span style="font-family:'JetBrains Mono',monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .5px; color: #06181a; background: var(--accent,#2dd4bf); padding: 3px 7px; border-radius: 5px;">JSON</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size: 12.5px; color: var(--tx-01); font-weight: 600;">{{ jsonModalField }}</span>
+            <span style="flex: 1;"></span>
+            <button onClick="{{ copyJsonModal }}" style="height: 26px; padding: 0 11px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 7px; color: var(--tx-06); font-size: 11px; cursor: pointer; font-family:'JetBrains Mono',monospace;" style-hover="color:var(--tx-hi);border-color:rgba(var(--ink),.22);">⧉ copy</button>
+            <button onClick="{{ closeJsonModal }}" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer;">✕</button>
+          </div>
+          <div class="oo-scroll" style="flex: 1; min-height: 0; overflow: auto; padding: 14px 16px; background: var(--sf-rail);">{{ jsonModalEl }}</div>
+        </div>
+      </div>
+    </sc-if>
+
     <!-- ===== SYNTAX GUIDE OVERLAY ===== -->
     <sc-if value="{{ guideOpen }}" hint-placeholder-val="{{ false }}">
-      <div onClick="{{ toggleGuide }}" style="position: absolute; inset: 0; background: rgba(4,5,7,.62); backdrop-filter: blur(3px); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 40px;">
-        <div onClick="{{ stop }}" style="width: 720px; max-height: 86%; background: #0c0f15; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.9); display: flex; flex-direction: column; overflow: hidden; animation: ooFade .14s ease;">
-          <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 15px 18px; border-bottom: 1px solid rgba(255,255,255,.07);">
+      <div onClick="{{ toggleGuide }}" style="position: absolute; inset: 0; background: rgba(4,5,7,.5); backdrop-filter: saturate(150%) blur(9px); -webkit-backdrop-filter: saturate(150%) blur(9px); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 40px;">
+        <div onClick="{{ stop }}" style="width: 720px; max-height: 86%; background: var(--glass-modal); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 14px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.9); display: flex; flex-direction: column; overflow: hidden; animation: ooFade .14s ease;">
+          <div style="flex: none; display: flex; align-items: center; gap: 10px; padding: 15px 18px; border-bottom: 1px solid rgba(var(--ink),.07);">
             <span style="color: var(--accent,#2dd4bf); font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 15px;">?</span>
-            <span style="font-size: 14px; font-weight: 600; color: #e6eaf2;">SQL syntax guide</span>
+            <span style="font-size: 14px; font-weight: 600; color: var(--tx-hi);">SQL Syntax Guide</span>
             <span style="flex: 1;"></span>
-            <button onClick="{{ toggleGuide }}" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(255,255,255,.1); background: #0e1116; color: #99a2b2; cursor: pointer;">✕</button>
+            <button onClick="{{ toggleGuide }}" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); cursor: pointer;">✕</button>
           </div>
           <div class="oo-scroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: 18px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
               <sc-for list="{{ guideSections }}" as="g" hint-placeholder-count="4">
                 <div>
-                  <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #5b6371; font-weight: 700; margin-bottom: 9px;">{{ g.title }}</div>
+                  <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--tx-10); font-weight: 700; margin-bottom: 9px;">{{ g.title }}</div>
                   <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
-                    <div onClick="{{ it.onUse }}" style="background: #0e1116; border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 9px 11px; margin-bottom: 7px; cursor: pointer;" style-hover="border-color:var(--accent,#2dd4bf);">
-                      <div style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: #cfd6e4; margin-bottom: 3px;">{{ it.code }}</div>
-                      <div style="font-size: 11px; color: #6b7282;">{{ it.note }}</div>
+                    <div onClick="{{ it.onUse }}" style="background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.06); border-radius: 8px; padding: 9px 11px; margin-bottom: 7px; cursor: pointer;" style-hover="border-color:var(--accent,#2dd4bf);">
+                      <div style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--tx-03); margin-bottom: 3px;">{{ it.code }}</div>
+                      <div style="font-size: 11px; color: var(--tx-09);">{{ it.note }}</div>
                     </div>
                   </sc-for>
                 </div>
@@ -768,7 +867,8 @@
 <script type="text/x-dc" data-dc-script data-props="{
   &quot;accent&quot;: { &quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#2dd4bf&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;#2dd4bf&quot;, &quot;#7c83ff&quot;, &quot;#f5a86a&quot;, &quot;#5b9dff&quot;] },
   &quot;density&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;ultra&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;ultra&quot;, &quot;comfortable&quot;] },
-  &quot;showHistogram&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; }
+  &quot;showHistogram&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; },
+  &quot;defaultTheme&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;dark&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;], &quot;section&quot;: &quot;Appearance&quot; }
 }">
 class Component extends DCLogic {
   constructor(props) {
@@ -870,6 +970,8 @@ class Component extends DCLogic {
       selectedId: null,
       fieldFilter: '',
       showHisto: this.props.showHistogram !== false,
+      themePref: (typeof localStorage !== 'undefined' && localStorage.getItem('oo-theme')) || this.props.defaultTheme || 'dark',
+      systemDark: (typeof matchMedia !== 'undefined') ? matchMedia('(prefers-color-scheme: dark)').matches : true,
       guideOpen: false,
       navActive: 'Logs',
       historyOpen: false,
@@ -882,6 +984,8 @@ class Component extends DCLogic {
       ],
       sidebarCollapsed: false,
       ctx: { open: false },
+      histoSel: null,
+      jsonModal: null,
       view: 'app',
       setupOpen: false,
       setTab: 'connection',
@@ -916,6 +1020,37 @@ class Component extends DCLogic {
   hexA(hex, a) {
     const n = parseInt(hex.slice(1), 16);
     return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;
+  }
+
+  // ---- theming ----
+  effTheme() {
+    const p = this.state.themePref;
+    if (p === 'system') return this.state.systemDark ? 'dark' : 'light';
+    return p;
+  }
+  applyThemeAttr() {
+    try { document.documentElement.setAttribute('data-oo-theme', this.effTheme()); } catch (e) {}
+  }
+  setTheme = (pref) => {
+    try { localStorage.setItem('oo-theme', pref); } catch (e) {}
+    this.setState({ themePref: pref }, () => this.applyThemeAttr());
+  };
+  componentDidMount() {
+    this.applyThemeAttr();
+    if (typeof matchMedia !== 'undefined') {
+      this._mq = matchMedia('(prefers-color-scheme: dark)');
+      this._mqHandler = (e) => {
+        this.setState({ systemDark: e.matches }, () => { if (this.state.themePref === 'system') this.applyThemeAttr(); });
+      };
+      if (this._mq.addEventListener) this._mq.addEventListener('change', this._mqHandler);
+      else if (this._mq.addListener) this._mq.addListener(this._mqHandler);
+    }
+  }
+  componentWillUnmount() {
+    if (this._mq && this._mqHandler) {
+      if (this._mq.removeEventListener) this._mq.removeEventListener('change', this._mqHandler);
+      else if (this._mq.removeListener) this._mq.removeListener(this._mqHandler);
+    }
   }
 
   // ---- editor ----
@@ -971,52 +1106,149 @@ class Component extends DCLogic {
     const re = /('(?:[^']|'')*'|"[^"]*")|(\d+(?:\.\d+)?)|([A-Za-z_][A-Za-z0-9_]*)|(\s+)|([^\s])/g;
     const parts = []; let m, idx = 0;
     while ((m = re.exec(str))) {
-      let color = '#cfd6e4', txt = m[0];
-      if (m[1]) color = '#a3e08c';
-      else if (m[2]) color = '#f6c177';
+      let color = 'var(--tx-03)', txt = m[0];
+      if (m[1]) color = 'var(--sy-str)';
+      else if (m[2]) color = 'var(--sy-num)';
       else if (m[3]) {
         const lw = m[3].toLowerCase();
         const rest = str.slice(re.lastIndex).match(/^\s*\(/);
-        if (kw.has(lw)) color = '#ff7b9c';
-        else if (fn.has(lw) && rest) color = '#7dd3fc';
-        else color = '#cfd6e4';
-      } else if (m[5]) color = '#7b8496';
+        if (kw.has(lw)) color = 'var(--sy-kw)';
+        else if (fn.has(lw) && rest) color = 'var(--sy-fn)';
+        else color = 'var(--tx-03)';
+      } else if (m[5]) color = 'var(--tx-7b)';
       parts.push(React.createElement('span', { key: idx++, style: { color } }, txt));
     }
-    parts.push(React.createElement('span', { key: 'c', style: { color: '#cfd6e4' } }, '\u200b'));
+    parts.push(React.createElement('span', { key: 'c', style: { color: 'var(--tx-03)' } }, '\u200b'));
     return React.createElement(React.Fragment, null, parts);
   }
 
   // ---- histogram ----
-  buildHistogram(accent) {
-    const seeds = [];
-    for (let i = 0; i < 66; i++) {
-      const v = 0.35 + 0.45 * Math.abs(Math.sin(i * 1.3) + Math.cos(i * 0.7)) / 2 + (i % 11 === 0 ? 0.4 : 0) + (i % 7 === 0 ? 0.15 : 0);
-      seeds.push(Math.min(1, v));
+  histoData() {
+    const n = 30;
+    const start = new Date('2026-06-25T13:43:30+08:00').getTime();
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      let v = 0.4 + 0.4 * Math.abs(Math.sin(i * 1.1) + Math.cos(i * 0.5)) / 2;
+      if (i % 9 === 0) v += 0.34;
+      if (i % 5 === 0) v += 0.12;
+      if (i === 22) v = 1;
+      v = Math.min(1, Math.max(0.05, v));
+      arr.push({ i, t0: start + i * 30000, count: Math.round(v * 7323) });
     }
-    const labels = ['13:44','13:46','13:48','13:50','13:52','13:54','13:56','13:58'];
-    return React.createElement('div', null,
-      React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '2px', height: '92px' } },
-        seeds.map((h, i) => React.createElement('div', {
-          key: i,
-          title: Math.round(h * 7323) + ' events',
-          style: {
-            flex: 1, height: (h * 100) + '%', minHeight: '3px',
-            background: `linear-gradient(180deg, ${accent}, ${this.hexA(accent, 0.32)})`,
-            borderRadius: '2px 2px 0 0', cursor: 'pointer', transition: 'opacity .12s'
-          }
-        }))
-      ),
-      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontFamily: "'JetBrains Mono',monospace", fontSize: '9.5px', color: '#4b5362' } },
-        labels.map((l, i) => React.createElement('span', { key: i }, l)))
-    );
+    return arr;
   }
+  buildHistogram(accent) {
+    const data = this.histoData();
+    const peak = Math.max.apply(null, data.map(d => d.count));
+    return React.createElement(this.HistogramChart, {
+      data, peak, accent, hexA: (h, a) => this.hexA(h, a),
+      selRange: this.state.histoSel, onBrush: this.applyHistoBrush
+    });
+  }
+  applyHistoBrush = (lo, hi) => {
+    const data = this.histoData();
+    const p = (x) => String(x).padStart(2, '0');
+    const fmt = (ms) => { const d = new Date(ms); return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); };
+    const t0 = data[lo].t0, t1 = data[hi].t0 + 30000;
+    const label = fmt(t0) + ' → ' + fmt(t1);
+    this.setState({ histoSel: { lo, hi, label }, timeRange: label });
+    this.runQuery();
+  };
+  clearHistoSel = () => { this.setState({ histoSel: null, timeRange: 'Past 15 Minutes' }); this.runQuery(); };
+
+  // interactive chart — local hover/brush state survives parent re-renders
+  HistogramChart = (props) => {
+    const { data, accent, peak, selRange, onBrush, hexA } = props;
+    const [hover, setHover] = React.useState(null);
+    const [drag, setDrag] = React.useState(null);
+    const barsRef = React.useRef(null);
+    const n = data.length;
+    const fmtNum = (v) => v >= 1000 ? (v / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(v);
+    const p2 = (x) => String(x).padStart(2, '0');
+    const fmtTime = (ms) => { const d = new Date(ms); return p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()); };
+    const fmtHM = (ms) => { const d = new Date(ms); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
+    const idxFromEvent = (e) => {
+      const el = barsRef.current; if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      let i = Math.floor((e.clientX - r.left) / r.width * n);
+      return Math.max(0, Math.min(n - 1, i));
+    };
+    const onDown = (e) => { e.preventDefault(); const i = idxFromEvent(e); setDrag({ s: i, e: i }); setHover(i); };
+    const onMove = (e) => { const i = idxFromEvent(e); setHover(i); setDrag(d => d ? { s: d.s, e: i } : d); };
+    const onUp = () => { if (drag) { const lo = Math.min(drag.s, drag.e), hi = Math.max(drag.s, drag.e); onBrush(lo, hi); } setDrag(null); };
+    const onLeave = () => { setHover(null); setDrag(null); };
+    const dragLo = drag ? Math.min(drag.s, drag.e) : null;
+    const dragHi = drag ? Math.max(drag.s, drag.e) : null;
+    const H = 96;
+
+    const yAxis = React.createElement('div', { style: { width: '46px', flex: 'none', height: H + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', paddingRight: '8px', fontFamily: "'JetBrains Mono',monospace", fontSize: '9px', color: 'var(--tx-12)' } },
+      [1, 0.75, 0.5, 0.25, 0].map((f, i) => React.createElement('span', { key: i, style: { lineHeight: 1, transform: i === 0 ? 'translateY(-1px)' : (i === 4 ? 'translateY(1px)' : 'none') } }, fmtNum(Math.round(peak * f)))));
+
+    const grid = [0, 0.25, 0.5, 0.75, 1].map((f, i) => React.createElement('div', { key: 'g' + i, style: { position: 'absolute', left: 0, right: 0, bottom: (f * 100) + '%', height: '1px', background: i === 0 ? 'rgba(var(--ink),.12)' : 'rgba(var(--ink),.045)' } }));
+
+    const selBand = selRange ? React.createElement('div', { key: 'sel', style: { position: 'absolute', top: 0, bottom: 0, left: (selRange.lo / n * 100) + '%', width: ((selRange.hi - selRange.lo + 1) / n * 100) + '%', borderLeft: '1px dashed ' + hexA(accent, 0.5), borderRight: '1px dashed ' + hexA(accent, 0.5), background: hexA(accent, 0.06), pointerEvents: 'none' } }) : null;
+
+    const bars = React.createElement('div', {
+      key: 'bars', ref: barsRef,
+      onMouseDown: onDown, onMouseMove: onMove, onMouseUp: onUp, onMouseLeave: onLeave,
+      style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', gap: '2px', cursor: drag ? 'ew-resize' : 'crosshair' }
+    }, data.map((d, i) => {
+      const inDrag = drag && i >= dragLo && i <= dragHi;
+      const inSel = selRange && i >= selRange.lo && i <= selRange.hi;
+      const isHover = hover === i;
+      let op;
+      if (drag) op = inDrag ? 1 : 0.26;
+      else if (selRange) op = inSel ? 1 : 0.24;
+      else op = isHover ? 1 : 0.85;
+      const top = (isHover && !drag) ? 'var(--tx-glow)' : accent;
+      return React.createElement('div', { key: i, style: { flex: 1, height: Math.max(2, (d.count / peak) * 100) + '%', background: 'linear-gradient(180deg, ' + top + ', ' + hexA(accent, 0.26) + ')', borderRadius: '2px 2px 0 0', opacity: op, boxShadow: isHover ? '0 0 0 1px ' + hexA(accent, 0.6) : 'none', transition: 'opacity .07s' } });
+    }));
+
+    const brushRect = (drag && dragHi > dragLo) ? React.createElement('div', { key: 'br', style: { position: 'absolute', top: 0, bottom: 0, left: (dragLo / n * 100) + '%', width: ((dragHi - dragLo + 1) / n * 100) + '%', background: hexA(accent, 0.1), border: '1px solid ' + hexA(accent, 0.5), borderRadius: '3px', pointerEvents: 'none' } }) : null;
+
+    let tip = null;
+    if (hover != null && data[hover]) {
+      const d = data[hover];
+      const leftPct = (hover + 0.5) / n * 100;
+      const side = leftPct > 58;
+      tip = React.createElement('div', { key: 'tip', style: { position: 'absolute', top: '2px', left: leftPct + '%', transform: side ? 'translateX(-100%)' : 'none', marginLeft: side ? '-6px' : '6px', background: 'var(--sf-pop)', border: '1px solid rgba(var(--ink),.14)', borderRadius: '8px', boxShadow: '0 14px 34px -10px rgba(0,0,0,.8)', padding: '7px 10px', pointerEvents: 'none', zIndex: 5, whiteSpace: 'nowrap' } },
+        React.createElement('div', { style: { fontFamily: "'JetBrains Mono',monospace", fontSize: '10px', color: '#7c8696', marginBottom: '4px' } }, fmtTime(d.t0) + ' – ' + fmtTime(d.t0 + 30000)),
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '7px' } },
+          React.createElement('span', { style: { width: '8px', height: '8px', borderRadius: '2px', background: accent, flex: 'none' } }),
+          React.createElement('span', { style: { fontSize: '13px', fontWeight: 700, color: 'var(--tx-hi)', fontFamily: "'JetBrains Mono',monospace" } }, d.count.toLocaleString()),
+          React.createElement('span', { style: { fontSize: '11px', color: 'var(--tx-09)' } }, 'events')),
+        React.createElement('div', { style: { fontSize: '9.5px', color: 'var(--tx-12)', marginTop: '3px' } }, Math.round(d.count / peak * 100) + '% of peak'));
+    }
+
+    const xLabels = React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '7px', marginLeft: '46px', fontFamily: "'JetBrains Mono',monospace", fontSize: '9.5px', color: 'var(--tx-12)' } },
+      data.filter((_, i) => i % 6 === 0).map((d, i) => React.createElement('span', { key: i }, fmtHM(d.t0))));
+
+    const hint = React.createElement('div', { style: { marginTop: '5px', marginLeft: '46px', fontSize: '9.5px', color: 'var(--tx-13)', fontFamily: "'JetBrains Mono',monospace" } }, '↔ Drag across barsrs to filter the time range');
+
+    return React.createElement('div', null,
+      React.createElement('div', { style: { display: 'flex' } },
+        yAxis,
+        React.createElement('div', { style: { position: 'relative', flex: 1, height: H + 'px' } }, grid, selBand, bars, brushRect, tip)),
+      xLabels, hint);
+  };
 
   jsonFor(row) {
-    const C = { str: '#a3e08c', num: '#f6c177' };
+    const C = { str: 'var(--sy-str)', num: 'var(--sy-num)' };
+    const attrs = {
+      'http.method': 'POST',
+      'http.route': '/corp/message/send',
+      'http.status_code': row.level === 'error' ? 502 : 200,
+      'net.peer.name': 'notify.example.internal',
+      'messaging.system': 'rabbitmq',
+      'messaging.destination': 'corp.msg',
+      'retry.count': row.level === 'warn' ? 3 : 0,
+      'duration_ms': 40 + (row.id * 37) % 1260
+    };
+    const attrStr = JSON.stringify(attrs);
     const e = [
       ['_timestamp', String(row.tms) + '000', C.num, String(row.tms) + '000'],
       ['body', '"' + row.body + '"', C.str, row.body],
+      ['attributes', '"' + attrStr.replace(/"/g, '\\"') + '"', C.str, attrStr],
       ['ctx_trace_id', '"' + row.trace + '"', C.str, row.trace],
       ['dropped_attributes_count', '0', C.num, '0'],
       ['host_name', '"demo-worker-7d5b56f564-cp2jx"', C.str, 'demo-worker-7d5b56f564-cp2jx'],
@@ -1028,15 +1260,45 @@ class Component extends DCLogic {
       ['service_version', '"11.3.6"', C.str, '11.3.6'],
       ['severity', '"' + row.level + '"', this.LEVELC[row.level], row.level]
     ];
-    return e.map((x) => ({ k: x[0], v: x[1], style: 'color:' + x[2], field: x[0], raw: x[3], onClick: (ev) => this.openValueMenu(x[0], x[3], ev) }));
+    return e.map((x) => ({ k: x[0], v: x[1], style: 'color:' + x[2], field: x[0], raw: x[3], json: !!this.tryParseJson(x[3]), onClick: (ev) => this.openValueMenu(x[0], x[3], ev) }));
   }
+
+  // ---- JSON detection / viewer ----
+  tryParseJson(v) {
+    if (typeof v !== 'string') return null;
+    const t = v.trim();
+    if (!(t.startsWith('{') || t.startsWith('['))) return null;
+    try { const p = JSON.parse(t); return (p && typeof p === 'object') ? p : null; } catch (e) { return null; }
+  }
+  jsonHtml(obj) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let json = esc(JSON.stringify(obj, null, 2));
+    return json.replace(/("(?:\\.|[^\\"])*"(\s*:)?|\b(?:true|false)\b|\bnull\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (m) => {
+      let color = 'var(--sy-num)';
+      if (/^"/.test(m)) color = /:\s*$/.test(m) ? 'var(--sy-key)' : 'var(--sy-str)';
+      else if (/^(true|false)$/.test(m)) color = 'var(--sy-bool)';
+      else if (/^null$/.test(m)) color = 'var(--sy-null)';
+      return '<span style="color:' + color + '">' + m + '</span>';
+    });
+  }
+  viewAsJson = () => {
+    const c = this.state.ctx;
+    const parsed = this.tryParseJson(c.value);
+    if (!parsed) { this.setState({ ctx: { open: false } }); return; }
+    this.setState({ ctx: { open: false }, jsonModal: { field: c.field, obj: parsed } });
+  };
+  closeJsonModal = () => this.setState({ jsonModal: null });
+  copyJsonModal = () => {
+    const m = this.state.jsonModal; if (!m) return;
+    try { navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(m.obj, null, 2)); } catch (e) {}
+  };
 
   // ---- Graylog-style value actions ----
   openValueMenu(field, value, e) {
     e.stopPropagation();
     const x = Math.max(8, Math.min(e.clientX, window.innerWidth - 252));
     const y = Math.max(8, Math.min(e.clientY, window.innerHeight - 236));
-    this.setState({ ctx: { open: true, x, y, field, value: String(value) } });
+    this.setState({ ctx: { open: true, x, y, field, value: String(value), isJson: !!this.tryParseJson(String(value)) } });
   }
   closeCtx = () => this.setState({ ctx: { open: false } });
   buildFilter(op) {
@@ -1135,6 +1397,23 @@ class Component extends DCLogic {
   onFieldFilter = (e) => this.setState({ fieldFilter: e.target.value });
   closeDrawer = () => this.setState({ selectedId: null });
   pickTab = (t) => this.setState({ query: t.q, caret: t.q.length, activeTabId: t.id, selectedId: null });
+  closeTab = (id, e) => {
+    if (e) e.stopPropagation();
+    this.setState(s => {
+      if (s.tabs.length <= 1) return {};
+      const idx = s.tabs.findIndex(t => t.id === id);
+      const tabs = s.tabs.filter(t => t.id !== id);
+      let patch = { tabs, editingTabId: null };
+      if (s.activeTabId === id) {
+        const next = tabs[Math.max(0, idx - 1)];
+        patch.activeTabId = next.id;
+        patch.query = next.q;
+        patch.caret = next.q.length;
+        patch.selectedId = null;
+      }
+      return patch;
+    });
+  };
   startRename = (id, e) => { if (e) e.stopPropagation(); this.setState({ editingTabId: id }); };
   onTabName = (id, e) => { const v = e.target.value; this.setState(s => ({ tabs: s.tabs.map(t => t.id === id ? { ...t, name: v } : t) })); };
   commitRename = () => this.setState({ editingTabId: null });
@@ -1175,7 +1454,7 @@ class Component extends DCLogic {
       return {
         name, title: soon ? name + ' \u00b7 coming soon' : name,
         soon,
-        style: `position:relative;width:36px;height:36px;border-radius:9px;border:none;display:flex;align-items:center;justify-content:center;${soon ? 'background:transparent;color:#3a4150;cursor:default' : (st.navActive===name ? 'background:'+this.hexA(accent,0.14)+';color:'+accent+';cursor:pointer' : 'background:transparent;color:#5b6371;cursor:pointer')}`,
+        style: `position:relative;width:36px;height:36px;border-radius:9px;border:none;display:flex;align-items:center;justify-content:center;${soon ? 'background:transparent;color:var(--tx-14);cursor:default' : (st.navActive===name ? 'background:'+this.hexA(accent,0.14)+';color:'+accent+';cursor:pointer' : 'background:transparent;color:var(--tx-10);cursor:pointer')}`,
         onPick: soon ? (() => {}) : (() => this.setState({ navActive: name })),
         icon: React.createElement('svg', { width: 19, height: 19, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d }))
       };
@@ -1190,9 +1469,11 @@ class Component extends DCLogic {
       return {
         isGroup: false, isTab: true, id: t.id, name: t.name, editing, notEditing: !editing,
         streamName: t.stream,
-        dotStyle: `width:7px;height:7px;border-radius:50%;flex:none;background:${sc};box-shadow:0 0 6px -1px ${sc}`,
-        tabStyle: `display:flex;align-items:center;gap:7px;padding:0 11px;height:34px;font-size:11.5px;cursor:pointer;white-space:nowrap;flex:none;border-bottom:2px solid ${active ? accent : 'transparent'};${active ? 'color:#e6eaf2;background:#0c0e13' : 'color:#7c8696;background:transparent'}`,
+        dotStyle: `width:8px;height:8px;border-radius:50%;flex:none;background:${sc};box-shadow:0 0 6px -1px ${sc}`,
+        tabStyle: `display:flex;align-items:center;gap:8px;padding:0 12px;height:30px;border-radius:8px;font-size:12.5px;cursor:pointer;white-space:nowrap;flex:none;border:1px solid ${active ? this.hexA(accent,0.42) : 'transparent'};${active ? 'color:var(--tx-hi);background:'+this.hexA(accent,0.12) : 'color:#7c8696;background:transparent'}`,
         onPick: () => this.pickTab(t),
+        onClose: (e) => this.closeTab(t.id, e),
+        canClose: st.tabs.length > 1,
         onRename: (e) => this.startRename(t.id, e),
         onNameChange: (e) => this.onTabName(t.id, e),
         onNameKey: this.onTabNameKey,
@@ -1226,23 +1507,23 @@ class Component extends DCLogic {
     ];
     const quickRanges = QUICK.map(([label, amount, unit]) => ({
       label, onPick: () => this.pickQuick(label, amount, unit),
-      style: `padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;${st.timeRange === label ? 'background:' + this.hexA(accent, 0.14) + ';color:' + accent + ';font-weight:600' : 'color:#aeb6c4'}`
+      style: `padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;${st.timeRange === label ? 'background:' + this.hexA(accent, 0.14) + ';color:' + accent + ';font-weight:600' : 'color:var(--tx-05)'}`
     }));
     const timeTabRel = st.timeTab === 'relative';
     const timeTabAbs = st.timeTab === 'absolute';
-    const relTabStyle = `flex:1;text-align:center;padding:6px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;${timeTabRel ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`;
-    const absTabStyle = `flex:1;text-align:center;padding:6px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;${timeTabAbs ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`;
+    const relTabStyle = `flex:1;text-align:center;padding:6px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;${timeTabRel ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`;
+    const absTabStyle = `flex:1;text-align:center;padding:6px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;${timeTabAbs ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`;
     const UNITS = [['s', 'sec'], ['m', 'min'], ['h', 'hr'], ['d', 'day'], ['w', 'wk']];
     const relUnits = UNITS.map(([id, label]) => ({
       label, onPick: () => this.setState({ relUnit: id }),
-      style: `flex:1;text-align:center;padding:6px 4px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-family:inherit;${st.relUnit === id ? 'background:' + this.hexA(accent, 0.18) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`
+      style: `flex:1;text-align:center;padding:6px 4px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-family:inherit;${st.relUnit === id ? 'background:' + this.hexA(accent, 0.18) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
 
     // streams
     const streams = this.STREAMS.map(([name, size]) => ({
       name, size,
       onPick: () => this.setState({ stream: name, streamOpen: false }),
-      style: `display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;cursor:pointer;${st.stream===name ? 'background:'+this.hexA(accent,0.12)+';color:'+accent : 'color:#aeb6c4'}`
+      style: `display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;cursor:pointer;${st.stream===name ? 'background:'+this.hexA(accent,0.12)+';color:'+accent : 'color:var(--tx-05)'}`
     }));
 
     // fields
@@ -1281,26 +1562,30 @@ class Component extends DCLogic {
     // value-action menu
     const ctx = st.ctx || { open: false };
     const ctxItems = [
+      { icon: '\u29C9', label: 'Copy value', onPick: () => this.copyVal() },
+      ...(ctx.isJson ? [{ icon: '{\u202F}', label: 'View as JSON', onPick: () => this.viewAsJson() }] : []),
       { icon: '=', label: 'Filter for value', onPick: () => this.buildFilter('=') },
       { icon: '\u2260', label: 'Exclude value', onPick: () => this.buildFilter('!=') },
       { icon: '\u229E', label: 'Group by ' + (ctx.field || 'field'), onPick: () => this.groupByField() },
-      { icon: '\u25A6', label: 'Top 10 values', onPick: () => this.topValues() },
-      { icon: '\u29C9', label: 'Copy value', onPick: () => this.copyVal() }
+      { icon: '\u25A6', label: 'Top 10 values', onPick: () => this.topValues() }
     ];
-    const ctxStyle = `position:fixed;left:${ctx.x || 0}px;top:${ctx.y || 0}px;width:236px;background:#0f131a;border:1px solid rgba(255,255,255,.12);border-radius:10px;box-shadow:0 22px 54px -12px rgba(0,0,0,.85);z-index:96;overflow:hidden;animation:ooFade .1s ease`;
+    const ctxStyle = `position:fixed;left:${ctx.x || 0}px;top:${ctx.y || 0}px;width:236px;background:var(--glass-pop);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid rgba(var(--ink),.12);border-radius:10px;box-shadow:0 22px 54px -12px rgba(0,0,0,.85);z-index:96;overflow:hidden;animation:ooFade .1s ease`;
 
     // query history
-    const firstLine = (q) => { const l = q.trim().split('\n'); return l[0] + (l.length > 1 ? ' …' : ''); };
     const history = st.history.map(h => ({
-      preview: firstLine(h.q), stream: h.stream, ago: h.ago, meta: h.ms + ' ms · ' + h.rows,
+      preview: h.q.trim(), full: h.q.trim(), stream: h.stream, ago: h.ago, meta: h.ms + ' ms · ' + h.rows,
       onPick: () => this.pickHistory(h)
     }));
 
     const runStyle = `display:flex;align-items:center;gap:7px;height:32px;padding:0 15px;border:none;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;background:${accent};color:#06181a;box-shadow:0 4px 14px -4px ${this.hexA(accent,0.6)}`;
 
     // histo toggle
-    const histoToggle = `width:30px;height:16px;border-radius:9px;border:none;cursor:pointer;position:relative;${st.showHisto ? 'background:'+accent : 'background:#1c2230'}`;
-    const histoKnob = `position:absolute;top:2px;${st.showHisto ? 'left:16px;background:#06181a' : 'left:2px;background:#5b6371'};width:12px;height:12px;border-radius:50%;transition:left .12s`;
+    const histoToggle = `width:30px;height:16px;border-radius:9px;border:none;cursor:pointer;position:relative;${st.showHisto ? 'background:'+accent : 'background:var(--sf-track)'}`;
+    const histoData = this.histoData();
+    const histoPeak = Math.max.apply(null, histoData.map(d => d.count)).toLocaleString();
+    const jm = st.jsonModal;
+    const jsonModalEl = jm ? React.createElement('pre', { style: { margin: 0, fontFamily: "'JetBrains Mono',monospace", fontSize: '12px', lineHeight: '20px', color: 'var(--tx-03)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }, dangerouslySetInnerHTML: { __html: this.jsonHtml(jm.obj) } }) : null;
+    const histoKnob = `position:absolute;top:2px;${st.showHisto ? 'left:16px;background:#06181a' : 'left:2px;background:var(--tx-10)'};width:12px;height:12px;border-radius:50%;transition:left .12s`;
 
     // guide
     const guideSections = this.GUIDE.map(([title, items]) => ({
@@ -1321,32 +1606,32 @@ class Component extends DCLogic {
     const ST = [['connection', 'Connection'], ['appearance', 'Appearance'], ['agent', 'Agent · MCP'], ['about', 'About']];
     const setTabs = ST.map(([id, label]) => ({
       label, onPick: () => this.setState({ setTab: id }),
-      style: `display:flex;align-items:center;width:100%;padding:9px 11px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:inherit;text-align:left;margin-bottom:2px;${st.setTab === id ? 'background:' + this.hexA(accent, 0.14) + ';color:' + accent + ';font-weight:600' : 'background:transparent;color:#99a2b2'}`
+      style: `display:flex;align-items:center;width:100%;padding:9px 11px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:inherit;text-align:left;margin-bottom:2px;${st.setTab === id ? 'background:' + this.hexA(accent, 0.14) + ';color:' + accent + ';font-weight:600' : 'background:transparent;color:var(--tx-06)'}`
     }));
     const authOpts = [['password', 'Email & Password'], ['token', 'API Token'], ['sso', 'SSO']];
     const authTabs = authOpts.map(([id, label]) => ({
       label, onPick: () => this.setConn('auth', id),
-      style: `flex:1;text-align:center;padding:7px 4px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;${conn.auth === id ? 'background:' + this.hexA(accent, 0.18) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`
+      style: `flex:1;text-align:center;padding:7px 4px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;${conn.auth === id ? 'background:' + this.hexA(accent, 0.18) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
     const testMap = { testing: 'Testing…', ok: '✓ Connected', fail: '✕ Failed', idle: 'Test connection' };
     const ACC = ['#2dd4bf', '#7c83ff', '#f5a86a', '#5b9dff', '#f4685f'];
     const accentSwatches = ACC.map(c => ({
       onPick: () => this.setState({ accentChoice: c }),
-      style: `width:32px;height:32px;border-radius:9px;cursor:pointer;background:${c};${accent === c ? 'box-shadow:0 0 0 2px #0a0c11,0 0 0 4px ' + c : ''}`
+      style: `width:32px;height:32px;border-radius:9px;cursor:pointer;background:${c};${accent === c ? 'box-shadow:0 0 0 2px var(--sf-main),0 0 0 4px ' + c : ''}`
     }));
     const densityOpts = [['ultra', 'Ultra-dense'], ['comfortable', 'Comfortable']];
     const densityTabs = densityOpts.map(([id, label]) => ({
       label, onPick: () => this.setState({ density: id }),
-      style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-family:inherit;${st.density === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`
+      style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-family:inherit;${st.density === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
-    const mcpToggleStyle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${st.mcpOn ? 'background:' + accent : 'background:#1c2230'}`;
-    const mcpKnobStyle = `position:absolute;top:2px;${st.mcpOn ? 'left:19px;background:#06181a' : 'left:2px;background:#5b6371'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
-    const ssToggleStyle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${conn.selfSigned ? 'background:' + accent : 'background:#1c2230'}`;
-    const ssKnobStyle = `position:absolute;top:2px;${conn.selfSigned ? 'left:19px;background:#06181a' : 'left:2px;background:#5b6371'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
+    const mcpToggleStyle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${st.mcpOn ? 'background:' + accent : 'background:var(--sf-track)'}`;
+    const mcpKnobStyle = `position:absolute;top:2px;${st.mcpOn ? 'left:19px;background:#06181a' : 'left:2px;background:var(--tx-10)'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
+    const ssToggleStyle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${conn.selfSigned ? 'background:' + accent : 'background:var(--sf-track)'}`;
+    const ssKnobStyle = `position:absolute;top:2px;${conn.selfSigned ? 'left:19px;background:#06181a' : 'left:2px;background:var(--tx-10)'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
     const AG = [['observe', 'Observe'], ['propose', 'Propose'], ['autorun', 'Autorun']];
     const agentTabs = AG.map(([id, label]) => ({
       label, onPick: () => this.setState({ agentMode: id }),
-      style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-weight:500;font-family:inherit;${st.agentMode === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:#8b93a3'}`
+      style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-weight:500;font-family:inherit;${st.agentMode === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
     const agentDesc = { observe: 'Agent can read your session, schema and results \u2014 but runs nothing. Pure analysis and suggestions.', propose: 'Agent stages rewritten queries into the editor; you review the diff and hit Run.', autorun: 'Agent runs queries itself within the guardrails below. Watch the activity stream and stop anytime.' }[st.agentMode];
 
@@ -1358,7 +1643,7 @@ class Component extends DCLogic {
         id: c.id, name: c.name, sub: c.url || 'no endpoint set', meta: c.org + ' \u00b7 ' + (authShort[c.auth] || c.auth),
         active, isActive: active, notActive: !active,
         dotStyle: `width:9px;height:9px;border-radius:50%;flex:none;background:${c.color};box-shadow:0 0 8px -1px ${c.color}`,
-        rowStyle: `display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;cursor:pointer;transition:border-color .12s;border:1px solid ${active ? this.hexA(c.color, 0.45) : 'rgba(255,255,255,.07)'};background:${active ? this.hexA(c.color, 0.08) : '#0c0e13'}`,
+        rowStyle: `display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;cursor:pointer;transition:border-color .12s;border:1px solid ${active ? this.hexA(c.color, 0.45) : 'rgba(var(--ink),.07)'};background:${active ? this.hexA(c.color, 0.08) : 'var(--sf-05)'}`,
         onUse: () => this.useContext(c.id),
         onRemove: (e) => this.removeContext(c.id, e)
       };
@@ -1369,11 +1654,29 @@ class Component extends DCLogic {
         id: c.id, name: c.name, sub: c.url || 'no endpoint', active, isActive: active,
         dotStyle: `width:8px;height:8px;border-radius:50%;flex:none;background:${c.color};box-shadow:0 0 6px -1px ${c.color}`,
         style: `display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;cursor:pointer;${active ? 'background:' + this.hexA(accent, 0.1) : ''}`,
-        wizStyle: `display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;border:1px solid ${active ? this.hexA(c.color, 0.5) : 'rgba(255,255,255,.07)'};background:${active ? this.hexA(c.color, 0.1) : 'rgba(255,255,255,.02)'}`,
+        wizStyle: `display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;border:1px solid ${active ? this.hexA(c.color, 0.5) : 'rgba(var(--ink),.07)'};background:${active ? this.hexA(c.color, 0.1) : 'rgba(var(--ink),.02)'}`,
         onPick: () => this.useContext(c.id)
       };
     });
     const curCtxDotStyle = `width:8px;height:8px;border-radius:50%;flex:none;background:${cur.color};box-shadow:0 0 7px -1px ${cur.color}`;
+
+    // theme switch (light / dark / system)
+    const eff = this.effTheme();
+    const themeIcons = {
+      light: 'M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4',
+      dark: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
+      system: 'M3 5h18v10H3zM8 19h8M12 15v4'
+    };
+    const themeSeg = ['light', 'dark', 'system'].map((k) => {
+      const active = st.themePref === k;
+      const label = k === 'system' ? 'System' : (k[0].toUpperCase() + k.slice(1));
+      return {
+        key: k, label, title: k === 'system' ? 'Sync with system' : label + ' theme',
+        path: themeIcons[k], hasDot: k === 'light',
+        onPick: () => this.setTheme(k),
+        segStyle: `flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 6px;border:1px solid ${active ? this.hexA(accent, 0.5) : 'rgba(var(--ink),.08)'};border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;${active ? 'background:' + this.hexA(accent, 0.1) + ';color:' + accent : 'background:var(--sf-02);color:var(--tx-06)'}`
+      };
+    });
 
     return {
       nav, tabItems, newTab: this.newTab,
@@ -1394,6 +1697,8 @@ class Component extends DCLogic {
       stream: st.stream, toggleStream: this.toggleStream, streamOpen: st.streamOpen, streams,
       fieldFilter: st.fieldFilter, onFieldFilter: this.onFieldFilter, fields, fieldCount: fieldsAll.length,
       showFields, showHisto, histogram: this.buildHistogram(accent),
+      histoPeak, histoSelActive: !!st.histoSel, histoSelLabel: st.histoSel ? st.histoSel.label : '', clearHistoSel: this.clearHistoSel,
+      jsonModalOpen: !!st.jsonModal, jsonModalField: st.jsonModal ? st.jsonModal.field : '', jsonModalEl, closeJsonModal: this.closeJsonModal, copyJsonModal: this.copyJsonModal,
       shownCount: this.logs.length, totalEvents: '402,170', queryMs: st.queryMs,
       logs,
       drawerOpen, drawerLevel: selected ? selected.level : '', drawerLevelStyle, drawerTime: selected ? selected.time : '', drawerJson, closeDrawer: this.closeDrawer,
@@ -1414,7 +1719,8 @@ class Component extends DCLogic {
       curCtxName: cur.name, curCtxDotStyle, ctxCount: st.contexts.length,
       ctxSwitchOpen: st.ctxSwitchOpen, toggleCtxSwitch: this.toggleCtxSwitch, closeCtxSwitch: this.closeCtxSwitch, ctxMenu,
       ctxRows, canRemoveCtx: st.contexts.length > 1, addContext: this.addContext, addContextFromMenu: this.addContextFromMenu,
-      openContextSettings: this.openContextSettings, onName: (e) => this.setConn('name', e.target.value)
+      openContextSettings: this.openContextSettings, onName: (e) => this.setConn('name', e.target.value),
+      themeSeg, themePref: st.themePref
     };
   }
 }
