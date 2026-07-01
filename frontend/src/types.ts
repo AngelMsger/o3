@@ -1,4 +1,5 @@
 export type Density = 'ultra' | 'comfortable';
+export type ThemePref = 'light' | 'dark' | 'system';
 export type SettingsTab = 'connection' | 'appearance' | 'agent' | 'about';
 export type TimeTab = 'relative' | 'absolute';
 export type QueryMode = 'sql' | 'search';

@@ -22,11 +22,12 @@ import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
 import { copyText } from './lib/clipboard';
-import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab } from './types';
+import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab, ThemePref } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
+import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
-  ListStreams, GetFields, RunQuery,
+  ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -83,6 +84,11 @@ function App() {
   const [tested, setTested] = useState(false);
   const [selfSigned, setSelfSigned] = useState(false);
   const [accent, setAccent] = useState<string>('#2dd4bf');
+  const [themePref, setThemePref] = useState<ThemePref>('dark');
+  const [systemDark, setSystemDark] = useState<boolean>(
+    typeof matchMedia !== 'undefined' ? matchMedia('(prefers-color-scheme: dark)').matches : true
+  );
+  const prefsLoaded = useRef(false);
   const [mcpOn, setMcpOn] = useState<boolean>(false);
   const [conn, setConn] = useState<{ url: string; org: string; email?: string; password?: string; token?: string }>({
     url: 'https://observe.example.internal',
@@ -173,6 +179,33 @@ function App() {
   /* ResultsTable state — task 10 */
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
   const [density, setDensity] = useState<Density>('ultra');
+
+  /* Theme prefs — Phase 4: load once, persist on change, follow OS appearance. */
+  useEffect(() => {
+    GetPrefs().then((p) => {
+      if (p.theme) setThemePref(p.theme as ThemePref);
+      if (p.accent) setAccent(p.accent);
+      if (p.density) setDensity(p.density as Density);
+      prefsLoaded.current = true;
+    }).catch(() => { prefsLoaded.current = true; });
+  }, []);
+
+  useEffect(() => {
+    if (!prefsLoaded.current) return;
+    SavePrefs({ theme: themePref, accent, density }).catch(() => {});
+  }, [themePref, accent, density]);
+
+  useEffect(() => {
+    applyThemeAttr(effectiveTheme(themePref, systemDark));
+  }, [themePref, systemDark]);
+
+  useEffect(() => {
+    if (typeof matchMedia === 'undefined') return;
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   /* DrawerInspector open/close animation: keep the drawer mounted through the
      close transition (delayed unmount), and flip `drawerVisible` on the next
