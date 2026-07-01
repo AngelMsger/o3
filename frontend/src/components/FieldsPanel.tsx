@@ -15,9 +15,9 @@ const TYPE_GLYPH: Record<string, string> = {
 
 const TYPE_COLOR: Record<string, string> = {
   datetime: '#b58bff',
-  string: '#a3e08c',
-  int: '#f6c177',
-  bool: '#5b9dff',
+  string: 'var(--sy-str)',
+  int: 'var(--sy-num)',
+  bool: 'var(--sy-bool)',
 };
 
 function glyphStyle(type: string): CSSProperties {
@@ -112,7 +112,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
           </svg>
           <span className={styles.streamName}>{stream}</span>
           {/* chevron down */}
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6b7282" strokeWidth="2.4">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx-09)" strokeWidth="2.4">
             <path d="M6 9l6 6 6-6" />
           </svg>
         </button>
@@ -142,7 +142,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
       {/* field search — design lines 271-278 */}
       <div className={styles.searchSection}>
         <div className={styles.searchBox}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4b5362" strokeWidth="2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx-12)" strokeWidth="2">
             <circle cx="11" cy="11" r="7" />
             <path d="M21 21l-4-4" />
           </svg>

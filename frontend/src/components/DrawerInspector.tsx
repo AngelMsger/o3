@@ -13,11 +13,11 @@ const LEVEL_COLOR: Record<string, string> = {
   trace: '#b58bff',
 };
 
-// kv kind → color — design line 927: { str: '#a3e08c', num: '#f6c177' }
+// kv kind → color — design line 927: { str: '#a3e08c', num: '#f6c177' } via --sy-* tokens
 // 'lvl' uses the row-level color (resolved at render time via LEVEL_COLOR)
 const KIND_COLOR: Record<'str' | 'num', string> = {
-  str: '#a3e08c',
-  num: '#f6c177',
+  str: 'var(--sy-str)',
+  num: 'var(--sy-num)',
 };
 
 interface DrawerInspectorProps {

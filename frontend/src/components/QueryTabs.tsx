@@ -35,7 +35,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: 
     /* design line 78 — saved-query tabs container */
     <div className={`${styles.strip} oo-scroll`}>
       {tabs.map((t): ReactElement => {
-        const color = STREAM_COLORS[t.stream] ?? '#5b6371';
+        const color = STREAM_COLORS[t.stream] ?? 'var(--tx-10)';
         const active = activeId === t.id;
         return (
           /* design line 80 — individual tab */

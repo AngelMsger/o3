@@ -96,7 +96,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             </svg>
             {timeRange}
             {/* chevron SVG — design line 111 */}
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6b7282" strokeWidth="2.4">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx-09)" strokeWidth="2.4">
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>

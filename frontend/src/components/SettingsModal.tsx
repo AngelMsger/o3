@@ -163,7 +163,7 @@ export function SettingsModal({
                         className={styles.ctxRow}
                         style={{
                           border: `1px solid ${c.isCurrent ? hexA(c.color, 0.45) : 'rgba(255,255,255,.07)'}`,
-                          background: c.isCurrent ? hexA(c.color, 0.08) : '#0c0e13',
+                          background: c.isCurrent ? hexA(c.color, 0.08) : 'var(--sf-05)',
                         }}
                         onClick={() => !c.isCurrent && onUse(c.name)}
                       >
@@ -216,7 +216,7 @@ export function SettingsModal({
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div className={styles.statusUrl}>{active.url || 'no endpoint set'}</div>
                           <div className={styles.statusMeta}>
-                            org <b style={{ color: '#99a2b2' }}>{active.org}</b>
+                            org <b style={{ color: 'var(--tx-06)' }}>{active.org}</b>
                           </div>
                         </div>
                         <button className={styles.testBtn} onClick={onTest}>Test connection</button>
@@ -368,7 +368,7 @@ export function SettingsModal({
                   {/* Row density — design line 474 */}
                   <div className={styles.formCard}>
                     <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 4 }}>Row density</div>
-                    <div style={{ fontSize: 11.5, color: '#6b7282', marginBottom: 12 }}>Ultra-dense fits the most rows on screen for power users.</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--tx-09)', marginBottom: 12 }}>Ultra-dense fits the most rows on screen for power users.</div>
                     <div className={styles.densitySeg}>
                       {DENSITY_OPTS.map(([id, label]) => (
                         <button
@@ -398,7 +398,7 @@ export function SettingsModal({
                     </button>
                   </div>
 
-                  <div className={styles.themeNote}>Theme · <b style={{ color: '#99a2b2' }}>Dark</b> — a light theme is on the roadmap.</div>
+                  <div className={styles.themeNote}>Theme · <b style={{ color: 'var(--tx-06)' }}>Dark</b> — a light theme is on the roadmap.</div>
                 </div>
               )}
 
@@ -446,11 +446,11 @@ export function SettingsModal({
                       <div className={styles.snippetCard}>
                         <div className={styles.snippetTitle}>Connect your agent</div>
                         <pre className={styles.snippetPre}>
-                          <span style={{ color: '#7dd3fc' }}>claude</span>{' mcp add openobserve \\\n  --transport sse http://127.0.0.1:7878/sse \\\n  --header '}
-                          <span style={{ color: '#a3e08c' }}>"Authorization: Bearer $OO_MCP_TOKEN"</span>
+                          <span style={{ color: 'var(--sy-fn)' }}>claude</span>{' mcp add openobserve \\\n  --transport sse http://127.0.0.1:7878/sse \\\n  --header '}
+                          <span style={{ color: 'var(--sy-str)' }}>"Authorization: Bearer $OO_MCP_TOKEN"</span>
                         </pre>
                         <div className={styles.snippetNote}>
-                          Exposes tools: <b style={{ color: '#99a2b2' }}>run_sql · get_schema · get_field_stats · summarize_results</b> + the live session as a resource.
+                          Exposes tools: <b style={{ color: 'var(--tx-06)' }}>run_sql · get_schema · get_field_stats · summarize_results</b> + the live session as a resource.
                         </div>
                       </div>
 
@@ -508,7 +508,7 @@ export function SettingsModal({
                     </span>
                     <div style={{ flex: 1 }}>
                       <div className={styles.brandName}>
-                        o3 <span style={{ fontSize: 11, color: '#6b7282', fontWeight: 400 }}>· OpenObserve desktop client</span>
+                        o3 <span style={{ fontSize: 11, color: 'var(--tx-09)', fontWeight: 400 }}>· OpenObserve desktop client</span>
                       </div>
                       <div className={styles.brandTagline} style={{ color: accent }}>SELECT signal FROM noise</div>
                       <div className={styles.brandVersion}>v0.1.0 · Wails v2 · macOS arm64</div>
