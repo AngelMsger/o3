@@ -6,7 +6,9 @@
   right: 0;
   top: 38px;
   width: 432px;
-  background: var(--sf-pop);
+  background: var(--glass-pop);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(var(--ink),0.12);
   border-radius: 11px;
   box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.85);
