@@ -199,6 +199,12 @@ function App() {
     applyThemeAttr(effectiveTheme(themePref, systemDark));
   }, [themePref, systemDark]);
 
+  // Sync the runtime accent CSS var on any accent change, including the value
+  // loaded from prefs on startup (not just manual picks in Settings).
+  useEffect(() => {
+    document.documentElement.style.setProperty('--accent', accent);
+  }, [accent]);
+
   useEffect(() => {
     if (typeof matchMedia === 'undefined') return;
     const mq = matchMedia('(prefers-color-scheme: dark)');
@@ -452,10 +458,8 @@ function App() {
     }
   };
 
-  const handlePickAccent = (c: string) => {
-    setAccent(c);
-    document.documentElement.style.setProperty('--accent', c);
-  };
+  // The [accent] effect above syncs the --accent CSS var; just update state.
+  const handlePickAccent = (c: string) => setAccent(c);
 
   const selectTab = (id: string) => {
     setActiveTab(id);
