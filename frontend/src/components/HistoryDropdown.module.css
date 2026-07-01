@@ -16,8 +16,8 @@
   max-height: 320px;
   display: flex;
   flex-direction: column;
-  background: #0f131a;
-  border: 1px solid rgba(255,255,255,.12);
+  background: var(--sf-pop);
+  border: 1px solid rgba(var(--ink),.12);
   border-radius: 11px;
   box-shadow: 0 24px 56px -12px rgba(0,0,0,.85);
   overflow: hidden;
@@ -32,21 +32,21 @@
   align-items: center;
   justify-content: space-between;
   padding: 9px 12px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
+  border-bottom: 1px solid rgba(var(--ink),.07);
 }
 
 .title {
   font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 700;
 }
 
 .count {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 /* scrollable list — design line 187 */
@@ -65,7 +65,7 @@
 }
 
 .row:hover {
-  background: #161b22;
+  background: var(--sf-hov2);
 }
 
 .rowTop {
@@ -78,7 +78,7 @@
 .preview {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  color: #cfd6e4;
+  color: var(--tx-03);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,7 +88,7 @@
 
 .ago {
   font-size: 10px;
-  color: #5b6371;
+  color: var(--tx-10);
   white-space: nowrap;
   flex: none;
 }
@@ -99,7 +99,7 @@
   gap: 8px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 .stream {
@@ -107,5 +107,5 @@
 }
 
 .dot {
-  /* inherits #4b5362 from rowMeta */
+  /* inherits var(--tx-12) from rowMeta */
 }

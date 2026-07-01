@@ -28,8 +28,8 @@
   max-width: 100%;
   height: 600px;
   max-height: 100%;
-  background: #0c0f15;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sf-modal);
+  border: 1px solid rgba(var(--ink),0.12);
   border-radius: 14px;
   box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
   display: flex;
@@ -55,13 +55,13 @@
   align-items: center;
   gap: 11px;
   padding: 15px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(var(--ink),0.07);
 }
 
 .headerTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #e6eaf2;
+  color: var(--tx-hi);
 }
 
 .headerSpacer {
@@ -72,9 +72,9 @@
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0e1116;
-  color: #99a2b2;
+  border: 1px solid rgba(var(--ink),0.1);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
   cursor: pointer;
 }
 
@@ -89,8 +89,8 @@
 .tabList {
   width: 180px;
   flex: none;
-  background: #090b0f;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-tabs);
+  border-right: 1px solid rgba(var(--ink),0.06);
   padding: 14px 10px;
   display: flex;
   flex-direction: column;
@@ -111,13 +111,13 @@
   text-align: left;
   margin-bottom: 2px;
   background: transparent;
-  color: #99a2b2;
+  color: var(--tx-06);
   transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .tab:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #dde3ee;
+  background: rgba(var(--ink),0.05);
+  color: var(--tx-01);
 }
 
 .tabActive {
@@ -146,13 +146,13 @@
 .panelTitle {
   font-size: 19px;
   font-weight: 600;
-  color: #e6eaf2;
+  color: var(--tx-hi);
   margin-bottom: 5px;
 }
 
 .panelSub {
   font-size: 13px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-bottom: 22px;
   line-height: 1.55;
 }
@@ -162,8 +162,8 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 12px;
   padding: 14px 18px;
   margin-bottom: 18px;
@@ -180,7 +180,7 @@
 
 .statusUrl {
   font-size: 13px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
@@ -189,7 +189,7 @@
 
 .statusMeta {
   font-size: 11px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-top: 3px;
 }
 
@@ -209,8 +209,8 @@
 
 /* Form card — design line 413 */
 .formCard {
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
@@ -220,7 +220,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -233,10 +233,10 @@
   width: 100%;
   height: 36px;
   padding: 0 12px;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.1);
   border-radius: 8px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-size: 13px;
   font-family: 'JetBrains Mono', monospace;
   outline: none;
@@ -251,8 +251,8 @@
 .authSeg {
   display: flex;
   gap: 3px;
-  background: #0b0d12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 3px;
   margin-bottom: 14px;
@@ -269,12 +269,12 @@
   font-weight: 500;
   font-family: inherit;
   background: transparent;
-  color: #8b93a3;
+  color: var(--tx-07);
   transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .authTab:hover {
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .authTabActive {
@@ -323,17 +323,17 @@
   gap: 11px;
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(var(--ink),0.05);
 }
 
 .toggleLabel {
   font-size: 12.5px;
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .toggleSub {
   font-size: 11px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-top: 1px;
 }
 
@@ -346,7 +346,7 @@
   cursor: pointer;
   position: relative;
   flex: none;
-  background: #1c2230;
+  background: var(--sf-track);
   transition: background var(--motion-fast) var(--motion-ease);
 }
 
@@ -361,7 +361,7 @@
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: #5b6371;
+  background: var(--tx-10);
   transition: left var(--motion-fast) var(--motion-ease);
 }
 
@@ -388,22 +388,22 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 700;
 }
 
 .ctxHeaderSub {
   font-size: 11px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 .ctxAddBtn {
   height: 28px;
   padding: 0 11px;
   border-radius: 7px;
-  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border: 1px dashed rgba(var(--ink),0.16);
   background: transparent;
-  color: #aeb6c4;
+  color: var(--tx-05);
   font-size: 12px;
   cursor: pointer;
   font-family: inherit;
@@ -412,7 +412,7 @@
 
 .ctxAddBtn:hover {
   border-color: var(--accent, #2dd4bf);
-  color: #e6eaf2;
+  color: var(--tx-hi);
 }
 
 .ctxList {
@@ -434,7 +434,7 @@
 
 .ctxRowName {
   font-size: 13px;
-  color: #e6eaf2;
+  color: var(--tx-hi);
   font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
@@ -457,9 +457,9 @@
   height: 28px;
   padding: 0 12px;
   border-radius: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0e1116;
-  color: #aeb6c4;
+  border: 1px solid rgba(var(--ink),0.12);
+  background: var(--sf-ctrl);
+  color: var(--tx-05);
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
@@ -469,8 +469,8 @@
 }
 
 .ctxUseBtn:hover {
-  color: #e6eaf2;
-  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--tx-hi);
+  border-color: rgba(var(--ink),0.25);
 }
 
 /* Delete "X" button — design lines 458-460 */
@@ -478,9 +478,9 @@
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--ink),0.08);
   background: transparent;
-  color: #5b6371;
+  color: var(--tx-10);
   font-size: 12px;
   cursor: pointer;
   flex: none;
@@ -488,7 +488,7 @@
 }
 
 .ctxRemoveBtn:hover {
-  color: #f4685f;
+  color: var(--sy-null);
   border-color: rgba(244, 104, 95, 0.4);
 }
 
@@ -497,7 +497,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 700;
   margin-bottom: 11px;
 }
@@ -508,7 +508,7 @@
   align-items: flex-start;
   gap: 9px;
   font-size: 11.5px;
-  color: #5b6371;
+  color: var(--tx-10);
   margin-bottom: 18px;
   line-height: 1.5;
 }
@@ -540,9 +540,9 @@
   height: 38px;
   padding: 0 16px;
   border-radius: 9px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--ink),0.12);
   background: transparent;
-  color: #aeb6c4;
+  color: var(--tx-05);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -564,15 +564,15 @@
 }
 
 .swatchActive {
-  box-shadow: 0 0 0 2px #0a0c11, 0 0 0 4px var(--swatch-color, #2dd4bf);
+  box-shadow: 0 0 0 2px var(--sf-main), 0 0 0 4px var(--swatch-color, var(--accent));
 }
 
 /* Density segmented — design line 477 */
 .densitySeg {
   display: flex;
   gap: 4px;
-  background: #0b0d12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 3px;
 }
@@ -587,12 +587,12 @@
   font-size: 12.5px;
   font-family: inherit;
   background: transparent;
-  color: #8b93a3;
+  color: var(--tx-07);
   transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .densityTab:hover {
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .densityTabActive {
@@ -605,27 +605,27 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 12px;
   padding: 16px 20px;
 }
 
 .histoCardLabel {
   font-size: 12.5px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-weight: 600;
 }
 
 .histoCardSub {
   font-size: 11.5px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-top: 2px;
 }
 
 .themeNote {
   font-size: 11.5px;
-  color: #4b5362;
+  color: var(--tx-12);
   margin-top: 14px;
 }
 
@@ -634,8 +634,8 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 16px;
@@ -643,13 +643,13 @@
 
 .mcpCardTitle {
   font-size: 13px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-weight: 600;
 }
 
 .mcpCardSub {
   font-size: 11.5px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-top: 2px;
 }
 
@@ -658,7 +658,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -672,8 +672,8 @@
 
 .codeChip {
   flex: 1;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.08);
   border-radius: 7px;
   padding: 8px 11px;
   font-family: 'JetBrains Mono', monospace;
@@ -681,7 +681,7 @@
 }
 
 .endpointUrl {
-  color: #a3e08c;
+  color: var(--sy-str);
 }
 
 .tokenMask {
@@ -692,9 +692,9 @@
   height: 34px;
   padding: 0 12px;
   border-radius: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0e1116;
-  color: #99a2b2;
+  border: 1px solid rgba(var(--ink),0.1);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
   font-size: 11.5px;
   cursor: pointer;
   font-family: 'JetBrains Mono', monospace;
@@ -702,8 +702,8 @@
 
 /* Connect agent snippet — design line 510 */
 .snippetCard {
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
@@ -711,20 +711,20 @@
 
 .snippetTitle {
   font-size: 12.5px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-weight: 600;
   margin-bottom: 10px;
 }
 
 .snippetPre {
   margin: 0;
-  background: #08090d;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-rail);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 12px 14px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11.5px;
-  color: #cfd6e4;
+  color: var(--tx-03);
   white-space: pre-wrap;
   word-break: break-all;
   line-height: 1.6;
@@ -732,14 +732,14 @@
 
 .snippetNote {
   font-size: 11px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-top: 9px;
 }
 
 /* Default leash card — design line 518 */
 .leashCard {
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
@@ -747,22 +747,22 @@
 
 .leashTitle {
   font-size: 12.5px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .leashDesc {
   font-size: 11.5px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-bottom: 12px;
 }
 
 .agentSeg {
   display: flex;
   gap: 4px;
-  background: #0b0d12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 3px;
 }
@@ -778,12 +778,12 @@
   font-weight: 500;
   font-family: inherit;
   background: transparent;
-  color: #8b93a3;
+  color: var(--tx-07);
   transition: background var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
 }
 
 .agentTab:hover {
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .agentTabActive {
@@ -799,28 +799,28 @@
 
 .statCard {
   flex: 1;
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 10px;
   padding: 14px 16px;
 }
 
 .statLabel {
   font-size: 11px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-bottom: 4px;
 }
 
 .statValue {
   font-size: 14px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-family: 'JetBrains Mono', monospace;
 }
 
 /* About brand card — design line 540 */
 .brandCard {
-  background: #0c0e13;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),0.06);
   border-radius: 12px;
   padding: 22px;
   display: flex;
@@ -843,7 +843,7 @@
 
 .brandName {
   font-size: 15px;
-  color: #e6eaf2;
+  color: var(--tx-hi);
   font-weight: 600;
 }
 
@@ -856,7 +856,7 @@
 
 .brandVersion {
   font-size: 12px;
-  color: #6b7282;
+  color: var(--tx-09);
   font-family: 'JetBrains Mono', monospace;
   margin-top: 4px;
 }
@@ -865,9 +865,9 @@
   height: 34px;
   padding: 0 14px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--ink),0.12);
   background: transparent;
-  color: #aeb6c4;
+  color: var(--tx-05);
   font-size: 12.5px;
   cursor: pointer;
   font-family: inherit;
@@ -877,7 +877,7 @@
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color: #5b6371;
+  color: var(--tx-10);
 }
 
 .aboutLink {

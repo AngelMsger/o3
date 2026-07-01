@@ -11,8 +11,8 @@
 .menu {
   position: fixed;
   width: 236px;
-  background: #0f131a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sf-pop);
+  border: 1px solid rgba(var(--ink),0.12);
   border-radius: 10px;
   box-shadow: 0 22px 54px -12px rgba(0, 0, 0, 0.85);
   z-index: 96;
@@ -34,8 +34,8 @@
 /* Header section — design line 638 */
 .header {
   padding: 8px 11px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: #0b0e13;
+  border-bottom: 1px solid rgba(var(--ink),0.07);
+  background: var(--sf-03);
 }
 
 /* Field label — design line 639 */
@@ -51,7 +51,7 @@
 .value {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  color: #dde3ee;
+  color: var(--tx-01);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -71,11 +71,11 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  color: #c3cad7;
+  color: var(--tx-04);
 }
 
 .item:hover {
-  background: #161b22;
+  background: var(--sf-hov2);
   color: #fff;
 }
 

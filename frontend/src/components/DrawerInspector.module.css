@@ -20,8 +20,8 @@
   width: 432px;
   height: 100%;
   flex: none;
-  background: #0b0e13;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--sf-03);
+  border-left: 1px solid rgba(var(--ink),0.08);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -43,14 +43,14 @@
   align-items: center;
   gap: 10px;
   padding: 11px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(var(--ink),0.06);
 }
 
 /* "Log record" label — design line 354 */
 .title {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-weight: 600;
 }
 
@@ -63,10 +63,10 @@
 .copyBtn {
   height: 24px;
   padding: 0 9px;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.1);
   border-radius: 6px;
-  color: #99a2b2;
+  color: var(--tx-06);
   font-size: 10.5px;
   cursor: pointer;
   font-family: 'JetBrains Mono', monospace;
@@ -77,9 +77,9 @@
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0e1116;
-  color: #99a2b2;
+  border: 1px solid rgba(var(--ink),0.1);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
   cursor: pointer;
 }
 
@@ -87,7 +87,7 @@
 .timestamp {
   flex: none;
   padding: 9px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--ink),0.05);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   color: #7c8696;
@@ -110,7 +110,7 @@
 
 /* Outer braces — design lines 362, 370 */
 .brace {
-  color: #5b6371;
+  color: var(--tx-10);
 }
 
 /* kv row — design line 364 */
@@ -123,7 +123,7 @@
 }
 
 .kvRow:hover {
-  background: #11141a;
+  background: var(--sf-hov);
 }
 
 /* kv key — design line 365 */
@@ -134,5 +134,5 @@
 
 /* kv colon — design line 366 */
 .kvColon {
-  color: #5b6371;
+  color: var(--tx-10);
 }

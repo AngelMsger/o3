@@ -9,8 +9,8 @@
   align-items: center;
   gap: 14px;
   padding: 7px 16px;
-  background: #090b0f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-tabs);
+  border-bottom: 1px solid rgba(var(--ink),0.06);
   font-size: 11px;
   white-space: nowrap;
 }
@@ -18,7 +18,7 @@
 /* "Showing 1–N of total events" — design line 308. It is the long item, so it
    absorbs the squeeze by ellipsizing rather than forcing the row to overflow. */
 .showing {
-  color: #99a2b2;
+  color: var(--tx-06);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -26,12 +26,12 @@
 
 /* Bold count numbers — design line 308 */
 .showingNum {
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 /* Separator dots — design lines 309, 311 */
 .sep {
-  color: #3a4150;
+  color: var(--tx-14);
 }
 
 /* Query ms — design line 310: var(--accent, #2dd4bf) */
@@ -43,7 +43,7 @@
 /* Scan size — design line 312 */
 .scan {
   font-family: 'JetBrains Mono', monospace;
-  color: #6b7282;
+  color: var(--tx-09);
 }
 
 /* Flex spacer — design line 313 */
@@ -54,7 +54,7 @@
 /* Timezone — design line 314 */
 .tz {
   font-family: 'JetBrains Mono', monospace;
-  color: #4b5362;
+  color: var(--tx-12);
   font-size: 10px;
 }
 
@@ -71,9 +71,9 @@
   width: 24px;
   height: 22px;
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0e1116;
-  color: #6b7282;
+  border: 1px solid rgba(var(--ink),0.08);
+  background: var(--sf-ctrl);
+  color: var(--tx-09);
   cursor: pointer;
   font-family: inherit;
 }
@@ -96,9 +96,9 @@
   width: 24px;
   height: 22px;
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0e1116;
-  color: #99a2b2;
+  border: 1px solid rgba(var(--ink),0.08);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
   cursor: pointer;
   font-family: inherit;
 }

@@ -348,7 +348,7 @@ export function SettingsModal({
 
                   {/* Accent swatches — design line 467 */}
                   <div className={styles.formCard}>
-                    <div style={{ fontSize: 12.5, color: '#dde3ee', fontWeight: 600, marginBottom: 12 }}>Accent</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 12 }}>Accent</div>
                     <div className={styles.swatchGrid}>
                       {ACCENT_SWATCHES.map((c) => (
                         <button
@@ -357,7 +357,7 @@ export function SettingsModal({
                           style={{
                             background: c,
                             // inline so the swatch color is data-driven
-                            ...(accent === c ? { boxShadow: `0 0 0 2px #0a0c11, 0 0 0 4px ${c}` } : {}),
+                            ...(accent === c ? { boxShadow: `0 0 0 2px var(--sf-main), 0 0 0 4px ${c}` } : {}),
                           }}
                           onClick={() => onPickAccent(c)}
                         />
@@ -367,7 +367,7 @@ export function SettingsModal({
 
                   {/* Row density — design line 474 */}
                   <div className={styles.formCard}>
-                    <div style={{ fontSize: 12.5, color: '#dde3ee', fontWeight: 600, marginBottom: 4 }}>Row density</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 4 }}>Row density</div>
                     <div style={{ fontSize: 11.5, color: '#6b7282', marginBottom: 12 }}>Ultra-dense fits the most rows on screen for power users.</div>
                     <div className={styles.densitySeg}>
                       {DENSITY_OPTS.map(([id, label]) => (

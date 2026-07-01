@@ -4,15 +4,15 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #0a0c11;
+  background: var(--sf-main);
 }
 
 /* Query header */
 .header {
   flex: none;
   padding: 11px 12px;
-  background: linear-gradient(#0c0e13, #0a0c11);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(var(--sf-05), var(--sf-main));
+  border-bottom: 1px solid rgba(var(--ink),0.06);
 }
 
 .titleRow {
@@ -26,20 +26,20 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .sub {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 /* Range segmented control */
 .rangeSeg {
   display: flex;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.08);
   border-radius: 7px;
   padding: 2px;
   gap: 2px;
@@ -48,7 +48,7 @@
 .rangePill {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: #5b6371;
+  color: var(--tx-10);
   padding: 4px 10px;
   cursor: pointer;
   border: none;
@@ -57,7 +57,7 @@
 }
 
 .rangePill:hover {
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 .runBtn {
@@ -80,8 +80,8 @@
 
 /* PromQL editor frame (the CodeMirror view lives inside) */
 .editorWrap {
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.1);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -92,20 +92,20 @@
   gap: 12px;
   margin-top: 6px;
   font-size: 10.5px;
-  color: #4b5362;
+  color: var(--tx-12);
   font-family: 'JetBrains Mono', monospace;
 }
 
 .hintKey {
-  color: #6b7282;
+  color: var(--tx-09);
 }
 
 .example code {
-  color: #7dd3fc;
+  color: var(--sy-fn);
 }
 
 .stepNote {
-  color: #5b6371;
+  color: var(--tx-10);
 }
 
 /* Chart area */
@@ -130,7 +130,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-size: 12px;
 }
 
@@ -138,7 +138,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(var(--ink),0.12);
   border-top-color: var(--accent, #2dd4bf);
   animation: ooSpin 0.7s linear infinite;
 }
@@ -155,8 +155,8 @@
   margin: 10px 12px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: color-mix(in srgb, #f4685f 12%, transparent);
-  border: 1px solid color-mix(in srgb, #f4685f 40%, transparent);
+  background: color-mix(in srgb, var(--sy-null) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sy-null) 40%, transparent);
   color: #f4a39c;
   font-size: 12px;
   align-self: flex-start;

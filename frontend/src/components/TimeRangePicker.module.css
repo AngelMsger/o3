@@ -6,8 +6,8 @@
   right: 0;
   top: 38px;
   width: 432px;
-  background: #0f131a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sf-pop);
+  border: 1px solid rgba(var(--ink),0.12);
   border-radius: 11px;
   box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.85);
   overflow: hidden;
@@ -20,7 +20,7 @@
 .quickCol {
   width: 168px;
   flex: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  border-right: 1px solid rgba(var(--ink),0.07);
   padding: 8px 7px;
   max-height: 320px;
   overflow-y: auto;
@@ -31,7 +31,7 @@
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #4b5362;
+  color: var(--tx-12);
   font-weight: 700;
   padding: 3px 8px 6px;
 }
@@ -39,7 +39,7 @@
 /* design line 1119 — quick range item (base) */
 .quickItem {
   font-size: 12px;
-  color: #aeb6c4;
+  color: var(--tx-05);
   padding: 6px 8px;
   border-radius: 6px;
   cursor: pointer;
@@ -47,8 +47,8 @@
 }
 
 .quickItem:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #dde3ee;
+  background: rgba(var(--ink),0.05);
+  color: var(--tx-01);
 }
 
 /* design line 121 — right pane */
@@ -62,21 +62,21 @@
 .tabBar {
   display: flex;
   gap: 3px;
-  background: #0b0d12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 3px;
   margin-bottom: 14px;
 }
 
-/* design lines 1123–1124 — tab button (base): inactive color #8b93a3 */
+/* design lines 1123–1124 — tab button (base): inactive color var(--tx-07) */
 .tabBtn {
   flex: 1;
   height: 28px;
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #8b93a3;
+  color: var(--tx-07);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -85,7 +85,7 @@
 }
 
 .tabBtn:hover {
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 /* design lines 1123–1124 — active tab: teal-tinted (hexA(accent,0.16) + accent) */
@@ -104,7 +104,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -127,10 +127,10 @@
   width: 64px;
   height: 36px;
   padding: 0 10px;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.12);
   border-radius: 8px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-size: 15px;
   font-family: 'JetBrains Mono', monospace;
   outline: none;
@@ -148,19 +148,19 @@
   flex: 1;
   display: flex;
   gap: 2px;
-  background: #0b0d12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 3px;
 }
 
-/* design line 1128–1129 — unit button (base): font-size 11.5px, padding 6px 4px, inactive #8b93a3 */
+/* design line 1128–1129 — unit button (base): font-size 11.5px, padding 6px 4px, inactive var(--tx-07) */
 .unitBtn {
   flex: 1;
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: #8b93a3;
+  color: var(--tx-07);
   font-size: 11.5px;
   padding: 6px 4px;
   font-weight: 500;
@@ -171,7 +171,7 @@
 }
 
 .unitBtn:hover {
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 /* design line 1129 — active unit button: hexA(accent,0.18) + accent */
@@ -190,10 +190,10 @@
   width: 100%;
   height: 34px;
   padding: 0 10px;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.12);
   border-radius: 8px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-size: 12.5px;
   font-family: 'JetBrains Mono', monospace;
   outline: none;
@@ -214,7 +214,7 @@
 /* design line 144 — format/timezone hint */
 .absHint {
   font-size: 10px;
-  color: #4b5362;
+  color: var(--tx-12);
   margin-bottom: 12px;
   font-family: 'JetBrains Mono', monospace;
 }

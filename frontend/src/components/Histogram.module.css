@@ -4,7 +4,7 @@
 .histogram {
   flex: none;
   padding: 12px 16px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--ink),0.05);
 }
 
 /* Header row — design line 295 */
@@ -25,7 +25,7 @@
 /* "Event volume" label — design line 297 */
 .labelTitle {
   font-size: 11px;
-  color: #99a2b2;
+  color: var(--tx-06);
   font-weight: 600;
 }
 
@@ -33,19 +33,19 @@
 .labelBuckets {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 /* "peak 7,323" right — design line 300 */
 .labelPeak {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 /* Bold peak number — design line 300 */
 .peakNum {
-  color: #99a2b2;
+  color: var(--tx-06);
 }
 
 /* ECharts canvas — replaces the hand-drawn bars + axis. Height covers the 92px

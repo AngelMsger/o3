@@ -6,7 +6,7 @@
   inset: 0;
   z-index: 100;
   display: flex;
-  background: #070809;
+  background: var(--sf-void);
   transition: opacity var(--motion-slow) var(--motion-ease);
 }
 
@@ -31,8 +31,8 @@
   width: 38%;
   max-width: 400px;
   flex: none;
-  background: linear-gradient(165deg, #0e2320 0%, #08120f 45%, #070809 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(165deg, var(--sf-atint) 0%, var(--sf-atint2) 45%, var(--sf-void) 100%);
+  border-right: 1px solid rgba(var(--ink),0.06);
   padding: 30px 34px;
   display: flex;
   flex-direction: column;
@@ -56,7 +56,7 @@
 .welcomeTitle {
   font-size: 26px;
   font-weight: 700;
-  color: #f0f3f8;
+  color: var(--tx-max);
   line-height: 1.2;
   margin-bottom: 8px;
 }
@@ -70,7 +70,7 @@
 
 .welcomeDesc {
   font-size: 13px;
-  color: #8b9a96;
+  color: var(--gg-3);
   line-height: 1.6;
   margin-bottom: 30px;
 }
@@ -106,19 +106,19 @@
 }
 
 .stepNumInactive {
-  background: #14181f;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #6b7282;
+  background: var(--sf-07);
+  border: 1px solid rgba(var(--ink),0.1);
+  color: var(--tx-09);
 }
 
 .stepLabelActive {
   font-size: 13px;
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .stepLabelInactive {
   font-size: 13px;
-  color: #6b7282;
+  color: var(--tx-09);
 }
 
 /* ===== "Your contexts" list in the left panel — design lines 644-656 ===== */
@@ -131,7 +131,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6b67;
+  color: var(--gg-4);
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -164,7 +164,7 @@
   flex: 1;
   min-width: 0;
   font-size: 12px;
-  color: #cfe3de;
+  color: var(--gg-1);
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
@@ -181,9 +181,9 @@
   margin-top: 4px;
   height: 32px;
   border-radius: 8px;
-  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border: 1px dashed rgba(var(--ink),0.16);
   background: transparent;
-  color: #9fb4ae;
+  color: var(--gg-2);
   font-size: 12px;
   cursor: pointer;
   font-family: inherit;
@@ -192,7 +192,7 @@
 
 .ctxAddBtn:hover {
   border-color: var(--accent, #2dd4bf);
-  color: #e6eaf2;
+  color: var(--tx-hi);
 }
 
 /* Spacer */
@@ -203,7 +203,7 @@
 /* Footer */
 .leftFooter {
   font-size: 11px;
-  color: #4b5b57;
+  color: var(--gg-5);
 }
 
 /* ===== Right pane ===== */
@@ -226,13 +226,13 @@
 .rightTitle {
   font-size: 20px;
   font-weight: 600;
-  color: #e6eaf2;
+  color: var(--tx-hi);
   margin-bottom: 6px;
 }
 
 .rightSub {
   font-size: 13px;
-  color: #6b7282;
+  color: var(--tx-09);
   margin-bottom: 24px;
 }
 
@@ -245,7 +245,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #5b6371;
+  color: var(--tx-10);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -254,10 +254,10 @@
   width: 100%;
   height: 38px;
   padding: 0 12px;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.1);
   border-radius: 8px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-size: 13px;
   font-family: 'JetBrains Mono', monospace;
   outline: none;
@@ -272,8 +272,8 @@
 .authSeg {
   display: flex;
   gap: 3px;
-  background: #0b0d12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 8px;
   padding: 3px;
 }
@@ -284,7 +284,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #6b7282;
+  color: var(--tx-09);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -292,7 +292,7 @@
 }
 
 .authTab:hover {
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 .authTabActive {
@@ -347,7 +347,7 @@
 
 .toggleLabel {
   font-size: 12.5px;
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 .toggle {
@@ -355,7 +355,7 @@
   height: 20px;
   border-radius: 10px;
   background: #1e2530;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--ink),0.12);
   cursor: pointer;
   position: relative;
   flex: none;
@@ -413,7 +413,7 @@
 
 .testError {
   font-size: 12px;
-  color: #f4685f;
+  color: var(--sy-null);
   margin-bottom: 10px;
 }
 
@@ -445,9 +445,9 @@
   height: 42px;
   padding: 0 18px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--ink),0.12);
   background: transparent;
-  color: #8b93a3;
+  color: var(--tx-07);
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
@@ -455,8 +455,8 @@
 }
 
 .btnSkip:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #aeb6c4;
+  border-color: rgba(var(--ink),0.22);
+  color: var(--tx-05);
 }
 
 /* Keychain note */
@@ -466,7 +466,7 @@
   gap: 8px;
   margin-top: 18px;
   font-size: 11px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 .keychainIcon {

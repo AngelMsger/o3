@@ -46,8 +46,8 @@
   width: 100%;
   height: 100%;
   flex: none;
-  background: #090b0f;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-tabs);
+  border-right: 1px solid rgba(var(--ink),0.06);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -57,7 +57,7 @@
 .streamSection {
   flex: none;
   padding: 9px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--ink),0.05);
   position: relative;
 }
 
@@ -72,7 +72,7 @@
   font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.9px;
-  color: #4b5362;
+  color: var(--tx-12);
   font-weight: 600;
 }
 
@@ -80,9 +80,9 @@
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0e1116;
-  color: #6b7282;
+  border: 1px solid rgba(var(--ink),0.08);
+  background: var(--sf-ctrl);
+  color: var(--tx-09);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -93,8 +93,8 @@
 }
 
 .collapseBtn:hover {
-  color: #dde3ee;
-  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--tx-01);
+  border-color: rgba(var(--ink),0.2);
 }
 
 .streamBtn {
@@ -104,17 +104,17 @@
   gap: 8px;
   height: 32px;
   padding: 0 9px;
-  background: #0e1116;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sf-ctrl);
+  border: 1px solid rgba(var(--ink),0.1);
   border-radius: 8px;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-family: 'JetBrains Mono', monospace;
   font-size: 12.5px;
   cursor: pointer;
 }
 
 .streamBtn:hover {
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(var(--ink),0.22);
 }
 
 .streamName {
@@ -129,8 +129,8 @@
   left: 10px;
   right: 10px;
   top: 70px;
-  background: #0f131a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sf-pop);
+  border: 1px solid rgba(var(--ink),0.12);
   border-radius: 9px;
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.85);
   /* cap the height so a long stream list scrolls instead of running off-screen;
@@ -150,12 +150,12 @@
   gap: 8px;
   border-radius: 7px;
   cursor: pointer;
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 .dropdownItem:hover {
   background: #161b23;
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .dropdownItemActive {
@@ -171,7 +171,7 @@
 .dropdownItemSize {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9.5px;
-  color: #4b5362;
+  color: var(--tx-12);
 }
 
 /* Field search section — design lines 271-278 */
@@ -186,8 +186,8 @@
   gap: 7px;
   height: 30px;
   padding: 0 9px;
-  background: #0c0e12;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--sf-04);
+  border: 1px solid rgba(var(--ink),0.07);
   border-radius: 7px;
 }
 
@@ -197,14 +197,14 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #dde3ee;
+  color: var(--tx-01);
   font-size: 12px;
   font-family: 'JetBrains Mono', monospace;
 }
 
 .searchCount {
   font-size: 10px;
-  color: #4b5362;
+  color: var(--tx-12);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -226,7 +226,7 @@
 }
 
 .fieldRow:hover {
-  background: #11141a;
+  background: var(--sf-hov);
 }
 
 .fieldName {
@@ -234,7 +234,7 @@
   min-width: 0;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11.5px;
-  color: #c3cad7;
+  color: var(--tx-04);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -242,7 +242,7 @@
 
 .fieldType {
   font-size: 9px;
-  color: #4b5362;
+  color: var(--tx-12);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -251,8 +251,8 @@
   width: 100%;
   height: 100%;
   flex: none;
-  background: #090b0f;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-tabs);
+  border-right: 1px solid rgba(var(--ink),0.06);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -264,9 +264,9 @@
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0e1116;
-  color: #99a2b2;
+  border: 1px solid rgba(var(--ink),0.08);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
   cursor: pointer;
   line-height: 1;
   display: flex;
@@ -277,7 +277,7 @@
 }
 
 .stripBtn:hover {
-  color: #dde3ee;
+  color: var(--tx-01);
 }
 
 .stripLabel {
@@ -285,6 +285,6 @@
   font-size: 9.5px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #4b5362;
+  color: var(--tx-12);
   font-family: 'JetBrains Mono', monospace;
 }

@@ -8,8 +8,8 @@
   align-items: stretch;
   gap: 1px;
   padding: 0 10px;
-  background: #090b0f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--sf-tabs);
+  border-bottom: 1px solid rgba(var(--ink),0.06);
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -32,18 +32,18 @@
 }
 
 .tab:hover {
-  color: #aeb6c4;
+  color: var(--tx-05);
 }
 
 /* active state — computed tabStyle line 1084 */
 .active {
   border-bottom-color: var(--accent, #2dd4bf);
-  color: #e6eaf2;
-  background: #0c0e13;
+  color: var(--tx-hi);
+  background: var(--sf-05);
 }
 
 .active:hover {
-  color: #e6eaf2;
+  color: var(--tx-hi);
 }
 
 /* design line 81 — stream dot base (computed dotStyle line 1083) */
@@ -68,7 +68,7 @@
   white-space: nowrap;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(var(--ink),0.25);
   padding: 0;
   margin: 0;
   width: 7em;
@@ -90,7 +90,7 @@
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: #5b6371;
+  color: var(--tx-10);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
@@ -107,8 +107,8 @@
 }
 
 .close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e6eaf2;
+  background: rgba(var(--ink),0.1);
+  color: var(--tx-hi);
 }
 
 /* design line 90 — new tab button */
@@ -118,9 +118,9 @@
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border: 1px dashed rgba(var(--ink),0.14);
   background: transparent;
-  color: #5b6371;
+  color: var(--tx-10);
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
@@ -130,6 +130,6 @@
 
 /* style-hover from design line 90 */
 .newBtn:hover {
-  color: #d7dce6;
-  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--tx-02);
+  border-color: rgba(var(--ink),0.3);
 }
