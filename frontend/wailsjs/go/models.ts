@@ -1,3 +1,24 @@
+export namespace config {
+	
+	export class Prefs {
+	    theme: string;
+	    accent: string;
+	    density: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Prefs(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.theme = source["theme"];
+	        this.accent = source["accent"];
+	        this.density = source["density"];
+	    }
+	}
+
+}
+
 export namespace main {
 	
 	export class ConnConfig {

@@ -6,6 +6,10 @@ export function GetFields(arg1) {
   return window['go']['main']['App']['GetFields'](arg1);
 }
 
+export function GetPrefs() {
+  return window['go']['main']['App']['GetPrefs']();
+}
+
 export function ListContexts() {
   return window['go']['main']['App']['ListContexts']();
 }
@@ -28,6 +32,10 @@ export function RunQuery(arg1) {
 
 export function SaveContext(arg1) {
   return window['go']['main']['App']['SaveContext'](arg1);
+}
+
+export function SavePrefs(arg1) {
+  return window['go']['main']['App']['SavePrefs'](arg1);
 }
 
 export function SwitchContext(arg1) {

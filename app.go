@@ -466,6 +466,13 @@ func (a *App) RunMetricsQuery(p metrics.Params) (metrics.Result, error) {
 	return metrics.Result{Series: series, Step: step}, nil
 }
 
+// GetPrefs returns the persisted UI preferences (theme/accent/density),
+// falling back to defaults when no prefs file exists yet.
+func (a *App) GetPrefs() (config.Prefs, error) { return config.LoadPrefs() }
+
+// SavePrefs persists the UI preferences.
+func (a *App) SavePrefs(p config.Prefs) error { return config.SavePrefs(p) }
+
 // humanBytes formats a byte count as a short human string (e.g. "1.2 MB").
 func humanBytes(b float64) string {
 	const unit = 1024.0
