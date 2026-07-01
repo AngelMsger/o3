@@ -452,8 +452,6 @@ export function SettingsModal({
                       <span className={`${styles.knob}${showHistogram ? ` ${styles.knobOn}` : ''}`} />
                     </button>
                   </div>
-
-                  <div className={styles.themeNote}>Theme · <b style={{ color: 'var(--tx-06)' }}>Dark</b> — a light theme is on the roadmap.</div>
                 </div>
               )}
 

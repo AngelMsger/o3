@@ -623,12 +623,6 @@
   margin-top: 2px;
 }
 
-.themeNote {
-  font-size: 11.5px;
-  color: var(--tx-12);
-  margin-top: 14px;
-}
-
 /* MCP: expose card — design line 496 */
 .mcpCard {
   display: flex;
