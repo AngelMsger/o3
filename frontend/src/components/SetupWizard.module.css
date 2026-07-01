@@ -354,7 +354,7 @@
   width: 36px;
   height: 20px;
   border-radius: 10px;
-  background: #1e2530;
+  background: var(--sf-track);
   border: 1px solid rgba(var(--ink),0.12);
   cursor: pointer;
   position: relative;
@@ -375,7 +375,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--tx-10);
   transition: transform var(--motion-fast) var(--motion-ease);
 }
 

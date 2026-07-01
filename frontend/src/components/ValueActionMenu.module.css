@@ -76,7 +76,7 @@
 
 .item:hover {
   background: var(--sf-hov2);
-  color: #fff;
+  color: var(--tx-max);
 }
 
 /* Icon — design line 645 */
