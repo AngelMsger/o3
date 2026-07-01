@@ -31,7 +31,7 @@ function parseAppError(e: unknown): string {
   return raw;
 }
 
-export function MetricsView({ accent }: { accent: string }): ReactElement {
+export function MetricsView({ accent, isDark }: { accent: string; isDark: boolean }): ReactElement {
   const editorRef = useRef<SqlEditorHandle>(null);
   const [promql, setPromql] = useState('');
   const [rangeMs, setRangeMs] = useState(RANGES[2].ms);
@@ -88,7 +88,7 @@ export function MetricsView({ accent }: { accent: string }): ReactElement {
         </div>
 
         <div className={styles.editorWrap}>
-          <SqlEditor ref={editorRef} value={promql} mode="search" fields={[]} accent={accent} onChange={setPromql} onRun={run} />
+          <SqlEditor ref={editorRef} value={promql} mode="search" fields={[]} accent={accent} isDark={isDark} onChange={setPromql} onRun={run} />
         </div>
 
         <div className={styles.hintRow}>

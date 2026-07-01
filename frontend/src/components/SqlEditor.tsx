@@ -23,6 +23,8 @@ export interface SqlEditorProps {
   mode: QueryMode;
   fields: Field[];
   accent: string;
+  /** effective theme is dark — drives CodeMirror's dark flag */
+  isDark: boolean;
   onChange: (v: string) => void;
   onRun: () => void;
 }
@@ -31,7 +33,7 @@ export interface SqlEditorProps {
 // (synced via a transaction, guarded against echo) and reconfigures language +
 // theme through Compartments rather than rebuilding the view.
 export const SqlEditor = forwardRef<SqlEditorHandle, SqlEditorProps>(function SqlEditor(
-  { value, mode, fields, accent, onChange, onRun },
+  { value, mode, fields, accent, isDark, onChange, onRun },
   ref,
 ) {
   const elRef = useRef<HTMLDivElement | null>(null);
@@ -84,7 +86,7 @@ export const SqlEditor = forwardRef<SqlEditorHandle, SqlEditorProps>(function Sq
         EditorView.lineWrapping,
         syntaxHighlighting(sqlHighlight),
         langConf.current.of(languageExt(mode)),
-        themeConf.current.of(makeEditorTheme(accent)),
+        themeConf.current.of(makeEditorTheme(accent, isDark)),
         keymap.of([
           { key: 'Mod-Enter', preventDefault: true, run: () => { onRunRef.current(); return true; } },
           ...completionKeymap, // Tab/Enter accept, arrows navigate, Esc close
@@ -119,10 +121,10 @@ export const SqlEditor = forwardRef<SqlEditorHandle, SqlEditorProps>(function Sq
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  // Re-theme (caret + selection) when the accent changes.
+  // Re-theme (caret + selection + dark flag) when the accent or theme changes.
   useEffect(() => {
-    viewRef.current?.dispatch({ effects: themeConf.current.reconfigure(makeEditorTheme(accent)) });
-  }, [accent]);
+    viewRef.current?.dispatch({ effects: themeConf.current.reconfigure(makeEditorTheme(accent, isDark)) });
+  }, [accent, isDark]);
 
   useImperativeHandle(ref, () => ({
     focus() { viewRef.current?.focus(); },

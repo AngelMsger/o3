@@ -525,7 +525,7 @@ function App() {
               workspace; other sections render their scaffold placeholder. */}
           <div className={styles.main}>
             {activeNav === 'Metrics' ? (
-              <MetricsView accent={accent} />
+              <MetricsView accent={accent} isDark={effectiveTheme(themePref, systemDark) === 'dark'} />
             ) : activeNav !== 'Logs' ? (
               <PlaceholderView title={activeNav} />
             ) : (
@@ -546,6 +546,7 @@ function App() {
               queryMode={mode}
               fields={configured ? liveFields : FIELDS}
               accent={accent}
+              isDark={effectiveTheme(themePref, systemDark) === 'dark'}
               showHistogram={showHistogram}
               running={running}
               timeRange={timeRange}

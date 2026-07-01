@@ -10,6 +10,7 @@ export interface QueryEditorProps {
   queryMode: QueryMode;
   fields: Field[];
   accent: string;
+  isDark: boolean;
   showHistogram: boolean;
   running: boolean;
   timeRange: string;
@@ -31,6 +32,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
     queryMode,
     fields,
     accent,
+    isDark,
     showHistogram,
     running,
     timeRange,
@@ -130,6 +132,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             mode={queryMode}
             fields={fields}
             accent={accent}
+            isDark={isDark}
             onChange={onQueryChange}
             onRun={onRun}
           />
