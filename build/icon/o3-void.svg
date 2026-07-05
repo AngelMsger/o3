@@ -1,0 +1,53 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- o3 app icon — "Void" variant (dark theme). Source of truth: design/Icon.dc.html (#o3-void).
+       Log-lines mark: one bright teal "signal" row lifted out of dim "noise". -->
+  <defs>
+    <!-- squircle body: radial-gradient(120% 120% at 30% 8%, #123039, #0a1a20 42%, #06121a) -->
+    <radialGradient id="body" gradientUnits="userSpaceOnUse" cx="307" cy="82" r="1229" fx="307" fy="82">
+      <stop offset="0" stop-color="#123039"/>
+      <stop offset="0.42" stop-color="#0a1a20"/>
+      <stop offset="1" stop-color="#06121a"/>
+    </radialGradient>
+    <!-- ambient signal glow behind the mark -->
+    <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="512" cy="553" r="411">
+      <stop offset="0" stop-color="#2dd4bf" stop-opacity="0.22"/>
+      <stop offset="0.62" stop-color="#2dd4bf" stop-opacity="0"/>
+    </radialGradient>
+    <!-- tighter glow right on the signal row -->
+    <radialGradient id="signalGlow" gradientUnits="userSpaceOnUse" cx="512" cy="591" r="300">
+      <stop offset="0" stop-color="#5df0dd" stop-opacity="0.30"/>
+      <stop offset="0.7" stop-color="#5df0dd" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="squircle">
+      <rect x="0" y="0" width="1024" height="1024" rx="229" ry="229"/>
+    </clipPath>
+  </defs>
+
+  <!-- body -->
+  <rect x="0" y="0" width="1024" height="1024" rx="229" ry="229" fill="#06121a"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="229" ry="229" fill="url(#body)"/>
+
+  <!-- glows (clipped to the squircle) -->
+  <g clip-path="url(#squircle)">
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#glow)"/>
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#signalGlow)"/>
+  </g>
+
+  <!-- top inner highlight + teal inset ring -->
+  <rect x="3" y="3" width="1018" height="1018" rx="227" ry="227" fill="none" stroke="#2dd4bf" stroke-opacity="0.18" stroke-width="5"/>
+
+  <!-- ===== mark (220-space scaled to 1024) ===== -->
+  <g transform="scale(4.654545)">
+    <!-- noise rows -->
+    <circle cx="42" cy="59"  r="8" fill="#7acec4" fill-opacity="0.42"/>
+    <rect x="58" y="51"  width="74"  height="16" rx="8" fill="#7acec4" fill-opacity="0.24"/>
+    <circle cx="42" cy="93"  r="8" fill="#7acec4" fill-opacity="0.42"/>
+    <rect x="58" y="85"  width="100" height="16" rx="8" fill="#7acec4" fill-opacity="0.24"/>
+    <circle cx="42" cy="161" r="8" fill="#7acec4" fill-opacity="0.42"/>
+    <rect x="58" y="153" width="62"  height="16" rx="8" fill="#7acec4" fill-opacity="0.24"/>
+    <!-- signal row -->
+    <circle cx="42"  cy="127" r="8" fill="#5df0dd"/>
+    <rect x="58"  y="119" width="104" height="16" rx="8" fill="#5df0dd"/>
+    <circle cx="178" cy="127" r="8" fill="#5df0dd"/>
+  </g>
+</svg>

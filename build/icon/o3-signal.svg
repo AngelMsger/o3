@@ -1,0 +1,41 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- o3 app icon — "Signal" variant (light theme). Source of truth: design/Icon.dc.html (#o3-signal).
+       Solid teal squircle, dark-ink signal row. Preserved for a future appearance swap;
+       the shipped app icon is o3-void.svg. -->
+  <defs>
+    <!-- squircle body: linear-gradient(165deg, #39e6d0, #2dd4bf 46%, #18b7a4) -->
+    <linearGradient id="body" gradientUnits="userSpaceOnUse" x1="379" y1="17" x2="645" y2="1007">
+      <stop offset="0" stop-color="#39e6d0"/>
+      <stop offset="0.46" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#18b7a4"/>
+    </linearGradient>
+    <!-- top inner highlight: linear-gradient(180deg, rgba(255,255,255,.26), transparent 42%) -->
+    <linearGradient id="hi" gradientUnits="userSpaceOnUse" x1="512" y1="0" x2="512" y2="1024">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.26"/>
+      <stop offset="0.42" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="squircle">
+      <rect x="0" y="0" width="1024" height="1024" rx="229" ry="229"/>
+    </clipPath>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="229" ry="229" fill="url(#body)"/>
+  <g clip-path="url(#squircle)">
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#hi)"/>
+  </g>
+
+  <!-- ===== mark (220-space scaled to 1024) ===== -->
+  <g transform="scale(4.654545)">
+    <!-- noise rows -->
+    <circle cx="42" cy="59"  r="8" fill="#06181a" fill-opacity="0.55"/>
+    <rect x="58" y="51"  width="74"  height="16" rx="8" fill="#06181a" fill-opacity="0.34"/>
+    <circle cx="42" cy="93"  r="8" fill="#06181a" fill-opacity="0.55"/>
+    <rect x="58" y="85"  width="100" height="16" rx="8" fill="#06181a" fill-opacity="0.34"/>
+    <circle cx="42" cy="161" r="8" fill="#06181a" fill-opacity="0.55"/>
+    <rect x="58" y="153" width="62"  height="16" rx="8" fill="#06181a" fill-opacity="0.34"/>
+    <!-- signal row -->
+    <circle cx="42"  cy="127" r="8" fill="#06181a"/>
+    <rect x="58"  y="119" width="104" height="16" rx="8" fill="#06181a"/>
+    <circle cx="178" cy="127" r="8" fill="#06181a"/>
+  </g>
+</svg>
