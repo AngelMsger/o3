@@ -10,6 +10,18 @@
   transition: opacity var(--motion-slow) var(--motion-ease);
 }
 
+/* Top drag strip so the frameless window can still be moved while this
+   full-screen overlay covers the TitleBar. Left inset clears the native
+   traffic-light buttons. */
+.dragStrip {
+  position: absolute;
+  top: 0;
+  left: 78px;
+  right: 0;
+  height: 30px;
+  z-index: 10;
+}
+
 .shown {
   opacity: 1;
 }

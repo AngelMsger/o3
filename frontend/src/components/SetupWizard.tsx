@@ -67,6 +67,11 @@ export function SetupWizard({
 
   return (
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
+      {/* Draggable strip — the overlay covers the TitleBar's drag region, so
+          this restores window dragging from the top edge (native traffic-light
+          buttons float above it and stay clickable). */}
+      <div className={`${styles.dragStrip} oo-drag`} />
+
       {/* ===== Left brand panel — design line 563 ===== */}
       <div className={styles.left}>
         {/* Logo icon — design line 569 */}

@@ -91,6 +91,8 @@ export function BrowserSignIn({
 
   return (
     <div className={styles.overlay}>
+      {/* Keep the frameless window draggable while this overlay covers the TitleBar. */}
+      <div className={`${styles.dragStrip} oo-drag`} />
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         {/* Titlebar */}
         <div className={styles.titlebar}>

@@ -17,7 +17,7 @@
 @property (nonatomic)         BOOL done;
 @end
 
-static O3WebAuth *gAuth = nil; // strong global: keeps the one live capture alive
+static O3WebAuth *gAuth = nil; // strong global: the one live capture
 
 @implementation O3WebAuth
 
@@ -28,6 +28,7 @@ static O3WebAuth *gAuth = nil; // strong global: keeps the one live capture aliv
     NSString *authz = self.authorization ?: @"";
     NSString *email = self.email ?: @"";
     [store getAllCookies:^(NSArray<NSHTTPCookie *> *cookies) {
+        if (self.done) return; // window was superseded/closed while fetching
         NSMutableArray *arr = [NSMutableArray array];
         for (NSHTTPCookie *c in cookies) {
             NSTimeInterval exp = c.expiresDate ? [c.expiresDate timeIntervalSince1970] : 0;
@@ -57,6 +58,7 @@ static O3WebAuth *gAuth = nil; // strong global: keeps the one live capture aliv
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    NSLog(@"[webauth] didFinishNavigation url=%@", webView.URL.absoluteString);
     [self probe];
 }
 
@@ -75,13 +77,14 @@ static O3WebAuth *gAuth = nil; // strong global: keeps the one live capture aliv
     self.done = YES;
     [self.timer invalidate];
     self.timer = nil;
-    // Break the userContentController -> handler retain cycle so the webview and
-    // this object can be released after the window goes away.
     [self.webView.configuration.userContentController removeScriptMessageHandlerForName:@"o3"];
+    NSLog(@"[webauth] windowWillClose wasDone=%d", wasDone);
+    // Only a user-initiated close (not a programmatic supersede/finish) reports
+    // cancellation to Go.
     if (!wasDone) {
         webauthClosed();
     }
-    gAuth = nil;
+    if (gAuth == self) gAuth = nil;
 }
 
 @end
@@ -89,6 +92,20 @@ static O3WebAuth *gAuth = nil; // strong global: keeps the one live capture aliv
 void o3StartWebAuth(const char *loginURL) {
     NSString *urlStr = [NSString stringWithUTF8String:loginURL];
     dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"[webauth] o3StartWebAuth (main thread) url=%@", urlStr);
+
+        // Supersede any window still open from a previous attempt so reopening
+        // always yields a fresh, working window. Marking done first stops its
+        // windowWillClose from reporting a cancellation.
+        if (gAuth != nil) {
+            NSLog(@"[webauth] superseding a prior window");
+            gAuth.done = YES;
+            [gAuth.timer invalidate];
+            gAuth.timer = nil;
+            [gAuth.window close];
+            gAuth = nil;
+        }
+
         O3WebAuth *auth = [[O3WebAuth alloc] init];
         gAuth = auth;
 
@@ -118,12 +135,15 @@ void o3StartWebAuth(const char *loginURL) {
         auth.webView = wv;
 
         NSWindow *win = [[NSWindow alloc] initWithContentRect:frame
-            styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable)
+            styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable)
             backing:NSBackingStoreBuffered defer:NO];
         win.title = @"Sign in to OpenObserve";
+        [win setMovable:YES];
+        [win setMovableByWindowBackground:NO];
         win.contentView = wv;
         win.delegate = auth;
         win.releasedWhenClosed = NO;
+        [win setLevel:NSNormalWindowLevel];
         auth.window = win;
         [win center];
         [win makeKeyAndOrderFront:nil];
@@ -133,6 +153,8 @@ void o3StartWebAuth(const char *loginURL) {
         if (u != nil) {
             [wv loadRequest:[NSURLRequest requestWithURL:u]];
         }
+        NSLog(@"[webauth] window shown movable=%d titled=%d",
+              (int)win.isMovable, (int)((win.styleMask & NSWindowStyleMaskTitled) != 0));
 
         auth.timer = [NSTimer scheduledTimerWithTimeInterval:0.7 repeats:YES
             block:^(NSTimer *t){ [auth probe]; }];
