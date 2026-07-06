@@ -2,7 +2,14 @@ import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { SettingsTab, Density, ThemePref } from '../types';
 import { hexA } from '../lib/format';
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import styles from './SettingsModal.module.css';
+
+// Project links. REPO_URL is the GitHub repository; DOCS_URL is the GitHub
+// Pages site (goes live once Pages is enabled on release). Opened in the user's
+// real browser via the Wails runtime, not inside the WebView.
+const REPO_URL = 'https://github.com/AngelMsger/o3';
+const DOCS_URL = 'https://angelmsger.github.io/o3';
 
 // Props for the kubectl-style contexts manager (Task 4)
 interface SettingsContextsProps {
@@ -566,14 +573,14 @@ export function SettingsModal({
                       <div className={styles.brandTagline} style={{ color: accent }}>SELECT signal FROM noise</div>
                       <div className={styles.brandVersion}>v0.1.0 · Wails v2 · macOS arm64</div>
                     </div>
-                    <button className={styles.updateBtn}>Check For Updates</button>
+                    <button className={styles.updateBtn} onClick={() => BrowserOpenURL(`${REPO_URL}/releases/latest`)}>Check For Updates</button>
                   </div>
 
                   {/* Doc links — design line 545 */}
                   <div className={styles.aboutLinks}>
-                    <button className={styles.aboutLink} style={{ color: accent }}>Documentation</button>
-                    <button className={styles.aboutLink} style={{ color: accent }}>Release Notes</button>
-                    <button className={styles.aboutLink} style={{ color: accent }}>Report An Issue</button>
+                    <button className={styles.aboutLink} style={{ color: accent }} onClick={() => BrowserOpenURL(DOCS_URL)}>Documentation</button>
+                    <button className={styles.aboutLink} style={{ color: accent }} onClick={() => BrowserOpenURL(`${REPO_URL}/releases`)}>Release Notes</button>
+                    <button className={styles.aboutLink} style={{ color: accent }} onClick={() => BrowserOpenURL(`${REPO_URL}/issues/new`)}>Report An Issue</button>
                   </div>
                 </div>
               )}

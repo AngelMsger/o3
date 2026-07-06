@@ -174,5 +174,5 @@ Legend: ✅ shipped · 🚧 in progress · 📋 planned
 ---
 
 <div align="center">
-<sub>Built by <a href="https://github.com/angelmsger">AngelMsger</a>.</sub>
+<sub>Built by <a href="https://github.com/AngelMsger">AngelMsger</a> · <a href="https://github.com/AngelMsger/o3">Source</a> · <a href="https://github.com/AngelMsger/o3/issues">Issues</a></sub>
 </div>
