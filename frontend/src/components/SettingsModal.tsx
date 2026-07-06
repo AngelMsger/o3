@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { SettingsTab, Density, ThemePref } from '../types';
 import { hexA } from '../lib/format';
+import { authTabToScheme, expiryLabel, schemeToAuthTab } from '../lib/signin';
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import styles from './SettingsModal.module.css';
 
@@ -42,6 +43,11 @@ interface SettingsModalProps extends SettingsContextsProps {
   onToggleMcp: () => void;
   onConnField: (key: string, value: string) => void;
   onOpenSetup?: () => void;
+  // Browser sign-in: open the capture flow for the active context, the current
+  // stored session status, and a sign-out action.
+  onBrowserSignIn?: () => void;
+  onSignOut?: () => void;
+  session?: { email: string; expiresAt: string; valid: boolean } | null;
 }
 
 // Left tab list — design line 1210
@@ -108,15 +114,17 @@ export function SettingsModal({
   onField,
   onTest,
   onSave,
+  onBrowserSignIn,
+  onSignOut,
+  session,
 }: SettingsModalProps): ReactElement {
   // Agent leash mode local state — design line 1235
   const [agentMode, setAgentMode] = useState<string>('observe');
 
-  // Auth mode for the edit-active-context form — derived from the active context scheme.
-  // 'basic' (backend) maps to 'password' (UI tab); 'token' maps to 'token'; else password.
-  const _scheme = active?.scheme ?? 'basic';
-  const authMode: 'password' | 'token' | 'sso' =
-    _scheme === 'token' ? 'token' : _scheme === 'sso' ? 'sso' : 'password';
+  // Auth mode for the edit-active-context form — derived from the active context
+  // scheme. 'session' shows the browser-session card; 'basic' maps to 'password'.
+  const authMode = schemeToAuthTab(active?.scheme ?? 'basic');
+  const isSession = authMode === 'session';
 
   return (
     /* Overlay backdrop — design line 381 */
@@ -276,14 +284,14 @@ export function SettingsModal({
                         <div style={{ marginBottom: 14 }}>
                           <div className={styles.fieldLabel}>Authentication</div>
                           <div className={styles.authSeg}>
-                            {(['password', 'token', 'sso'] as const).map((id, i) => {
-                              const labels = ['Email & Password', 'API Token', 'SSO'];
+                            {(['session', 'password', 'token', 'sso'] as const).map((id, i) => {
+                              const labels = ['Browser sign-in', 'Email & Password', 'API Token', 'SSO'];
                               return (
                                 <button
                                   key={id}
                                   className={`${styles.authTab}${authMode === id ? ` ${styles.authTabActive}` : ''}`}
                                   style={authMode === id ? { background: hexA(accent, 0.18), color: accent } : undefined}
-                                  onClick={() => onField('scheme', id === 'password' ? 'basic' : id)}
+                                  onClick={() => onField('scheme', authTabToScheme(id))}
                                 >
                                   {labels[i]}
                                 </button>
@@ -291,6 +299,54 @@ export function SettingsModal({
                             })}
                           </div>
                         </div>
+
+                        {/* Browser session card — design Browser Sign-in 1a (A4) */}
+                        {isSession && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 12,
+                                background: 'var(--sf-05)', borderRadius: 11, padding: '13px 15px',
+                                border: `1px solid ${hexA(accent, 0.2)}`,
+                              }}
+                            >
+                              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="1.8" style={{ flex: 'none' }}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: 12.5, color: 'var(--tx-01)' }}>
+                                  Browser session{session?.email ? <> · signed in as <span className="mono" style={{ color: 'var(--tx-05)' }}>{session.email}</span></> : null}
+                                </div>
+                                <div style={{ fontSize: 11, color: 'var(--tx-09)', marginTop: 2 }}>
+                                  Stored in your OS keychain · expires {expiryLabel(session?.expiresAt ?? '')}. o3 never stores your password.
+                                </div>
+                              </div>
+                              {session?.valid && (
+                                <button
+                                  className={styles.ctxUseBtn}
+                                  onClick={onSignOut}
+                                  title="Remove the stored session"
+                                >
+                                  Sign out
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              className={styles.testBtn}
+                              style={{ alignSelf: 'flex-start' }}
+                              onClick={onBrowserSignIn}
+                            >
+                              {session?.valid ? 'Sign in again' : 'Open sign-in window'}
+                            </button>
+                            <div
+                              style={{
+                                fontSize: 12, color: 'var(--tx-07)', lineHeight: 1.5,
+                                background: hexA(accent, 0.05), border: `1px solid ${hexA(accent, 0.16)}`,
+                                borderRadius: 11, padding: '11px 14px',
+                              }}
+                            >
+                              The same session works from the terminal — <span className="mono" style={{ color: accent }}>openobserve-cli</span> reuses this exact keychain session, no separate setup.
+                            </div>
+                          </div>
+                        )}
 
                         {/* Email + password fields — design lines 494-498 */}
                         {authMode === 'password' && (

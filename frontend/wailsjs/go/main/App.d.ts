@@ -5,6 +5,8 @@ import {config} from '../models';
 import {metrics} from '../models';
 import {query} from '../models';
 
+export function BrowserSignIn(arg1:string,arg2:string):Promise<main.SessionResult>;
+
 export function GetFields(arg1:string):Promise<Array<main.Field>>;
 
 export function GetPrefs():Promise<config.Prefs>;
@@ -23,9 +25,13 @@ export function SaveContext(arg1:main.ConnConfig):Promise<void>;
 
 export function SavePrefs(arg1:config.Prefs):Promise<void>;
 
+export function SessionStatus(arg1:string):Promise<main.SessionInfo>;
+
 export function SetAppearance(arg1:string):Promise<void>;
 
 export function SetDockTheme(arg1:boolean):Promise<void>;
+
+export function SignOut(arg1:string):Promise<void>;
 
 export function SwitchContext(arg1:string):Promise<void>;
 

@@ -19,6 +19,8 @@ import { ResultsTable } from './components/ResultsTable';
 import { DrawerInspector } from './components/DrawerInspector';
 import { SettingsModal } from './components/SettingsModal';
 import { SetupWizard } from './components/SetupWizard';
+import { BrowserSignIn } from './components/BrowserSignIn';
+import type { CapturedSession } from './lib/signin';
 import { ValueActionMenu } from './components/ValueActionMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
@@ -30,6 +32,7 @@ import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
+  BrowserSignIn as BrowserSignInCall, SessionStatus, SignOut,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -107,6 +110,14 @@ function App() {
   const [contexts, setContexts] = useState<UICtx[]>([]);
   const [currentName, setCurrentName] = useState<string>('');
   const [ctxSwitchOpen, setCtxSwitchOpen] = useState(false);
+
+  // Browser sign-in overlay state. signInTarget carries the context being
+  // connected so onAuthorize can persist under the right name after capture.
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [signInTarget, setSignInTarget] = useState<{ name: string; url: string; org: string; origName: string }>(
+    { name: '', url: '', org: 'default', origName: '' }
+  );
+  const [sessionInfo, setSessionInfo] = useState<{ email: string; expiresAt: string; valid: boolean } | null>(null);
 
   /* Active-tab derivation — tab is the single source of truth for editor state */
   const activeTabData = tabs.find((t) => t.id === activeTab) ?? tabs[0];
@@ -311,6 +322,19 @@ function App() {
       .catch(() => { setConfigured(false); setSetupOpen(true); });
   }, []);
 
+  /* Keep the browser-session status (email/expiry) synced with the active
+     context so Settings > Connection can render the session card. */
+  useEffect(() => {
+    const active = contexts.find((c) => c.name === currentName);
+    if (active && active.scheme === 'session' && active.url) {
+      SessionStatus(active.url)
+        .then((s) => setSessionInfo(s as { email: string; expiresAt: string; valid: boolean }))
+        .catch(() => setSessionInfo(null));
+    } else {
+      setSessionInfo(null);
+    }
+  }, [currentName, contexts]);
+
   /* Step 4: Wire stream selector to load fields */
   useEffect(() => {
     if (!configured || !stream) return;
@@ -472,7 +496,7 @@ function App() {
       seq += 1;
     }
     const draft: UICtx = {
-      name: draftName, url: '', org: 'default', scheme: 'basic', username: '',
+      name: draftName, url: '', org: 'default', scheme: 'session', username: '',
       hasSecret: false, isCurrent: false, color, password: '', token: '', draft: true,
       origName: '', // I1: never persisted yet, so no old entry to remove
     };
@@ -487,6 +511,41 @@ function App() {
     await SaveContext({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret, origName: ctx.origName } as any);
     setConfigured(true);
     await refreshContexts(); // reloads from disk; toUICtx re-sets origName to the new persisted name
+  };
+
+  // startBrowserSignIn opens the sign-in overlay for a context. Capture runs
+  // inside the overlay; persistence happens on authorize (handleAuthorizeSession).
+  const startBrowserSignIn = (ctx: UICtx) => {
+    if (!ctx.url) { setWizardError('Enter a Server URL first.'); return; }
+    setWizardError(null);
+    setSignInTarget({ name: ctx.name, url: ctx.url, org: ctx.org, origName: ctx.origName });
+    setSignInOpen(true);
+  };
+
+  // handleAuthorizeSession persists a captured session under the target context.
+  const handleAuthorizeSession = async (s: CapturedSession): Promise<void> => {
+    await SaveContext({
+      name: signInTarget.name, url: signInTarget.url, org: s.org || signInTarget.org,
+      scheme: 'session', username: s.email, secret: s.secret, origName: signInTarget.origName,
+    } as any);
+    setConfigured(true);
+    await refreshContexts();
+    setSessionInfo({ email: s.email, expiresAt: s.expiresAt, valid: true });
+  };
+
+  // handleSignOut clears the stored session for the active context.
+  const handleSignOut = async () => {
+    const active = contexts.find((c) => c.name === currentName);
+    if (!active) return;
+    try {
+      await SignOut(active.url);
+      setSessionInfo(null);
+      await refreshContexts();
+      setConfigured(false);
+      setSetupOpen(true);
+    } catch (e: any) {
+      setWizardError(parseAppError(e).message);
+    }
   };
 
   // handleTestContext tests the connection for the given context draft.
@@ -774,6 +833,9 @@ function App() {
             onField={(key, value) => setContexts((cs) => cs.map((c) => (c.name === currentName ? { ...c, [key]: value } : c)))}
             onTest={() => { const a = contexts.find((c) => c.name === currentName); if (a) handleTestContext(a); }}
             onSave={() => { const a = contexts.find((c) => c.name === currentName); if (a) handleSaveContext(a); }}
+            onBrowserSignIn={() => { const a = contexts.find((c) => c.name === currentName); if (a) startBrowserSignIn(a); }}
+            onSignOut={handleSignOut}
+            session={sessionInfo}
           />
         )}
 
@@ -833,8 +895,21 @@ function App() {
                 });
             }}
             onAddContext={() => { handleAddContext(); }}
+            onBrowserSignIn={(ctx) => startBrowserSignIn(ctx)}
           />
         )}
+
+        {/* BrowserSignIn — captured-session overlay (Log in -> Authorize -> Done) */}
+        <BrowserSignIn
+          open={signInOpen}
+          accent={accent}
+          url={signInTarget.url}
+          org={signInTarget.org}
+          onCapture={(url, org) => BrowserSignInCall(url, org) as unknown as Promise<CapturedSession>}
+          onAuthorize={handleAuthorizeSession}
+          onCancel={() => setSignInOpen(false)}
+          onDone={() => { setSignInOpen(false); setSetupOpen(false); }}
+        />
 
         {/* ValueActionMenu — task 14: Graylog-style value action menu */}
         {ctxT.mounted && ctxMenu && (

@@ -97,6 +97,42 @@ export namespace main {
 	        this.type = source["type"];
 	    }
 	}
+	export class SessionInfo {
+	    email: string;
+	    expiresAt: string;
+	    valid: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SessionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.email = source["email"];
+	        this.expiresAt = source["expiresAt"];
+	        this.valid = source["valid"];
+	    }
+	}
+	export class SessionResult {
+	    email: string;
+	    org: string;
+	    secret: string;
+	    host: string;
+	    expiresAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SessionResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.email = source["email"];
+	        this.org = source["org"];
+	        this.secret = source["secret"];
+	        this.host = source["host"];
+	        this.expiresAt = source["expiresAt"];
+	    }
+	}
 	export class StreamInfo {
 	    name: string;
 	    streamType: string;
