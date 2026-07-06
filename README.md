@@ -1,5 +1,11 @@
 <div align="center">
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo-light.png">
+  <img src="docs/assets/logo-light.png" alt="o3 logo" width="128" height="128">
+</picture>
+
 # o3
 
 **A fast, native desktop client for [OpenObserve](https://openobserve.ai).**
