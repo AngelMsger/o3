@@ -16,9 +16,12 @@ export interface EChartProps {
   // onEvents maps ECharts event names (e.g. 'click', 'datazoom') to handlers.
   // Memoize the object on the caller side; it is rebound whenever its identity changes.
   onEvents?: Record<string, (params: unknown) => void>;
+  // onReady is called once with the chart instance right after init, for callers that
+  // need imperative actions (e.g. dispatchAction for brushing). Keep it stable.
+  onReady?: (chart: ReturnType<typeof echarts.init>) => void;
 }
 
-export function EChart({ option, className, style, onEvents }: EChartProps): ReactElement {
+export function EChart({ option, className, style, onEvents, onReady }: EChartProps): ReactElement {
   const elRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ReturnType<typeof echarts.init> | null>(null);
 
@@ -28,6 +31,7 @@ export function EChart({ option, className, style, onEvents }: EChartProps): Rea
     if (!el) return;
     const chart = echarts.init(el, undefined, { renderer: 'canvas' });
     chartRef.current = chart;
+    onReady?.(chart);
     const ro = new ResizeObserver(() => chart.resize());
     ro.observe(el);
     return () => {

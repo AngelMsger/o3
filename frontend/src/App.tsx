@@ -13,6 +13,7 @@ import { FieldsPanel } from './components/FieldsPanel';
 import { PlaceholderView } from './components/views/PlaceholderView';
 import { MetricsView } from './components/views/MetricsView';
 import { Histogram } from './components/Histogram';
+import { bucketRangeMicros, formatBucketTime } from './components/charts/buildHistogramOption';
 import { ResultsHeader } from './components/ResultsHeader';
 import { ResultsTable } from './components/ResultsTable';
 import { DrawerInspector } from './components/DrawerInspector';
@@ -324,7 +325,16 @@ function App() {
       });
   }, [stream, configured]);
 
-  /* Step 5: Compute time window from relative picker state */
+  /* Histogram drag-to-select: a SECONDARY time filter layered on the primary (picker)
+     range. It narrows the RESULTS only; the histogram keeps showing the primary range
+     with the drilled buckets highlighted, so the user can pop back to the broader view.
+     lo/hi index into the current bars; start/endMicros are the sub-window; label is the
+     tag text. Null when there is no drill-down. */
+  const [histoSel, setHistoSel] = useState<
+    { lo: number; hi: number; startMicros: number; endMicros: number; label: string } | null
+  >(null);
+
+  /* Step 5: Compute the PRIMARY time window from the relative picker state. */
   const computeRange = (): { startMicros: number; endMicros: number } => {
     const now = Date.now() * 1000; // micros
     const amount = parseInt(relAmount, 10) || 15;
@@ -347,33 +357,67 @@ function App() {
     return { sql, effStream: fromStream(sql) || stream };
   };
 
-  const runQueryAt = async (pageNum: number) => {
+  const runQueryAt = async (
+    pageNum: number,
+    opts?: { resultsRange?: { startMicros: number; endMicros: number }; withHistogram?: boolean },
+  ) => {
     setRunning(true); setLoading(true); setQueryError(null);
-    const { startMicros, endMicros } = computeRange();
+    // Results honor the secondary drill-down window when one is active; an explicit
+    // resultsRange (from a brush apply/clear) is used verbatim to avoid racing state.
+    // The histogram is only (re)fetched on a full run so it keeps showing the broad
+    // primary range while a drill-down narrows just the results.
+    const range = opts?.resultsRange
+      ?? (histoSel ? { startMicros: histoSel.startMicros, endMicros: histoSel.endMicros } : computeRange());
+    const withHistogram = (opts?.withHistogram ?? true) && showHistogram;
     const { sql, effStream } = buildRequest();
     try {
       const res = await RunQuery({
         stream: effStream,            // histogram + results target the SAME stream
         sql,
-        startMicros, endMicros,
+        startMicros: range.startMicros, endMicros: range.endMicros,
         from: (pageNum - 1) * PAGE_SIZE,
         size: PAGE_SIZE,
-        histogram: showHistogram,
+        histogram: withHistogram,
       } as any);
       setLiveRows((res.rows ?? []) as unknown as TLogRow[]);
-      setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
+      if (withHistogram) setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
       setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
       setPage(pageNum);
       if (effStream && effStream !== stream) setActiveStream(effStream); // sync tab to the queried FROM
     } catch (e: any) {
       const ae = parseAppError(e);
       setQueryError({ message: ae.message, hint: ae.hint });
-      setLiveRows([]); setLiveBars([]);
+      setLiveRows([]);
+      if (withHistogram) setLiveBars([]);
     } finally {
       setRunning(false); setLoading(false);
     }
   };
-  const runQuery = () => runQueryAt(1); // a fresh Run resets to page 1
+  // A fresh Run (or Cmd+Enter) resets to page 1 and drops any drill-down so the primary
+  // range drives both histogram and results again.
+  const runQuery = () => {
+    setHistoSel(null);
+    runQueryAt(1, { resultsRange: computeRange(), withHistogram: true });
+  };
+
+  /* Histogram drag-to-select: layer a secondary time filter on the current query. Map the
+     brushed bucket range to a sub-window, show the removable tag, and refresh RESULTS only
+     — the histogram stays broad so the selection band keeps its context. */
+  const handleHistoBrush = (lo: number, hi: number) => {
+    const range = bucketRangeMicros(liveBars, lo, hi);
+    if (!range) return;
+    const from = formatBucketTime(liveBars[Math.min(lo, hi)].t, true);
+    const to = formatBucketTime(String(range.endMicros), true);
+    setHistoSel({ lo: Math.min(lo, hi), hi: Math.max(lo, hi), ...range, label: `${from} → ${to}` });
+    runQueryAt(1, { resultsRange: range, withHistogram: false });
+  };
+
+  /* Remove the tag: drop the secondary filter and return to the original broader results.
+     The histogram is untouched, so this is an instant results-only refresh. */
+  const clearHistoSel = () => {
+    setHistoSel(null);
+    runQueryAt(1, { resultsRange: computeRange(), withHistogram: false });
+  };
 
   // handleSwitchContext switches the active context and reloads streams.
   const handleSwitchContext = async (name: string) => {
@@ -477,6 +521,7 @@ function App() {
   const selectTab = (id: string) => {
     setActiveTab(id);
     setPage(1);
+    setHistoSel(null);
     setLiveRows([]);
     setLiveBars([]);
     setLiveMeta({ total: 0, tookMs: 0, shown: 0 });
@@ -583,17 +628,19 @@ function App() {
                   relUnit={relUnit}
                   absFrom={absFrom}
                   absTo={absTo}
-                  onPickQuick={(label) => { setTimeRange(label); setTimeOpen(false); }}
+                  onPickQuick={(label) => { setHistoSel(null); setTimeRange(label); setTimeOpen(false); }}
                   onSetTab={setTimeTab}
                   onRelAmount={setRelAmount}
                   onRelUnit={setRelUnit}
                   onApplyRelative={() => {
+                    setHistoSel(null);
                     setTimeRange(`Last ${relAmount}${relUnit}`);
                     setTimeOpen(false);
                   }}
                   onAbsFrom={setAbsFrom}
                   onAbsTo={setAbsTo}
                   onApplyAbsolute={() => {
+                    setHistoSel(null);
                     setTimeRange(`${absFrom} — ${absTo}`);
                     setTimeOpen(false);
                   }}
@@ -635,7 +682,14 @@ function App() {
               <div className={styles.centerCol}>
                 {histoT.mounted && (
                   <div className={`${styles.histoWrap} ${histoT.visible ? styles.histoWrapShown : styles.histoWrapHidden}`}>
-                    <Histogram accent={accent} bars={liveBars} />
+                    <Histogram
+                      accent={accent}
+                      bars={liveBars}
+                      onBrushRange={handleHistoBrush}
+                      selRange={histoSel ? { lo: histoSel.lo, hi: histoSel.hi } : undefined}
+                      selectionLabel={histoSel?.label ?? null}
+                      onClearSelection={clearHistoSel}
+                    />
                   </div>
                 )}
                 {/* Results header */}
