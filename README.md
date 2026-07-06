@@ -67,15 +67,7 @@ cannot drift apart.
 
 ## Screenshots
 
-<div align="center">
-  <a href="https://angelmsger.github.io/o3/" title="Open the live interactive demo">
-    <img src="docs/assets/demo.png" alt="o3 logs explorer — SQL editor, event-volume histogram, and virtualized results" width="900">
-  </a>
-  <br>
-  <sub><b><a href="https://angelmsger.github.io/o3/">▶ Try the live interactive demo →</a></b></sub>
-</div>
-
-GitHub can't run a live app inside a README, so the frame above is a still — click it to open the real, clickable demo hosted on [GitHub Pages](https://angelmsger.github.io/o3/).
+> _Screenshots coming soon._ Run `wails dev` to see the app live.
 
 ## Getting started
 
