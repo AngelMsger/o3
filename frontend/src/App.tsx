@@ -28,7 +28,7 @@ import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
-  ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme,
+  ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -195,6 +195,15 @@ function App() {
     if (!prefsLoaded.current) return;
     SavePrefs({ theme: themePref, accent, density }).catch(() => {});
   }, [themePref, accent, density]);
+
+  // Drive the native macOS appearance from the preference. 'system' clears the
+  // pinned appearance so the WebView's prefers-color-scheme (below) tracks the
+  // OS; 'dark'/'light' pin it so native chrome matches. Unpinning may change the
+  // effective appearance, which fires the matchMedia 'change' handler and
+  // refreshes systemDark.
+  useEffect(() => {
+    SetAppearance(themePref).catch(() => {});
+  }, [themePref]);
 
   useEffect(() => {
     const dark = effectiveTheme(themePref, systemDark) === 'dark';

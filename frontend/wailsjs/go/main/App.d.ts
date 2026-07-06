@@ -23,6 +23,8 @@ export function SaveContext(arg1:main.ConnConfig):Promise<void>;
 
 export function SavePrefs(arg1:config.Prefs):Promise<void>;
 
+export function SetAppearance(arg1:string):Promise<void>;
+
 export function SetDockTheme(arg1:boolean):Promise<void>;
 
 export function SwitchContext(arg1:string):Promise<void>;

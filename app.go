@@ -479,6 +479,12 @@ func (a *App) SavePrefs(p config.Prefs) error { return config.SavePrefs(p) }
 // No-op on non-darwin platforms.
 func (a *App) SetDockTheme(dark bool) { branding.SetDock(dark) }
 
+// SetAppearance drives the native macOS app appearance from the theme
+// preference ("dark" | "light" | "system"). "system" clears the pinned
+// appearance so the WebView's prefers-color-scheme tracks the OS and the
+// "System" theme can resolve to light. No-op on non-darwin platforms.
+func (a *App) SetAppearance(pref string) { branding.SetAppearance(pref) }
+
 // humanBytes formats a byte count as a short human string (e.g. "1.2 MB").
 func humanBytes(b float64) string {
 	const unit = 1024.0

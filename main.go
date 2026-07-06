@@ -28,8 +28,12 @@ func main() {
 		CSSDragProperty: "--wails-draggable",
 		CSSDragValue:    "drag",
 		Mac: &mac.Options{
-			TitleBar:   mac.TitleBarHiddenInset(),
-			Appearance: mac.NSAppearanceNameDarkAqua,
+			TitleBar: mac.TitleBarHiddenInset(),
+			// Appearance is intentionally NOT pinned here. Pinning it to DarkAqua
+			// forces the WKWebView's prefers-color-scheme to dark forever, so the
+			// "System" theme preference could never resolve to light. Instead the
+			// app follows the OS at startup, and the frontend drives the native
+			// appearance at runtime via App.SetAppearance (see internal/branding).
 			// Opaque window. A translucent NSVisualEffectView backing made the CSS
 			// backdrop-filter flicker during window drags, and gave the chrome
 			// nothing in-page to blur (the vibrancy sits behind the webview, so the
