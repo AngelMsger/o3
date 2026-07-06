@@ -20,7 +20,7 @@ export function Histogram({ accent, bars }: HistogramProps): ReactElement {
       {/* Header row — design lines 295-300 */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <span className={styles.labelTitle}>Event volume</span>
+          <span className={styles.labelTitle}>Event Volume</span>
           <span className={styles.labelBuckets}>30s buckets</span>
         </div>
         <span className={styles.labelPeak}>

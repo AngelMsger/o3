@@ -28,12 +28,18 @@ func main() {
 		CSSDragProperty: "--wails-draggable",
 		CSSDragValue:    "drag",
 		Mac: &mac.Options{
-			TitleBar:             mac.TitleBarHiddenInset(),
-			Appearance:           mac.NSAppearanceNameDarkAqua,
+			TitleBar:   mac.TitleBarHiddenInset(),
+			Appearance: mac.NSAppearanceNameDarkAqua,
+			// Opaque window. A translucent NSVisualEffectView backing made the CSS
+			// backdrop-filter flicker during window drags, and gave the chrome
+			// nothing in-page to blur (the vibrancy sits behind the webview, so the
+			// blur was a no-op — it read as a flat tint). With an opaque webview,
+			// backdrop-filter blurs real page content: a controllable, flicker-free
+			// frosted-glass effect on the chrome and overlays.
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 		},
-		BackgroundColour: &options.RGBA{R: 5, G: 6, B: 8, A: 1}, // #050608
+		BackgroundColour: &options.RGBA{R: 5, G: 6, B: 8, A: 1}, // #050608 opaque
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

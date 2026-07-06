@@ -53,14 +53,14 @@ export function DrawerInspector({ row, visible, onClose, onKvCtx }: DrawerInspec
         {/* header — design line 352 */}
         <div className={styles.header}>
           <span style={levelStyle}>{row.level}</span>
-          <span className={styles.title}>Log record</span>
+          <span className={styles.title}>Log Record</span>
           <span className={styles.spacer} />
           <button
             className={styles.copyBtn}
             title="Copy this record as JSON"
             onClick={() => copyText(JSON.stringify(Object.fromEntries(row.json.map((kv) => [kv.k, kv.v])), null, 2))}
           >
-            ⧉ copy
+            ⧉ Copy
           </button>
           <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>

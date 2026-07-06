@@ -12,7 +12,9 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: var(--sf-main);
+  /* No opaque fill: the title bar (glass) sits directly over the translucent
+     window backing, so the desktop blurs through it. Content below paints its
+     own surfaces. */
   overflow: hidden;
   position: relative;
 }
@@ -33,15 +35,19 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--sf-main);
+  /* Transparent so the glass tab strip is vibrant; the editor + workspace below
+     paint opaque surfaces. */
 }
 
-/* workspace — design line ~230 */
+/* workspace — design line ~230. Opaque content surface: this is the readable
+   data region (fields panel, histogram, results), so it sits on a solid fill
+   rather than the vibrancy material. */
 .workspace {
   flex: 1;
   min-height: 0;
   display: flex;
   position: relative;
+  background: var(--sf-main);
 }
 
 /* center column — design line 290 */

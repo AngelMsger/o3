@@ -2,17 +2,17 @@
    Native macOS traffic lights are provided by the OS (mac.TitleBarHiddenInset);
    the bar is left-padded to clear them, and the bar is the window drag region.
    The context switcher moved into the query toolbar (see ContextSwitcher) in the
-   design refresh, so the title bar now carries just the brand and avatar. */
+   design refresh, so the title bar now carries just the brand and avatar. The
+   brand mark is the log-lines app icon (see BrandMark), theme-aware to match. */
 import styles from './TitleBar.module.css';
+import { BrandMark } from './BrandMark';
 
-export function TitleBar() {
+export function TitleBar({ isDark }: { isDark: boolean }) {
   return (
     <div className={`${styles.bar} oo-drag`}>
       <div className={styles.brand}>
-        <span className={`${styles.logo} oo-no-drag`}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 12h4l3 8 4-16 3 8h6" />
-          </svg>
+        <span className="oo-no-drag" style={{ display: 'flex' }}>
+          <BrandMark variant={isDark ? 'void' : 'signal'} />
         </span>
         <span className={styles.name}>o3</span>
         <span className={styles.crumb}>/ Logs</span>

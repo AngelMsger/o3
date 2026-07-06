@@ -97,7 +97,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
           <button
             className={styles.collapseBtn}
             onClick={onToggleCollapse}
-            title="Collapse sidebar"
+            title="Collapse Sidebar"
           >
             «
           </button>
@@ -150,7 +150,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
             className={styles.searchInput}
             value={fieldFilter}
             onChange={(e) => onFieldFilter(e.target.value)}
-            placeholder="Filter fields"
+            placeholder="Filter Fields"
           />
           <span className={styles.searchCount}>{fieldCount}</span>
         </div>
@@ -184,7 +184,7 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
           <button
             className={styles.stripBtn}
             onClick={onToggleCollapse}
-            title="Expand fields"
+            title="Expand Fields"
           >
             »
           </button>

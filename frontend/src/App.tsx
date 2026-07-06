@@ -28,7 +28,7 @@ import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
-  ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs,
+  ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -141,11 +141,11 @@ function App() {
 
   /* ctxItems — design lines 1173-1179, verbatim icons + labels, each with an action id */
   const ctxItems = [
-    { icon: '=',    label: 'Filter for value', action: 'filter' },
-    { icon: '≠', label: 'Exclude value', action: 'exclude' },
-    { icon: '⊞', label: `Group by ${ctxMenu?.field ?? 'field'}`, action: 'groupby' },
-    { icon: '▦', label: 'Top 10 values', action: 'top10' },
-    { icon: '⧉', label: 'Copy value', action: 'copy' },
+    { icon: '=',    label: 'Filter For Value', action: 'filter' },
+    { icon: '≠', label: 'Exclude Value', action: 'exclude' },
+    { icon: '⊞', label: `Group By ${ctxMenu?.field ?? 'field'}`, action: 'groupby' },
+    { icon: '▦', label: 'Top 10 Values', action: 'top10' },
+    { icon: '⧉', label: 'Copy Value', action: 'copy' },
   ];
 
   // handleValueAction runs a value-action-menu item against the row's field/value:
@@ -197,7 +197,10 @@ function App() {
   }, [themePref, accent, density]);
 
   useEffect(() => {
-    applyThemeAttr(effectiveTheme(themePref, systemDark));
+    const dark = effectiveTheme(themePref, systemDark) === 'dark';
+    applyThemeAttr(dark ? 'dark' : 'light');
+    // Swap the native Dock icon to the matching variant (Void/Signal).
+    SetDockTheme(dark).catch(() => {});
   }, [themePref, systemDark]);
 
   // Sync the runtime accent CSS var on any accent change, including the value
@@ -503,7 +506,7 @@ function App() {
     <div className={styles.shell}>
       <div className={styles.card}>
         {/* TitleBar — design line 41; context switcher added in task 3 */}
-        <TitleBar />
+        <TitleBar isDark={effectiveTheme(themePref, systemDark) === 'dark'} />
 
         {/* BODY flex row — design line 61 */}
         <div className={styles.body}>

@@ -206,7 +206,7 @@ export function SettingsModal({
                         {canRemove && (
                           <button
                             className={styles.ctxRemoveBtn}
-                            title="Delete context"
+                            title="Delete Context"
                             onClick={(e) => { e.stopPropagation(); onRemove(c.name); }}
                           >
                             ✕
@@ -230,7 +230,7 @@ export function SettingsModal({
                             org <b style={{ color: 'var(--tx-06)' }}>{active.org}</b>
                           </div>
                         </div>
-                        <button className={styles.testBtn} onClick={onTest}>Test connection</button>
+                        <button className={styles.testBtn} onClick={onTest}>Test Connection</button>
                       </div>
 
                       {/* Edit form card — design lines 475-513 */}
@@ -342,7 +342,7 @@ export function SettingsModal({
                       {/* Action buttons — design lines 520-523 */}
                       <div className={styles.actions}>
                         <button className={styles.btnPrimary} onClick={onSave}>Save</button>
-                        <button className={styles.btnSecondary} onClick={onOpenSetup}>Re-run setup wizard…</button>
+                        <button className={styles.btnSecondary} onClick={onOpenSetup}>Re-run Setup Wizard…</button>
                       </div>
                     </>
                   )}
@@ -365,7 +365,7 @@ export function SettingsModal({
                       {(['light', 'dark', 'system'] as ThemePref[]).map((k) => {
                         const active = themePref === k;
                         const label = k === 'system' ? 'System' : k[0].toUpperCase() + k.slice(1);
-                        const title = k === 'system' ? 'Sync with system' : label + ' theme';
+                        const title = k === 'system' ? 'Sync With System' : label + ' Theme';
                         return (
                           <button
                             key={k}
@@ -422,7 +422,7 @@ export function SettingsModal({
 
                   {/* Row density — design line 474 */}
                   <div className={styles.formCard}>
-                    <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 4 }}>Row density</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 4 }}>Row Density</div>
                     <div style={{ fontSize: 11.5, color: 'var(--tx-09)', marginBottom: 12 }}>Ultra-dense fits the most rows on screen for power users.</div>
                     <div className={styles.densitySeg}>
                       {DENSITY_OPTS.map(([id, label]) => (
@@ -441,7 +441,7 @@ export function SettingsModal({
                   {/* Show histogram — design line 482 */}
                   <div className={styles.histoCard}>
                     <div style={{ flex: 1 }}>
-                      <div className={styles.histoCardLabel}>Show histogram by default</div>
+                      <div className={styles.histoCardLabel}>Show Histogram By Default</div>
                       <div className={styles.histoCardSub}>The event-volume chart above the results.</div>
                     </div>
                     <button
@@ -466,7 +466,7 @@ export function SettingsModal({
                   {/* Expose server toggle — design line 496 */}
                   <div className={styles.mcpCard}>
                     <div style={{ flex: 1 }}>
-                      <div className={styles.mcpCardTitle}>Expose local MCP server</div>
+                      <div className={styles.mcpCardTitle}>Expose Local MCP Server</div>
                       <div className={styles.mcpCardSub}>Loopback only · token-protected · shares your live query session.</div>
                     </div>
                     <button
@@ -486,18 +486,18 @@ export function SettingsModal({
                         <div className={styles.endpointLabel}>Endpoint</div>
                         <div className={styles.endpointRow}>
                           <code className={`${styles.codeChip} ${styles.endpointUrl}`}>http://127.0.0.1:7878/sse</code>
-                          <button className={styles.iconBtn}>⧉ copy</button>
+                          <button className={styles.iconBtn}>⧉ Copy</button>
                         </div>
                         <div className={styles.endpointLabel}>Access token</div>
                         <div className={styles.endpointRow} style={{ marginBottom: 0 }}>
                           <code className={`${styles.codeChip} ${styles.tokenMask}`}>oo_mcp_••••••••••••••3f9d</code>
-                          <button className={styles.iconBtn}>↻ rotate</button>
+                          <button className={styles.iconBtn}>↻ Rotate</button>
                         </div>
                       </div>
 
                       {/* Claude mcp add snippet — design line 510 */}
                       <div className={styles.snippetCard}>
-                        <div className={styles.snippetTitle}>Connect your agent</div>
+                        <div className={styles.snippetTitle}>Connect Your Agent</div>
                         <pre className={styles.snippetPre}>
                           <span style={{ color: 'var(--sy-fn)' }}>claude</span>{' mcp add openobserve \\\n  --transport sse http://127.0.0.1:7878/sse \\\n  --header '}
                           <span style={{ color: 'var(--sy-str)' }}>"Authorization: Bearer $OO_MCP_TOKEN"</span>
@@ -509,7 +509,7 @@ export function SettingsModal({
 
                       {/* Default leash — design line 518 */}
                       <div className={styles.leashCard}>
-                        <div className={styles.leashTitle}>Default leash</div>
+                        <div className={styles.leashTitle}>Default Leash</div>
                         <div className={styles.leashDesc}>{AGENT_DESC[agentMode]}</div>
                         <div className={styles.agentSeg}>
                           {AGENT_TABS.map(([id, label]) => (
@@ -528,11 +528,11 @@ export function SettingsModal({
                       {/* Max scan / rows cards — design line 526 */}
                       <div className={styles.statsRow}>
                         <div className={styles.statCard}>
-                          <div className={styles.statLabel}>Max scan / query</div>
+                          <div className={styles.statLabel}>Max Scan / Query</div>
                           <div className={styles.statValue}>5.0 GB</div>
                         </div>
                         <div className={styles.statCard}>
-                          <div className={styles.statLabel}>Max rows returned</div>
+                          <div className={styles.statLabel}>Max Rows Returned</div>
                           <div className={styles.statValue}>10,000</div>
                         </div>
                       </div>
@@ -566,14 +566,14 @@ export function SettingsModal({
                       <div className={styles.brandTagline} style={{ color: accent }}>SELECT signal FROM noise</div>
                       <div className={styles.brandVersion}>v0.1.0 · Wails v2 · macOS arm64</div>
                     </div>
-                    <button className={styles.updateBtn}>Check for updates</button>
+                    <button className={styles.updateBtn}>Check For Updates</button>
                   </div>
 
                   {/* Doc links — design line 545 */}
                   <div className={styles.aboutLinks}>
                     <button className={styles.aboutLink} style={{ color: accent }}>Documentation</button>
-                    <button className={styles.aboutLink} style={{ color: accent }}>Release notes</button>
-                    <button className={styles.aboutLink} style={{ color: accent }}>Report an issue</button>
+                    <button className={styles.aboutLink} style={{ color: accent }}>Release Notes</button>
+                    <button className={styles.aboutLink} style={{ color: accent }}>Report An Issue</button>
                   </div>
                 </div>
               )}

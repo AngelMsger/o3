@@ -73,7 +73,7 @@ export function SetupWizard({
         </span>
 
         {/* Welcome text — design lines 570-572 */}
-        <div className={styles.welcomeTitle}>Welcome to o3</div>
+        <div className={styles.welcomeTitle}>Welcome To o3</div>
         <div className={styles.welcomeTagline}>SELECT signal FROM noise</div>
         <div className={styles.welcomeDesc}>
           A fast, native desktop client for OpenObserve. Point it at your self-hosted instance to begin.
@@ -83,7 +83,7 @@ export function SetupWizard({
         <div className={styles.stepsList}>
           <div className={styles.stepRow}>
             <span className={`${styles.stepNum} ${styles.stepNumActive}`}>1</span>
-            <span className={styles.stepLabelActive}>Connect your instance</span>
+            <span className={styles.stepLabelActive}>Connect Your Instance</span>
           </div>
           <div className={styles.stepRow}>
             <span className={`${styles.stepNum} ${styles.stepNumInactive}`}>2</span>
@@ -91,7 +91,7 @@ export function SetupWizard({
           </div>
           <div className={styles.stepRow}>
             <span className={`${styles.stepNum} ${styles.stepNumInactive}`}>3</span>
-            <span className={styles.stepLabelInactive}>Run your first query</span>
+            <span className={styles.stepLabelInactive}>Run Your First Query</span>
           </div>
         </div>
 
@@ -139,7 +139,7 @@ export function SetupWizard({
       <div className={`oo-scroll ${styles.right}`}>
         <div className={styles.rightInner}>
           {/* Heading — design lines 663-664 */}
-          <div className={styles.rightTitle}>Connect to OpenObserve</div>
+          <div className={styles.rightTitle}>Connect To OpenObserve</div>
           <div className={styles.rightSub}>
             Name this context and point it at your instance. Switch between contexts any time from the title bar. Self-hosted OSS uses basic auth — no hosted OAuth.
           </div>
@@ -260,7 +260,7 @@ export function SetupWizard({
                 style={selfSigned ? { transform: 'translateX(16px)' } : undefined}
               />
             </button>
-            <span className={styles.toggleLabel}>Trust self-signed certificate</span>
+            <span className={styles.toggleLabel}>Trust Self-Signed Certificate</span>
           </div>
 
           {/* Test connection row */}
@@ -270,7 +270,7 @@ export function SetupWizard({
               onClick={() => selected && onTest(selected)}
               disabled={!selected}
             >
-              Test connection
+              Test Connection
             </button>
             {tested && (
               <span className={styles.testedLabel}>✓ reachable</span>
@@ -285,7 +285,7 @@ export function SetupWizard({
               onClick={() => selected && onSave(selected)}
               disabled={!selected}
             >
-              Connect &amp; continue
+              Connect &amp; Continue
             </button>
             <button className={styles.btnSkip} onClick={onClose}>
               Skip

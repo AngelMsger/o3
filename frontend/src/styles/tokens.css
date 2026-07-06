@@ -33,11 +33,14 @@
   /* syntax (query editor + JSON viewer) */
   --sy-str:#a3e08c; --sy-num:#f6c177; --sy-key:#8fb7ff; --sy-bool:#5b9dff;
   --sy-null:#f4685f; --sy-kw:#ff7b9c; --sy-fn:#7dd3fc;
-  /* liquid glass (translucent chrome + overlays) */
-  --glass-titl: rgba(17,20,27,.66); --glass-bar: rgba(12,14,19,.60);
-  --glass-pop: rgba(16,20,28,.74); --glass-modal: rgba(13,16,22,.80);
-  --glass-drawer: rgba(11,13,18,.72); --glass-hi: rgba(255,255,255,.06);
-  --glass-blur: saturate(180%) blur(22px);
+  /* liquid glass (translucent chrome + overlays). Alphas are lowered and the
+     blur/saturation raised vs the design mock for a more pronounced frost. */
+  --desk-veil: #05070b;                /* opaque desk — the frosted chrome blurs this + the glow */
+  --glass-titl: rgba(17,20,27,.44); --glass-bar: rgba(12,14,19,.40);
+  --glass-pop: rgba(16,20,28,.55); --glass-modal: rgba(13,16,22,.66);
+  --glass-drawer: rgba(11,13,18,.54); --glass-hi: rgba(255,255,255,.12);
+  /* brightness lift makes the blurred backdrop read as a frost on the dark UI */
+  --glass-blur: saturate(190%) brightness(1.14) blur(28px);
   color-scheme: dark;
 }
 
@@ -60,10 +63,13 @@
   --av-1:#c1c9d6; --av-2:#99a2b1;
   --sy-str:#2f8f3a; --sy-num:#b0741a; --sy-key:#2f5fc4; --sy-bool:#2563eb;
   --sy-null:#d33a30; --sy-kw:#d23a66; --sy-fn:#0e83ad;
-  --glass-titl: rgba(247,249,252,.68); --glass-bar: rgba(240,243,248,.62);
-  --glass-pop: rgba(252,253,255,.76); --glass-modal: rgba(255,255,255,.82);
-  --glass-drawer: rgba(250,251,253,.74); --glass-hi: rgba(255,255,255,.55);
-  --glass-blur: saturate(180%) blur(22px);
+  /* Light theme keeps a near-opaque desk veil so the (fixed dark) vibrancy
+     material can't wash out contrast; the frost here is intentionally subtle. */
+  --desk-veil: #e6eaf1;                /* opaque light desk */
+  --glass-titl: rgba(247,249,252,.50); --glass-bar: rgba(240,243,248,.46);
+  --glass-pop: rgba(252,253,255,.60); --glass-modal: rgba(255,255,255,.72);
+  --glass-drawer: rgba(250,251,253,.56); --glass-hi: rgba(255,255,255,.6);
+  --glass-blur: saturate(150%) brightness(1.02) blur(28px);
   color-scheme: light;
 }
 
@@ -93,7 +99,11 @@ body {
 }
 
 body {
-  background: radial-gradient(120% 120% at 80% -10%, rgba(var(--glow),.10) 0%, transparent 55%), var(--sf-desk);
+  /* Opaque desk base (see --desk-veil) with the accent glow on top. The glass
+     chrome (transparent .card/.main above it) blurs this desk + glow via
+     backdrop-filter, so the frosted title bar / tab strip / nav rail are a
+     real blur of it. Content panes paint their own opaque surfaces. */
+  background: radial-gradient(120% 120% at 80% -10%, rgba(var(--glow),.10) 0%, transparent 55%), var(--desk-veil);
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
   transition: background .25s ease;
 }

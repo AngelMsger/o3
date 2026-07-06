@@ -38,6 +38,10 @@ export function SavePrefs(arg1) {
   return window['go']['main']['App']['SavePrefs'](arg1);
 }
 
+export function SetDockTheme(arg1) {
+  return window['go']['main']['App']['SetDockTheme'](arg1);
+}
+
 export function SwitchContext(arg1) {
   return window['go']['main']['App']['SwitchContext'](arg1);
 }

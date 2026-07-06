@@ -11,6 +11,7 @@ import (
 	cfgshared "github.com/angelmsger/openobserve-cli/pkg/config"
 
 	"github.com/angelmsger/o3/internal/apperr"
+	"github.com/angelmsger/o3/internal/branding"
 	"github.com/angelmsger/o3/internal/config"
 	"github.com/angelmsger/o3/internal/metrics"
 	"github.com/angelmsger/o3/internal/query"
@@ -472,6 +473,11 @@ func (a *App) GetPrefs() (config.Prefs, error) { return config.LoadPrefs() }
 
 // SavePrefs persists the UI preferences.
 func (a *App) SavePrefs(p config.Prefs) error { return config.SavePrefs(p) }
+
+// SetDockTheme swaps the macOS Dock icon to match the active theme: the Void
+// (dark) variant when dark is true, the Signal (light) variant otherwise.
+// No-op on non-darwin platforms.
+func (a *App) SetDockTheme(dark bool) { branding.SetDock(dark) }
 
 // humanBytes formats a byte count as a short human string (e.g. "1.2 MB").
 func humanBytes(b float64) string {

@@ -13,7 +13,7 @@ export function PlaceholderView({ title, subtitle }: PlaceholderViewProps): Reac
   return (
     <div className={styles.view}>
       <div className={styles.inner}>
-        <div className={styles.badge}>Coming soon</div>
+        <div className={styles.badge}>Coming Soon</div>
         <h2 className={styles.title}>{title}</h2>
         <p className={styles.subtitle}>{subtitle ?? `The ${title} view is on the way.`}</p>
       </div>

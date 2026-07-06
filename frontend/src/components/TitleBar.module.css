@@ -23,16 +23,7 @@
   gap: 8px;
 }
 
-.logo {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  background: var(--accent, #2dd4bf);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 14px -2px var(--accent, #2dd4bf);
-}
+/* brand mark is rendered by the BrandMark component (self-styled squircle) */
 
 /* line 51 */
 .name {

@@ -75,7 +75,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: 
             {closable && (
               <button
                 className={styles.close}
-                title="Close query"
+                title="Close Query"
                 onClick={(e) => {
                   e.stopPropagation();
                   onClose(t.id);
@@ -91,7 +91,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: 
       <button
         className={styles.newBtn}
         onClick={onNew}
-        title="New query"
+        title="New Query"
       >+</button>
     </div>
   );

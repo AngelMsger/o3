@@ -79,7 +79,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
 
         {/* design lines 102–105 — histogram toggle */}
         <div className={styles.histoGroup}>
-          <span>histogram</span>
+          <span>Histogram</span>
           <button
             className={`${styles.toggle} ${showHistogram ? styles.toggleOn : ''}`}
             onClick={onToggleHisto}
@@ -147,9 +147,9 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
 
         {/* design lines 168–206 — hint line */}
         <div className={styles.hintLine}>
-          <span><b className={styles.hintKey}>⌘↵</b> run</span>
-          <span><b className={styles.hintKey}>Tab</b> accept</span>
-          <span><b className={styles.hintKey}>↑↓</b> navigate</span>
+          <span><b className={styles.hintKey}>⌘↵</b> Run</span>
+          <span><b className={styles.hintKey}>Tab</b> Accept</span>
+          <span><b className={styles.hintKey}>↑↓</b> Navigate</span>
           {/* flex spacer */}
           <span style={{ flex: 1 }} />
 
@@ -158,7 +158,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             <button
               className={styles.hintBtn}
               onClick={onToggleHistory}
-              title="Query history"
+              title="Query History"
             >
               {/* history SVG — design line 177 */}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -166,7 +166,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
                 <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
                 <path d="M12 7v5l3 2" />
               </svg>
-              history
+              History
             </button>
             {/* Task 7 slot */}
             {historyPanel}
@@ -177,7 +177,7 @@ export function QueryEditor(props: QueryEditorProps): ReactElement {
             className={styles.hintBtn}
             onClick={onToggleGuide}
           >
-            <span className={styles.guideQ}>?</span> syntax guide
+            <span className={styles.guideQ}>?</span> Syntax Guide
           </button>
         </div>
       </div>
