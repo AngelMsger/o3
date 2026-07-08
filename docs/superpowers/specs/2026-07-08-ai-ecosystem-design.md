@@ -31,7 +31,7 @@ The decision: MCP is unnecessary because o3 already pairs with `openobserve-cli`
 
 1. **CLI management = shell out to npm.** Install = `npm install -g @angelmsger/openobserve-cli`; Upgrade = `npm install -g @angelmsger/openobserve-cli@latest`; Uninstall = `npm uninstall -g @angelmsger/openobserve-cli`. If `npm` is absent, install/upgrade buttons fall back to showing the copy command + docs link instead of running.
 2. **Provenance-aware.** o3 checks whether the on-PATH binary is npm-managed (`npm ls -g`). npm-managed -> full Install/Upgrade/Uninstall. Present but external (go/brew/manual) -> show "Installed - managed outside o3", keep version + Skill controls, but Upgrade/Uninstall defer to docs (never run npm on a binary o3 did not install).
-3. **Skill management = shell out to the CLI.** o3 runs `openobserve-cli skill install` / `skill uninstall` and never touches skill files directly. The CLI owns agent detection and deployment.
+3. **Skill management = shell out to the CLI.** o3 runs `openobserve-cli skill install` / `skill uninstall` for actions and `openobserve-cli skill status --format json` for detection; it never touches skill files directly. The CLI owns agent detection, deployment, and the authoritative status payload.
 4. **Update detection via npm registry.** The "update available" state queries `https://registry.npmjs.org/@angelmsger/openobserve-cli` for `dist-tags.latest` and semver-compares to the installed version. Any network failure degrades silently to "Installed" (no update prompt).
 5. **No oa-cli changes.** This feature consumes the CLI's existing surface only. The sibling repo stays clean (unlike the Browser Sign-in feature).
 
@@ -94,7 +94,7 @@ Detection steps:
 - **CLI presence/version:** `LookPath("openobserve-cli")`; if found, run `openobserve-cli version` and parse `v(\d+\.\d+\.\d+)` from the first line.
 - **Provenance:** run `npm ls -g --depth=0 --json @angelmsger/openobserve-cli`; if the package appears in `dependencies`, `Managed = "npm"`, else `"external"`. If the CLI is not installed, `Managed = ""`.
 - **Latest version:** HTTP GET the npm registry metadata, read `dist-tags.latest`. On error/timeout/offline, leave `LatestVersion = ""` and `UpdateAvailable = false`. Short timeout (~3s) so detection never hangs the panel.
-- **Skill:** for each known agent (`claude-code` -> `~/.claude/skills/openobserve/SKILL.md`, `codex` -> `~/.codex/skills/openobserve/SKILL.md`), check the file; collect the agent id into `Agents` and parse `version:` from the YAML frontmatter for `SkillStatus.Version`. `Installed = len(Agents) > 0`. (This reads the filesystem directly rather than parsing CLI stdout, for determinism; the CLI's own `skill path` is the equivalent authority.)
+- **Skill (CLI-authoritative):** run `openobserve-cli skill status --format json` and parse its payload — `{loaded, embedded_version, installs:[{agent,path,status}], next}`. Map: `SkillStatus.Agents` = every `install.agent` whose `status == "installed"`; `SkillStatus.Installed = len(Agents) > 0`; `SkillStatus.Version = embedded_version` (the Skill version this CLI would deploy, always matched to the CLI binary). o3 ignores `loaded` (that is the agent-in-context handshake, irrelevant to a GUI). The child process sets `OPENOBSERVE_CLI_SKILL=1` so the CLI suppresses its stderr discovery nudge. Requires the CLI installed; if absent, `SkillStatus` is empty and the Skill card shows "Install openobserve-cli first". Using the CLI's own `skill status` (rather than reading agent dirs directly) makes the agent list authoritative — o3 never hardcodes it, so new agents the CLI adds appear automatically.
 
 #### Actions — bound methods
 
@@ -143,14 +143,13 @@ CLI card pill: `Installed` (green) / `Update available` (amber) / `Installed - e
 
 ### Testing
 
-- **Go unit (injected fake Runner):** version parse (valid/garbage/empty), `compareSemver`, provenance parse from `npm ls --json` (present/absent/malformed), skill-dir detection + SKILL.md frontmatter parse (both agents / one / none), PATH-resolution union, action command construction (correct arg vectors), Uninstall guard rejects `external`.
+- **Go unit (injected fake Runner):** version parse (valid/garbage/empty), `compareSemver`, provenance parse from `npm ls --json` (present/absent/malformed), skill-status parse from `skill status --format json` (both agents installed / one / none / malformed), PATH-resolution union, action command construction (correct arg vectors, incl. `--format json` and the `OPENOBSERVE_CLI_SKILL=1` env for skill status), Uninstall guard rejects `external`.
 - **Go integration:** stub `npm` and `openobserve-cli` executables on a temp PATH; assert `EcosystemStatus` classifies installed/updatable/external correctly and that action methods invoke the stubs with the expected args.
 - **Frontend vitest:** `lib/ecosystem.ts` (semver, pill/dot/tooltip derivation, agent labels).
 
 ## Deferred (flagged, not dropped)
 
 - **CLI context configuration.** After install, the agent's CLI still needs a context pointing at this instance (the shared keychain carries the secret, but not the host/org selection). A follow-up could add a "Configure openobserve-cli for this context" action that writes the CLI's config. Out of v1 scope; the design does not show it.
-- **Extensible agent list.** v1 knows two agents (Claude Code, Codex). If the CLI adds more, o3's status list lags until updated; a future version could parse `openobserve-cli skill path` for the authoritative list.
 - **Streaming install progress.** v1 shows a busy spinner and the final result; live npm output streaming is a later nicety.
 
 ## End-to-end verification
