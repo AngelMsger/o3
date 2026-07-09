@@ -20,6 +20,8 @@ import { DrawerInspector } from './components/DrawerInspector';
 import { SettingsModal } from './components/SettingsModal';
 import { SetupWizard } from './components/SetupWizard';
 import { ValueActionMenu } from './components/ValueActionMenu';
+import { TabContextMenu } from './components/TabContextMenu';
+import type { TabMenuAction } from './lib/tabMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
@@ -108,6 +110,8 @@ function App() {
   ]);
   const [activeTab, setActiveTab] = useState<string>('t1');
   const tabSeq = useRef(0);
+  const [tabMenu, setTabMenu] = useState<{ id: string; x: number; y: number; open: boolean } | null>(null);
+  const tabMenuT = useDelayedUnmount(!!tabMenu?.open, 140);
 
   // Contexts state — kubectl-style named contexts loaded from shared config
   const [contexts, setContexts] = useState<UICtx[]>([]);
@@ -576,6 +580,44 @@ function App() {
     }
   };
 
+  // Bulk tab close actions for the right-click menu. Each keeps >=1 tab and
+  // moves activeTab onto a surviving tab when the active one is closed.
+  const closeTabsLeft = (id: string) => {
+    const idx = tabs.findIndex((t) => t.id === id);
+    if (idx <= 0) return;
+    const next = tabs.slice(idx);
+    setTabs(next);
+    if (!next.some((t) => t.id === activeTab)) selectTab(id);
+  };
+  const closeTabsRight = (id: string) => {
+    const idx = tabs.findIndex((t) => t.id === id);
+    if (idx < 0 || idx >= tabs.length - 1) return;
+    const next = tabs.slice(0, idx + 1);
+    setTabs(next);
+    if (!next.some((t) => t.id === activeTab)) selectTab(id);
+  };
+  const closeOtherTabs = (id: string) => {
+    const keep = tabs.find((t) => t.id === id);
+    if (!keep || tabs.length <= 1) return;
+    setTabs([keep]);
+    if (activeTab !== id) selectTab(id);
+  };
+  const closeAllTabs = () => {
+    tabSeq.current += 1;
+    const id = `t-new-${tabSeq.current}`;
+    setTabs([{ id, name: 'untitled', mode: 'sql', sql: '', search: '', stream: '' }]);
+    selectTab(id);
+  };
+  const onTabMenuPick = (action: TabMenuAction) => {
+    if (!tabMenu) return;
+    const id = tabMenu.id;
+    if (action === 'close') handleCloseTab(id);
+    else if (action === 'closeLeft') closeTabsLeft(id);
+    else if (action === 'closeRight') closeTabsRight(id);
+    else if (action === 'closeOthers') closeOtherTabs(id);
+    else if (action === 'closeAll') closeAllTabs();
+  };
+
   // Field-click insertion now goes through the editor's imperative handle, which
   // inserts at the live caret and refocuses — CodeMirror owns the doc + cursor.
   const handleInsertField = (name: string) => {
@@ -619,6 +661,11 @@ function App() {
               onNew={handleNewTab}
               onClose={handleCloseTab}
               onRename={handleRenameTab}
+              onContextMenu={(id, e) => {
+                const x = Math.max(8, Math.min(e.clientX, window.innerWidth - 232));
+                const y = e.clientY + 4;
+                setTabMenu({ id, x, y, open: true });
+              }}
             />
 
             {/* QueryEditor — design lines 93-207 */}
@@ -888,6 +935,19 @@ function App() {
             items={ctxItems}
             onPick={handleValueAction}
             onClose={() => setCtxMenu((m) => (m ? { ...m, open: false } : m))}
+          />
+        )}
+
+        {/* TabContextMenu — task 3: right-click tab menu with bulk-close actions */}
+        {tabMenuT.mounted && tabMenu && (
+          <TabContextMenu
+            count={tabs.length}
+            index={tabs.findIndex((t) => t.id === tabMenu.id)}
+            x={tabMenu.x}
+            y={tabMenu.y}
+            visible={tabMenuT.visible}
+            onPick={onTabMenuPick}
+            onClose={() => setTabMenu((m) => (m ? { ...m, open: false } : m))}
           />
         )}
 

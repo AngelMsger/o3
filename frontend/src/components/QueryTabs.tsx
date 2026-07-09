@@ -3,20 +3,21 @@ import { useState, useRef } from 'react';
 import styles from './QueryTabs.module.css';
 import { STREAMS } from '../data/mock';
 import type { QueryTab } from '../types';
-import type { ReactElement } from 'react';
+import type { ReactElement, MouseEvent } from 'react';
 
 // Build stream-name -> color lookup from STREAMS array
 const STREAM_COLORS: Record<string, string> = Object.fromEntries(
   STREAMS.map(s => [s.name, s.color])
 );
 
-export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: {
+export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename, onContextMenu }: {
   tabs: QueryTab[];
   activeId: string;
   onPick: (id: string) => void;
   onNew: () => void;
   onClose: (id: string) => void;
   onRename: (id: string, name: string) => void;
+  onContextMenu?: (id: string, e: MouseEvent) => void;
 }): ReactElement {
   const closable = tabs.length > 1;
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename }: 
             className={`${styles.tab} ${active ? styles.active : ''}`}
             onClick={() => onPick(t.id)}
             onDoubleClick={() => { setEditingId(t.id); setDraft(t.name); }}
+            onContextMenu={(e) => { e.preventDefault(); onContextMenu?.(t.id, e); }}
             title={`stream: ${t.stream} — double-click to rename`}
           >
             {/* design line 81 — stream color dot */}

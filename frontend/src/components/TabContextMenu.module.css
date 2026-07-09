@@ -1,0 +1,56 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+
+.menu {
+  position: fixed;
+  min-width: 216px;
+  background: var(--glass-pop);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(var(--ink), 0.12);
+  border-radius: 11px;
+  box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 var(--glass-hi);
+  padding: 5px;
+  z-index: 91;
+  transform-origin: top left;
+  transition: opacity var(--motion-fast) var(--motion-ease), transform var(--motion-fast) var(--motion-ease);
+}
+
+.shown { opacity: 1; transform: none; }
+.hidden { opacity: 0; transform: scale(0.97); }
+
+.item {
+  display: flex;
+  align-items: center;
+  height: 31px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--tx-02);
+}
+
+.item:hover {
+  background: var(--sf-hov2);
+  color: var(--tx-hi);
+}
+
+.disabled {
+  color: var(--tx-12);
+  cursor: default;
+}
+
+.disabled:hover {
+  background: transparent;
+  color: var(--tx-12);
+}
+
+.sep {
+  height: 1px;
+  margin: 5px 9px;
+  background: rgba(var(--ink), 0.09);
+}
