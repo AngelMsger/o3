@@ -38,10 +38,12 @@ const ICONS: Record<NavItem['icon'], ReactElement> = {
   ),
 };
 
-export function NavRail({ activeNav, onPick, onOpenSettings }: {
+export function NavRail({ activeNav, onPick, onOpenSettings, eco, onOpenEcosystem }: {
   activeNav: string;
   onPick: (name: string) => void;
   onOpenSettings: () => void;
+  eco: { state: 'ok' | 'update' | 'off'; title: string };
+  onOpenEcosystem: () => void;
 }) {
   return (
     <div className={styles.rail}>
@@ -57,6 +59,14 @@ export function NavRail({ activeNav, onPick, onOpenSettings }: {
         </button>
       ))}
       <div style={{ flex: 1 }} />
+      {/* AI Ecosystem shortcut — design Observe.dc.html nav rail. Terminal >_
+          glyph with a live status dot; jumps to Settings -> AI Ecosystem. */}
+      <button className={styles.gear} title={eco.title} onClick={onOpenEcosystem}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 5l6 5-6 5" /><path d="M12 19h8" />
+        </svg>
+        <span className={`${styles.ecoDot} ${styles['ecoDot_' + eco.state]}`} />
+      </button>
       {/* settings gear — design line 69–71 */}
       <button className={styles.gear} title="Settings" onClick={onOpenSettings}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">

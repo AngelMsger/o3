@@ -24,6 +24,7 @@ import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
 import { copyText } from './lib/clipboard';
+import { dotState, ecoTooltip } from './lib/ecosystem';
 import type { EcoStatus } from './lib/ecosystem';
 import { BrowserOpenURL } from '../wailsjs/runtime/runtime';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab, ThemePref } from './types';
@@ -594,6 +595,11 @@ function App() {
             activeNav={activeNav}
             onPick={setActiveNav}
             onOpenSettings={() => setSettingsOpen(true)}
+            eco={{
+              state: ecoStatus ? dotState(ecoStatus.cli) : 'off',
+              title: ecoStatus ? ecoTooltip(ecoStatus.cli) : 'openobserve-cli not installed',
+            }}
+            onOpenEcosystem={() => { setSettingsOpen(true); setSettingsTab('agent'); }}
           />
 
           {/* main column — design line 75. Nav routing: Logs renders the query

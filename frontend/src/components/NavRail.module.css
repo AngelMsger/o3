@@ -61,6 +61,7 @@
 
 /* settings gear button — design line 69 */
 .gear {
+  position: relative;
   width: 36px;
   height: 36px;
   border-radius: 9px;
@@ -79,3 +80,17 @@
   background: var(--sf-hov);
   color: var(--tx-05);
 }
+
+/* AI Ecosystem shortcut status dot — fixed traffic-light semantics, not accent
+   (accent is user-configurable, so it must not drive a green/amber/grey signal). */
+.ecoDot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.ecoDot_ok { background: #34e0a1; box-shadow: 0 0 6px -1px #34e0a1; }
+.ecoDot_update { background: #f5b340; box-shadow: 0 0 6px -1px #f5b340; }
+.ecoDot_off { background: var(--tx-13); }
