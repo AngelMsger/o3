@@ -2,11 +2,12 @@
 .panelSub { font-size: 13px; color: var(--tx-09); margin-bottom: 22px; line-height: 1.55; }
 
 .card {
-  background: var(--sf-05);
-  border: 1px solid rgba(var(--ink),.06);
+  background: var(--card-bg);
+  border: 1px solid var(--card-bd);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 14px;
+  box-shadow: var(--card-sh);
 }
 .cardHead { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .iconMono {

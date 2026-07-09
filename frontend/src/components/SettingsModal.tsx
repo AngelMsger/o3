@@ -348,7 +348,7 @@ export function SettingsModal({
                   </div>
 
                   {/* Theme card — design lines 621-635 */}
-                  <div style={{ background: 'var(--sf-05)', border: '1px solid rgba(var(--ink),.06)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                  <div style={{ background: 'var(--card-bg)', border: '1px solid var(--card-bd)', borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: 'var(--card-sh)' }}>
                     <div style={{ fontSize: 12.5, color: 'var(--tx-01)', fontWeight: 600, marginBottom: 4 }}>Theme</div>
                     <div style={{ fontSize: 11.5, color: 'var(--tx-09)', marginBottom: 14 }}>Choose a look, or let it follow your macOS appearance automatically.</div>
                     <div style={{ display: 'flex', gap: 10 }}>
