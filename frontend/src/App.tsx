@@ -24,12 +24,15 @@ import { SyntaxGuide } from './components/SyntaxGuide';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
 import { copyText } from './lib/clipboard';
+import type { EcoStatus } from './lib/ecosystem';
+import { BrowserOpenURL } from '../wailsjs/runtime/runtime';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab, ThemePref } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
+  EcosystemStatus, InstallCLI, UpgradeCLI, UninstallCLI, InstallSkill, UninstallSkill,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -91,7 +94,9 @@ function App() {
     typeof matchMedia !== 'undefined' ? matchMedia('(prefers-color-scheme: dark)').matches : true
   );
   const prefsLoaded = useRef(false);
-  const [mcpOn, setMcpOn] = useState<boolean>(false);
+  const [ecoStatus, setEcoStatus] = useState<EcoStatus | null>(null);
+  const [ecoBusy, setEcoBusy] = useState<string | null>(null);
+  const [ecoError, setEcoError] = useState<string>('');
   const [conn, setConn] = useState<{ url: string; org: string; email?: string; password?: string; token?: string }>({
     url: 'https://observe.example.internal',
     org: 'default',
@@ -196,6 +201,26 @@ function App() {
     if (!prefsLoaded.current) return;
     SavePrefs({ theme: themePref, accent, density }).catch(() => {});
   }, [themePref, accent, density]);
+
+  // AI Ecosystem: detect CLI + Skill state. Refresh on mount and whenever the
+  // settings modal opens (so it reflects installs done in another terminal).
+  const refreshEco = () => {
+    EcosystemStatus().then(setEcoStatus).catch(() => setEcoStatus(null));
+  };
+  useEffect(() => { refreshEco(); }, []);
+  useEffect(() => { if (settingsOpen) refreshEco(); }, [settingsOpen]);
+
+  // runEco wraps an action method: set busy, run, surface errors, refresh state.
+  const runEco = (key: string, fn: () => Promise<void>) => {
+    setEcoBusy(key);
+    setEcoError('');
+    fn()
+      .then(() => { refreshEco(); })
+      .catch((e) => { setEcoError(parseAppError(e).message); })
+      .finally(() => setEcoBusy(null));
+  };
+
+  const CLI_DOCS_URL = 'https://github.com/AngelMsger/openobserve-cli#installation';
 
   // Drive the native macOS appearance from the preference. 'system' clears the
   // pinned appearance so the WebView's prefers-color-scheme (below) tracks the
@@ -753,7 +778,18 @@ function App() {
             accent={accent}
             density={density}
             themePref={themePref}
-            mcpOn={mcpOn}
+            ecosystem={{
+              status: ecoStatus,
+              busy: ecoBusy,
+              error: ecoError,
+              onInstallCli: () => runEco('cli-install', InstallCLI),
+              onUpgradeCli: () => runEco('cli-upgrade', UpgradeCLI),
+              onUninstallCli: () => runEco('cli-uninstall', UninstallCLI),
+              onInstallSkill: () => runEco('skill-install', InstallSkill),
+              onUninstallSkill: () => runEco('skill-uninstall', UninstallSkill),
+              onOpenDocs: () => BrowserOpenURL(CLI_DOCS_URL),
+              onCopy: (cmd: string) => { copyText(cmd); },
+            }}
             showHistogram={showHistogram}
             conn={conn}
             onClose={() => setSettingsOpen(false)}
@@ -762,7 +798,6 @@ function App() {
             onPickDensity={setDensity}
             onPickTheme={setThemePref}
             onToggleHisto={() => setShowHistogram((v) => !v)}
-            onToggleMcp={() => setMcpOn((v) => !v)}
             onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
             onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
             contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName }))}

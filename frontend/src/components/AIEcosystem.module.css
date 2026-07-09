@@ -1,0 +1,75 @@
+.panelTitle { font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px; }
+.panelSub { font-size: 13px; color: var(--tx-09); margin-bottom: 22px; line-height: 1.55; }
+
+.card {
+  background: var(--sf-05);
+  border: 1px solid rgba(var(--ink),.06);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.cardHead { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.iconMono {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08);
+  display: flex; align-items: center; justify-content: center; flex: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
+}
+.iconBox {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08);
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.cardTitleRow { display: flex; align-items: center; gap: 8px; }
+.cardTitle { font-size: 13.5px; color: var(--tx-01); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+.verLabel { font-size: 11px; color: var(--tx-07); font-family: 'JetBrains Mono', monospace; }
+.skillTag { font-size: 11px; color: var(--tx-10); }
+.cardDesc { font-size: 11.5px; color: var(--tx-09); margin-top: 2px; }
+.pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex: none; }
+
+.cmdRow { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.cmd {
+  flex: 1; min-width: 0;
+  background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px;
+  padding: 8px 11px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #a3e08c;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.copyBtn {
+  height: 33px; padding: 0 11px; border-radius: 7px;
+  border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06);
+  font-size: 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace; flex: none;
+}
+
+.actions { display: flex; gap: 8px; }
+.primary {
+  height: 36px; padding: 0 16px; border-radius: 8px; border: none;
+  color: #06181a; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.primary:disabled { opacity: .6; cursor: default; }
+.secondary {
+  height: 36px; padding: 0 16px; border-radius: 8px;
+  border: 1px solid rgba(var(--ink),.14); background: transparent; color: var(--tx-06);
+  font-size: 12.5px; cursor: pointer; font-family: inherit;
+}
+.danger {
+  height: 36px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid rgba(244,104,95,.3); background: transparent; color: #f4685f;
+  font-size: 12.5px; cursor: pointer; font-family: inherit;
+}
+.danger:disabled { opacity: .6; cursor: default; }
+
+.hint { font-size: 11px; color: var(--tx-10); margin-top: 10px; line-height: 1.5; }
+
+.agentRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.agentLabel { font-size: 11px; color: var(--tx-10); }
+.agentChip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: var(--tx-03);
+  border: 1px solid rgba(var(--ink),.12); border-radius: 20px; padding: 3px 10px;
+}
+.agentDot { width: 5px; height: 5px; border-radius: 50%; }
+
+.error { font-size: 12px; color: #f4685f; margin: 4px 0 14px; line-height: 1.5; }
+
+.learn { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--tx-10); margin-top: 4px; }
+.learnLink { background: transparent; border: none; cursor: pointer; font-size: 11.5px; padding: 0; }

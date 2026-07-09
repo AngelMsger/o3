@@ -1,8 +1,9 @@
-import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { SettingsTab, Density, ThemePref } from '../types';
 import { hexA } from '../lib/format';
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
+import { AIEcosystem } from './AIEcosystem';
+import type { EcosystemPaneProps } from './AIEcosystem';
 import styles from './SettingsModal.module.css';
 
 // Project links. REPO_URL is the GitHub repository; DOCS_URL is the GitHub
@@ -30,7 +31,7 @@ interface SettingsModalProps extends SettingsContextsProps {
   accent: string;
   density: Density;
   themePref: ThemePref;
-  mcpOn: boolean;
+  ecosystem: EcosystemPaneProps;
   showHistogram: boolean;
   conn: { url: string; org: string; email?: string; password?: string; token?: string };
   onClose: () => void;
@@ -39,7 +40,6 @@ interface SettingsModalProps extends SettingsContextsProps {
   onPickDensity: (d: Density) => void;
   onPickTheme: (t: ThemePref) => void;
   onToggleHisto: () => void;
-  onToggleMcp: () => void;
   onConnField: (key: string, value: string) => void;
   onOpenSetup?: () => void;
 }
@@ -48,7 +48,7 @@ interface SettingsModalProps extends SettingsContextsProps {
 const SET_TABS: [SettingsTab, string][] = [
   ['connection', 'Connection'],
   ['appearance', 'Appearance'],
-  ['agent', 'Agent · MCP'],
+  ['agent', 'AI Ecosystem'],
   ['about', 'About'],
 ];
 
@@ -68,26 +68,13 @@ const THEME_ICONS: Record<ThemePref, string> = {
   system: 'M3 5h18v10H3zM8 19h8M12 15v4',
 };
 
-// Agent leash options — design line 1235
-const AGENT_TABS: [string, string][] = [
-  ['observe', 'Observe'],
-  ['propose', 'Propose'],
-  ['autorun', 'Autorun'],
-];
-
-const AGENT_DESC: Record<string, string> = {
-  observe: 'Agent can read your session, schema and results — but runs nothing. Pure analysis and suggestions.',
-  propose: 'Agent stages rewritten queries into the editor; you review the diff and hit Run.',
-  autorun: 'Agent runs queries itself within the guardrails below. Watch the activity stream and stop anytime.',
-};
-
 export function SettingsModal({
   visible,
   tab,
   accent,
   density,
   themePref,
-  mcpOn,
+  ecosystem,
   showHistogram,
   conn,
   onClose,
@@ -96,7 +83,6 @@ export function SettingsModal({
   onPickDensity,
   onPickTheme,
   onToggleHisto,
-  onToggleMcp,
   onConnField,
   onOpenSetup,
   contexts,
@@ -109,9 +95,6 @@ export function SettingsModal({
   onTest,
   onSave,
 }: SettingsModalProps): ReactElement {
-  // Agent leash mode local state — design line 1235
-  const [agentMode, setAgentMode] = useState<string>('observe');
-
   // Auth mode for the edit-active-context form — derived from the active context scheme.
   // 'basic' (backend) maps to 'password' (UI tab); 'token' maps to 'token'; else password.
   const _scheme = active?.scheme ?? 'basic';
@@ -462,90 +445,9 @@ export function SettingsModal({
                 </div>
               )}
 
-              {/* ===== AGENT · MCP ===== design lines 492–533 */}
+              {/* ===== AI ECOSYSTEM ===== */}
               {tab === 'agent' && (
-                <div>
-                  <div className={styles.panelTitle}>Agent · MCP</div>
-                  <div className={styles.panelSub}>
-                    Let a local coding agent (Claude Code, Codex…) drive this same session through a Model Context Protocol server. The app stays the tool — your agent brings the reasoning.
-                  </div>
-
-                  {/* Expose server toggle — design line 496 */}
-                  <div className={styles.mcpCard}>
-                    <div style={{ flex: 1 }}>
-                      <div className={styles.mcpCardTitle}>Expose Local MCP Server</div>
-                      <div className={styles.mcpCardSub}>Loopback only · token-protected · shares your live query session.</div>
-                    </div>
-                    <button
-                      className={`${styles.toggle}${mcpOn ? ` ${styles.toggleOn}` : ''}`}
-                      style={mcpOn ? { background: accent } : undefined}
-                      onClick={onToggleMcp}
-                    >
-                      <span className={`${styles.knob}${mcpOn ? ` ${styles.knobOn}` : ''}`} />
-                    </button>
-                  </div>
-
-                  {/* Body gated on mcpOn — design line 501 */}
-                  {mcpOn && (
-                    <div>
-                      {/* Endpoint + token card — design line 503 */}
-                      <div className={styles.formCard}>
-                        <div className={styles.endpointLabel}>Endpoint</div>
-                        <div className={styles.endpointRow}>
-                          <code className={`${styles.codeChip} ${styles.endpointUrl}`}>http://127.0.0.1:7878/sse</code>
-                          <button className={styles.iconBtn}>⧉ Copy</button>
-                        </div>
-                        <div className={styles.endpointLabel}>Access token</div>
-                        <div className={styles.endpointRow} style={{ marginBottom: 0 }}>
-                          <code className={`${styles.codeChip} ${styles.tokenMask}`}>oo_mcp_••••••••••••••3f9d</code>
-                          <button className={styles.iconBtn}>↻ Rotate</button>
-                        </div>
-                      </div>
-
-                      {/* Claude mcp add snippet — design line 510 */}
-                      <div className={styles.snippetCard}>
-                        <div className={styles.snippetTitle}>Connect Your Agent</div>
-                        <pre className={styles.snippetPre}>
-                          <span style={{ color: 'var(--sy-fn)' }}>claude</span>{' mcp add openobserve \\\n  --transport sse http://127.0.0.1:7878/sse \\\n  --header '}
-                          <span style={{ color: 'var(--sy-str)' }}>"Authorization: Bearer $OO_MCP_TOKEN"</span>
-                        </pre>
-                        <div className={styles.snippetNote}>
-                          Exposes tools: <b style={{ color: 'var(--tx-06)' }}>run_sql · get_schema · get_field_stats · summarize_results</b> + the live session as a resource.
-                        </div>
-                      </div>
-
-                      {/* Default leash — design line 518 */}
-                      <div className={styles.leashCard}>
-                        <div className={styles.leashTitle}>Default Leash</div>
-                        <div className={styles.leashDesc}>{AGENT_DESC[agentMode]}</div>
-                        <div className={styles.agentSeg}>
-                          {AGENT_TABS.map(([id, label]) => (
-                            <button
-                              key={id}
-                              className={`${styles.agentTab}${agentMode === id ? ` ${styles.agentTabActive}` : ''}`}
-                              style={agentMode === id ? { background: hexA(accent, 0.16), color: accent } : undefined}
-                              onClick={() => setAgentMode(id)}
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Max scan / rows cards — design line 526 */}
-                      <div className={styles.statsRow}>
-                        <div className={styles.statCard}>
-                          <div className={styles.statLabel}>Max Scan / Query</div>
-                          <div className={styles.statValue}>5.0 GB</div>
-                        </div>
-                        <div className={styles.statCard}>
-                          <div className={styles.statLabel}>Max Rows Returned</div>
-                          <div className={styles.statValue}>10,000</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <AIEcosystem accent={accent} {...ecosystem} />
               )}
 
               {/* ===== ABOUT ===== design lines 537–551 */}
