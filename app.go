@@ -13,6 +13,7 @@ import (
 	"github.com/angelmsger/o3/internal/apperr"
 	"github.com/angelmsger/o3/internal/branding"
 	"github.com/angelmsger/o3/internal/config"
+	"github.com/angelmsger/o3/internal/ecosystem"
 	"github.com/angelmsger/o3/internal/metrics"
 	"github.com/angelmsger/o3/internal/query"
 )
@@ -24,6 +25,8 @@ type App struct {
 
 	mu     sync.Mutex
 	client api.Client // nil until built for the current context
+
+	eco *ecosystem.Service
 }
 
 // NewApp creates a new App application struct.
@@ -35,6 +38,7 @@ func NewApp() *App {
 // current context.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.eco = ecosystem.NewProduction(ctx)
 	_ = a.rebuildClient() // best-effort; data methods re-report if it fails
 }
 
@@ -484,6 +488,26 @@ func (a *App) SetDockTheme(dark bool) { branding.SetDock(dark) }
 // appearance so the WebView's prefers-color-scheme tracks the OS and the
 // "System" theme can resolve to light. No-op on non-darwin platforms.
 func (a *App) SetAppearance(pref string) { branding.SetAppearance(pref) }
+
+// EcosystemStatus reports the openobserve-cli + companion Skill install state.
+func (a *App) EcosystemStatus() (ecosystem.EcoStatus, error) {
+	return a.eco.Status(a.ctx)
+}
+
+// InstallCLI installs openobserve-cli via npm.
+func (a *App) InstallCLI() error { return apperr.Wrap(a.eco.InstallCLI(a.ctx)) }
+
+// UpgradeCLI upgrades openobserve-cli to the latest npm release.
+func (a *App) UpgradeCLI() error { return apperr.Wrap(a.eco.UpgradeCLI(a.ctx)) }
+
+// UninstallCLI removes openobserve-cli (npm-managed installs only).
+func (a *App) UninstallCLI() error { return apperr.Wrap(a.eco.UninstallCLI(a.ctx)) }
+
+// InstallSkill deploys the companion Skill into every detected agent.
+func (a *App) InstallSkill() error { return apperr.Wrap(a.eco.InstallSkill(a.ctx)) }
+
+// UninstallSkill removes the companion Skill from all agents.
+func (a *App) UninstallSkill() error { return apperr.Wrap(a.eco.UninstallSkill(a.ctx)) }
 
 // humanBytes formats a byte count as a short human string (e.g. "1.2 MB").
 func humanBytes(b float64) string {

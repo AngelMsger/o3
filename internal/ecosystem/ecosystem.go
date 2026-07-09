@@ -3,7 +3,10 @@ package ecosystem
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
 	"strings"
+	"time"
 )
 
 // EcoStatus is the full detection snapshot returned to the frontend.
@@ -40,6 +43,21 @@ type Service struct {
 // New builds a Service.
 func New(run Runner, latest func(ctx context.Context) (string, error)) *Service {
 	return &Service{run: run, latest: latest}
+}
+
+// NewProduction builds a Service backed by the real exec Runner (PATH resolved
+// from the login shell) and the npm-registry latest fetcher with a short
+// timeout. It also sets the Skill handshake env so the CLI suppresses its
+// stderr discovery nudge in child processes.
+func NewProduction(ctx context.Context) *Service {
+	os.Setenv("OPENOBSERVE_CLI_SKILL", "1")
+	run := newExecRunner(ctx)
+	latest := func(c context.Context) (string, error) {
+		cctx, cancel := context.WithTimeout(c, 3*time.Second)
+		defer cancel()
+		return fetchLatest(cctx, http.DefaultClient, registryURL)
+	}
+	return New(run, latest)
 }
 
 // Status gathers CLI + Skill + npm state in one pass. Missing tools are normal

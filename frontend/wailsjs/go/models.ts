@@ -19,6 +19,83 @@ export namespace config {
 
 }
 
+export namespace ecosystem {
+	
+	export class CLIStatus {
+	    installed: boolean;
+	    version: string;
+	    path: string;
+	    managed: string;
+	    latestVersion: string;
+	    updateAvailable: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CLIStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.installed = source["installed"];
+	        this.version = source["version"];
+	        this.path = source["path"];
+	        this.managed = source["managed"];
+	        this.latestVersion = source["latestVersion"];
+	        this.updateAvailable = source["updateAvailable"];
+	    }
+	}
+	export class SkillStatus {
+	    installed: boolean;
+	    version: string;
+	    agents: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SkillStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.installed = source["installed"];
+	        this.version = source["version"];
+	        this.agents = source["agents"];
+	    }
+	}
+	export class EcoStatus {
+	    npmAvailable: boolean;
+	    cli: CLIStatus;
+	    skill: SkillStatus;
+	
+	    static createFrom(source: any = {}) {
+	        return new EcoStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.npmAvailable = source["npmAvailable"];
+	        this.cli = this.convertValues(source["cli"], CLIStatus);
+	        this.skill = this.convertValues(source["skill"], SkillStatus);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace main {
 	
 	export class ConnConfig {
