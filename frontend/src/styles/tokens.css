@@ -36,40 +36,41 @@
   /* liquid glass (translucent chrome + overlays). Alphas are lowered and the
      blur/saturation raised vs the design mock for a more pronounced frost. */
   --desk-veil: #05070b;                /* opaque desk — the frosted chrome blurs this + the glow */
-  --glass-titl: rgba(17,20,27,.44); --glass-bar: rgba(12,14,19,.40);
-  --glass-pop: rgba(16,20,28,.55); --glass-modal: rgba(13,16,22,.66);
-  --glass-drawer: rgba(11,13,18,.54); --glass-hi: rgba(255,255,255,.12);
-  /* brightness lift makes the blurred backdrop read as a frost on the dark UI */
-  --glass-blur: saturate(190%) brightness(1.14) blur(28px);
+  --glass-titl: rgba(17,20,27,.55); --glass-bar: rgba(12,14,19,.46);
+  --glass-pop: rgba(16,20,28,.58); --glass-modal: rgba(13,16,22,.64);
+  --glass-drawer: rgba(11,13,18,.54); --glass-hi: rgba(255,255,255,.10);
+  --glass-blur: saturate(200%) blur(32px);
+  /* cards + sheets: cards lift off a sheet in light; in dark they match sf-05 with no shadow */
+  --sheet-bg: transparent; --card-bg: var(--sf-05); --card-bd: rgba(var(--ink),.09); --card-sh: none;
   color-scheme: dark;
 }
 
 /* ===== THEME TOKENS — light ===== */
 :root[data-oo-theme="light"] {
-  --ink: 22,30,44;
+  --ink: 20,28,42;
   --glow: 45,180,165;
-  --sf-desk:#e6eaf1; --sf-void:#e1e6ee; --sf-rail:#eef1f6; --sf-tabs:#eef1f6;
-  --sf-main:#ffffff; --sf-01:#f6f8fb; --sf-02:#f6f8fb; --sf-03:#f1f4f9;
-  --sf-04:#f6f8fb; --sf-05:#f8fafc; --sf-modal:#ffffff; --sf-ctrl:#eef2f7;
-  --sf-pop:#ffffff; --sf-hov:#eef1f6; --sf-06:#e8edf4; --sf-07:#e8edf4;
-  --sf-hov2:#e7ecf3; --sf-track:#cfd5df; --sf-atint:#d3f3ec; --sf-atint2:#e0f5f0;
-  --sf-titl:#f4f7fb;
-  --tx-max:#0d141c; --tx-glow:#0a4a41; --tx-hi:#101820; --tx-01:#1b2431;
-  --tx-02:#202836; --tx-03:#28313f; --tx-04:#313b48; --tx-05:#4a5361;
-  --tx-06:#5b6573; --tx-07:#6b7381; --tx-7b:#6e7785; --tx-09:#79818e;
-  --tx-10:#89909c; --tx-11:#8d94a0; --tx-12:#949ca7; --tx-13:#a6adb6;
-  --tx-14:#adb3bd; --tx-15:#b5bac3;
-  --gg-1:#2b4a43; --gg-2:#4b6b63; --gg-3:#5d6f6a; --gg-4:#79857f; --gg-5:#8a938e;
-  --av-1:#c1c9d6; --av-2:#99a2b1;
-  --sy-str:#2f8f3a; --sy-num:#b0741a; --sy-key:#2f5fc4; --sy-bool:#2563eb;
-  --sy-null:#d33a30; --sy-kw:#d23a66; --sy-fn:#0e83ad;
-  /* Light theme keeps a near-opaque desk veil so the (fixed dark) vibrancy
-     material can't wash out contrast; the frost here is intentionally subtle. */
-  --desk-veil: #e6eaf1;                /* opaque light desk */
-  --glass-titl: rgba(247,249,252,.50); --glass-bar: rgba(240,243,248,.46);
-  --glass-pop: rgba(252,253,255,.60); --glass-modal: rgba(255,255,255,.72);
-  --glass-drawer: rgba(250,251,253,.56); --glass-hi: rgba(255,255,255,.6);
-  --glass-blur: saturate(150%) brightness(1.02) blur(28px);
+  --sf-desk:#d1d9e5; --sf-void:#c4cddb; --sf-rail:#e6ebf3; --sf-tabs:#e7ecf3;
+  --sf-main:#ffffff; --sf-01:#ffffff; --sf-02:#ecf1f7; --sf-03:#e6ecf4;
+  --sf-04:#ffffff; --sf-05:#ffffff; --sf-modal:#ffffff; --sf-ctrl:#e9eff5;
+  --sf-pop:#ffffff; --sf-hov:#e9eef4; --sf-06:#e0e7f0; --sf-07:#e6ecf4;
+  --sf-hov2:#e1e8f1; --sf-track:#c6cfdb; --sf-atint:#d0f2eb; --sf-atint2:#e0f5f0;
+  --sf-titl:#edf2f8;
+  --tx-max:#0b1119; --tx-glow:#08423a; --tx-hi:#0e161f; --tx-01:#18212e;
+  --tx-02:#1d2534; --tx-03:#252e3c; --tx-04:#2f3947; --tx-05:#404956;
+  --tx-06:#4c5563; --tx-07:#565f6c; --tx-7b:#5a6370; --tx-09:#576070;
+  --tx-10:#535e6e; --tx-11:#626b79; --tx-12:#6c7482; --tx-13:#838b97;
+  --tx-14:#969ea9; --tx-15:#a4abb6;
+  --gg-1:#243f39; --gg-2:#42605a; --gg-3:#556662; --gg-4:#6e7a76; --gg-5:#828b86;
+  --av-1:#b6bfce; --av-2:#8993a3;
+  --sy-str:#1f7a2b; --sy-num:#9a6410; --sy-key:#2350b8; --sy-bool:#1d4ed8;
+  --sy-null:#c62f26; --sy-kw:#c22f5b; --sy-fn:#0b7295;
+  --desk-veil:#d1d9e5;                /* deepened so panels lift off it */
+  --glass-titl: rgba(237,241,247,.55); --glass-bar: rgba(232,237,244,.48);
+  --glass-pop: rgba(252,253,255,.60); --glass-modal: rgba(255,255,255,.66);
+  --glass-drawer: rgba(250,251,253,.58); --glass-hi: rgba(255,255,255,.75);
+  --glass-blur: saturate(180%) blur(32px);
+  --sheet-bg:#eef2f7; --card-bg:#ffffff; --card-bd: rgba(20,28,42,.11);
+  --card-sh: 0 1px 2px rgba(28,39,58,.06), 0 6px 16px -8px rgba(28,39,58,.16);
   color-scheme: light;
 }
 
