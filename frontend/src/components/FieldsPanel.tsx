@@ -1,8 +1,10 @@
 /* FieldsPanel — design lines 233–289 */
 
+import { useState, useRef, useEffect } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { Field, StreamInfo } from '../types';
 import { hexA } from '../lib/format';
+import { filterStreams } from '../lib/streams';
 import styles from './FieldsPanel.module.css';
 
 // Field glyph/color mapping — design script lines 1140-1146
@@ -81,6 +83,17 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
     : fields;
   const fieldCount = String(filtered.length);
 
+  const [streamFilter, setStreamFilter] = useState('');
+  const streamSearchRef = useRef<HTMLInputElement>(null);
+  // Focus the search field and reset the query each time the dropdown opens.
+  useEffect(() => {
+    if (streamOpen) {
+      setStreamFilter('');
+      requestAnimationFrame(() => streamSearchRef.current?.focus());
+    }
+  }, [streamOpen]);
+  const shownStreams = filterStreams(streams, streamFilter);
+
   // Animated collapse: the expanded panel and the collapsed strip are BOTH
   // mounted inside a width-animating shell and crossfade. (design lines 233-289)
   return (
@@ -119,22 +132,42 @@ export function FieldsPanel(props: FieldsPanelProps): ReactElement {
 
         {/* stream dropdown — shown when streamOpen=true */}
         {streamOpen && (
-          <div className={`oo-scroll ${styles.dropdown}`}>
-            {streams.map((s) => (
-              <div
-                key={s.name}
-                className={`${styles.dropdownItem} ${s.name === stream ? styles.dropdownItemActive : ''}`}
-                onClick={() => onPickStream(s.name)}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <ellipse cx="12" cy="6" rx="8" ry="3" />
-                  <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6" />
-                </svg>
-                <span className={styles.dropdownItemName}>{s.name}</span>
-                <span style={{ flex: 1 }} />
-                <span className={styles.dropdownItemSize}>{s.size}</span>
+          <div className={styles.dropdown}>
+            <div className={styles.dropdownSearch}>
+              <div className={styles.dropdownSearchBox}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx-11)" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
+                <input
+                  ref={streamSearchRef}
+                  className={styles.dropdownSearchInput}
+                  value={streamFilter}
+                  onChange={(e) => setStreamFilter(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Search streams…"
+                  spellCheck={false}
+                />
+                <span className={styles.dropdownSearchCount}>{shownStreams.length}</span>
               </div>
-            ))}
+            </div>
+            <div className={`oo-scroll ${styles.dropdownList}`}>
+              {shownStreams.map((s) => (
+                <div
+                  key={s.name}
+                  className={`${styles.dropdownItem} ${s.name === stream ? styles.dropdownItemActive : ''}`}
+                  onClick={() => onPickStream(s.name)}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <ellipse cx="12" cy="6" rx="8" ry="3" />
+                    <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6" />
+                  </svg>
+                  <span className={styles.dropdownItemName}>{s.name}</span>
+                  <span style={{ flex: 1 }} />
+                  <span className={styles.dropdownItemSize}>{s.size}</span>
+                </div>
+              ))}
+              {shownStreams.length === 0 && (
+                <div className={styles.dropdownEmpty}>No streams match "{streamFilter}"</div>
+              )}
+            </div>
           </div>
         )}
       </div>

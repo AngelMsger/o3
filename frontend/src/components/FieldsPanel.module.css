@@ -130,17 +130,62 @@
   right: 10px;
   top: 70px;
   background: var(--sf-pop);
-  border: 1px solid rgba(var(--ink),0.12);
+  border: 1px solid rgba(var(--ink), 0.12);
   border-radius: 9px;
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.85);
-  /* cap the height so a long stream list scrolls instead of running off-screen;
-     keep horizontal overflow clipped so the rounded corners stay clean */
-  max-height: 320px;
-  overflow-y: auto;
-  overflow-x: hidden;
   z-index: 50;
-  padding: 4px;
+  overflow: hidden;
   animation: ooFade var(--motion-base) var(--motion-ease);
+}
+
+.dropdownSearch {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(var(--ink), 0.08);
+}
+
+/* Named distinctly from .searchBox/.searchInput/.searchCount (the field-filter
+   box below) — those class names are already used elsewhere in this module,
+   and CSS Modules would merge a same-named rule into the same scoped class. */
+.dropdownSearchBox {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--sf-04);
+  border: 1px solid rgba(var(--ink), 0.12);
+  border-radius: 8px;
+}
+
+.dropdownSearchInput {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--tx-01);
+  font-size: 12.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dropdownSearchCount {
+  font-size: 10px;
+  color: var(--tx-12);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dropdownList {
+  max-height: 258px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.dropdownEmpty {
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--tx-10);
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .dropdownItem {
