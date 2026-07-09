@@ -2,6 +2,7 @@
    Left panel shows "Your contexts" list + "+ New context"; right pane edits the
    selected context (name, URL, org, auth, test, save). */
 import type { ReactElement } from 'react';
+import { authTabToScheme, schemeToAuthTab } from '../lib/signin';
 import styles from './SetupWizard.module.css';
 
 // UICtx mirrors the interface in App.tsx (kept local to avoid a shared types file)
@@ -32,9 +33,11 @@ interface SetupWizardProps {
   onClose: () => void;
   onSave: (ctx: UICtx) => Promise<void>;
   onAddContext: () => void;
+  onBrowserSignIn: (ctx: UICtx) => void;
 }
 
-const AUTH_TABS: Array<{ id: 'password' | 'token' | 'sso'; label: string }> = [
+const AUTH_TABS: Array<{ id: 'session' | 'password' | 'token' | 'sso'; label: string }> = [
+  { id: 'session', label: 'Browser sign-in' },
   { id: 'password', label: 'Email & Password' },
   { id: 'token', label: 'API Token' },
   { id: 'sso', label: 'SSO' },
@@ -54,15 +57,21 @@ export function SetupWizard({
   onClose,
   onSave,
   onAddContext,
+  onBrowserSignIn,
 }: SetupWizardProps): ReactElement {
   const selected = contexts.find((c) => c.name === currentName) ?? contexts[0];
   // Fix 3: derive the active auth tab from the selected context's scheme so the
   // displayed tab always matches what handleSaveContext / handleTestContext will use.
-  const authTab: 'password' | 'token' | 'sso' =
-    selected?.scheme === 'token' ? 'token' : selected?.scheme === 'sso' ? 'sso' : 'password';
+  const authTab = schemeToAuthTab(selected?.scheme ?? '');
+  const isSession = authTab === 'session';
 
   return (
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
+      {/* Draggable strip — the overlay covers the TitleBar's drag region, so
+          this restores window dragging from the top edge (native traffic-light
+          buttons float above it and stay clickable). */}
+      <div className={`${styles.dragStrip} oo-drag`} />
+
       {/* ===== Left brand panel — design line 563 ===== */}
       <div className={styles.left}>
         {/* Logo icon — design line 569 */}
@@ -192,8 +201,7 @@ export function SetupWizard({
                     if (!selected) return;
                     // Fix 3: toggling the auth tab updates the selected context's scheme
                     // so Save/Test always use the scheme the user sees.
-                    const scheme = a.id === 'token' ? 'token' : a.id === 'sso' ? 'sso' : 'basic';
-                    onUpdateCtx(selected.name, 'scheme', scheme);
+                    onUpdateCtx(selected.name, 'scheme', authTabToScheme(a.id));
                   }}
                 >
                   {a.label}
@@ -201,6 +209,24 @@ export function SetupWizard({
               ))}
             </div>
           </div>
+
+          {/* Auth pane: browser sign-in (default) */}
+          {isSession && (
+            <div className={styles.browserPane}>
+              <div className={styles.browserDesc}>
+                Log in through your instance's own web page — o3 opens a secure window, captures the session, and stores it in your OS keychain. No token to create or paste; works for everyone.
+              </div>
+              <button
+                className={styles.browserBtn}
+                onClick={() => selected && onBrowserSignIn(selected)}
+                disabled={!selected || !selected.url}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
+                Open sign-in window
+              </button>
+              {!selected?.url && <div className={styles.browserHint}>Enter your Server URL above first.</div>}
+            </div>
+          )}
 
           {/* Auth pane: password */}
           {authTab === 'password' && (
@@ -249,44 +275,51 @@ export function SetupWizard({
             </div>
           )}
 
-          {/* Self-signed toggle */}
-          <div className={styles.toggleRow}>
-            <button
-              className={`${styles.toggle}${selfSigned ? ` ${styles.toggleOn}` : ''}`}
-              onClick={onToggleSelfSigned}
-            >
-              <span
-                className={styles.knob}
-                style={selfSigned ? { transform: 'translateX(16px)' } : undefined}
-              />
-            </button>
-            <span className={styles.toggleLabel}>Trust Self-Signed Certificate</span>
-          </div>
+          {/* Self-signed toggle + Test (not shown for browser sign-in, which
+              connects through the captured session, not typed credentials) */}
+          {!isSession && (
+            <>
+              <div className={styles.toggleRow}>
+                <button
+                  className={`${styles.toggle}${selfSigned ? ` ${styles.toggleOn}` : ''}`}
+                  onClick={onToggleSelfSigned}
+                >
+                  <span
+                    className={styles.knob}
+                    style={selfSigned ? { transform: 'translateX(16px)' } : undefined}
+                  />
+                </button>
+                <span className={styles.toggleLabel}>Trust Self-Signed Certificate</span>
+              </div>
 
-          {/* Test connection row */}
-          <div className={styles.testRow}>
-            <button
-              className={styles.testBtn}
-              onClick={() => selected && onTest(selected)}
-              disabled={!selected}
-            >
-              Test Connection
-            </button>
-            {tested && (
-              <span className={styles.testedLabel}>✓ reachable</span>
-            )}
-          </div>
-          {error && <div className={styles.testError}>{error}</div>}
+              <div className={styles.testRow}>
+                <button
+                  className={styles.testBtn}
+                  onClick={() => selected && onTest(selected)}
+                  disabled={!selected}
+                >
+                  Test Connection
+                </button>
+                {tested && (
+                  <span className={styles.testedLabel}>✓ reachable</span>
+                )}
+              </div>
+              {error && <div className={styles.testError}>{error}</div>}
+            </>
+          )}
 
-          {/* Action buttons */}
+          {/* Action buttons — browser sign-in connects via the sign-in window,
+              so it only offers Skip; typed methods keep Connect & Continue. */}
           <div className={styles.actions}>
-            <button
-              className={styles.btnPrimary}
-              onClick={() => selected && onSave(selected)}
-              disabled={!selected}
-            >
-              Connect &amp; Continue
-            </button>
+            {!isSession && (
+              <button
+                className={styles.btnPrimary}
+                onClick={() => selected && onSave(selected)}
+                disabled={!selected}
+              >
+                Connect &amp; Continue
+              </button>
+            )}
             <button className={styles.btnSkip} onClick={onClose}>
               Skip
             </button>

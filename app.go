@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	api "github.com/angelmsger/openobserve-cli/pkg/apiclient"
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
@@ -16,6 +18,7 @@ import (
 	"github.com/angelmsger/o3/internal/ecosystem"
 	"github.com/angelmsger/o3/internal/metrics"
 	"github.com/angelmsger/o3/internal/query"
+	"github.com/angelmsger/o3/internal/webauth"
 )
 
 // App is the Wails-bound application. It owns a lazily-built client for the
@@ -354,6 +357,123 @@ func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
 		info.StreamCount = len(streams)
 	}
 	return info, nil
+}
+
+// --- Browser sign-in (captured session) ---
+
+// SessionResult is returned to the frontend after a browser capture, before the
+// user authorizes persistence. Secret is the encoded session blob handed back
+// to SaveContext once the user authorizes.
+type SessionResult struct {
+	Email     string `json:"email"`
+	Org       string `json:"org"`
+	Secret    string `json:"secret"`
+	Host      string `json:"host"`
+	ExpiresAt string `json:"expiresAt"` // RFC3339, empty when unknown
+}
+
+// SessionInfo describes a stored browser session for the connection UI.
+type SessionInfo struct {
+	Email     string `json:"email"`
+	ExpiresAt string `json:"expiresAt"` // RFC3339, empty when unknown
+	Valid     bool   `json:"valid"`
+}
+
+// normalizeURL ensures the instance URL has a scheme and no trailing slash.
+func normalizeURL(raw string) (string, error) {
+	s := strings.TrimSpace(raw)
+	if s == "" {
+		return "", fmt.Errorf("instance URL is required")
+	}
+	if !strings.Contains(s, "://") {
+		s = "https://" + s
+	}
+	u, err := url.Parse(s)
+	if err != nil || u.Host == "" {
+		return "", fmt.Errorf("invalid instance URL %q", raw)
+	}
+	u.Path = strings.TrimRight(u.Path, "/")
+	return u.String(), nil
+}
+
+// hostOf returns the host (with any port) of a URL, for cookie scoping.
+func hostOf(rawURL string) string {
+	if u, err := url.Parse(rawURL); err == nil && u.Host != "" {
+		return u.Host
+	}
+	return rawURL
+}
+
+func rfc3339OrEmpty(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.UTC().Format(time.RFC3339)
+}
+
+// BrowserSignIn opens the native login window for the instance URL, captures the
+// authenticated session, and returns it for the frontend consent step. It does
+// NOT persist anything; the frontend calls SaveContext once the user authorizes.
+func (a *App) BrowserSignIn(rawURL, org string) (SessionResult, error) {
+	base, err := normalizeURL(rawURL)
+	if err != nil {
+		return SessionResult{}, apperr.Wrap(err)
+	}
+	host := hostOf(base)
+	sess, err := webauth.Capture(base+"/web/login", host)
+	if err != nil {
+		return SessionResult{}, apperr.Wrap(err)
+	}
+	blob, err := pkgauth.EncodeSession(sess)
+	if err != nil {
+		return SessionResult{}, apperr.Wrap(err)
+	}
+	return SessionResult{
+		Email:     sess.Email,
+		Org:       orgOrDefault(org),
+		Secret:    blob,
+		Host:      host,
+		ExpiresAt: rfc3339OrEmpty(sess.ExpiresAt),
+	}, nil
+}
+
+// SessionStatus reports the stored browser session for a context URL (email,
+// expiry) for the Settings "Connected" card. Valid is false when none is stored.
+func (a *App) SessionStatus(rawURL string) (SessionInfo, error) {
+	base, err := normalizeURL(rawURL)
+	if err != nil {
+		return SessionInfo{}, apperr.Wrap(err)
+	}
+	secret, has, err := config.LoadSecret(base, pkgauth.SchemeSession)
+	if err != nil {
+		return SessionInfo{}, apperr.Wrap(err)
+	}
+	if !has {
+		return SessionInfo{Valid: false}, nil
+	}
+	s := pkgauth.DecodeSession(secret)
+	return SessionInfo{
+		Email:     s.Email,
+		ExpiresAt: rfc3339OrEmpty(s.ExpiresAt),
+		Valid:     true,
+	}, nil
+}
+
+// SignOut removes the stored browser session for a context URL and drops the
+// live client so the app returns to a signed-out state.
+func (a *App) SignOut(rawURL string) error {
+	base, err := normalizeURL(rawURL)
+	if err != nil {
+		return apperr.Wrap(err)
+	}
+	if err := config.DeleteSecret(base, pkgauth.SchemeSession); err != nil {
+		return apperr.Wrap(err)
+	}
+	a.mu.Lock()
+	a.client = nil
+	a.mu.Unlock()
+	_ = a.rebuildClient() // best-effort; likely not-configured after sign-out
+	return nil
 }
 
 // ListStreams returns the logs streams in the configured org.
