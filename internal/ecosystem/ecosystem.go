@@ -75,13 +75,8 @@ func (s *Service) Status(ctx context.Context) (EcoStatus, error) {
 			st.CLI.Version = parseCLIVersion(out)
 		}
 		st.CLI.Managed = "external"
-		if st.NpmAvailable {
-			// `npm ls` exits non-zero when the package is absent but still prints
-			// JSON, so parse stdout regardless of err.
-			out, _, _ := s.run.Run(ctx, "npm", "ls", "-g", "--depth=0", "--json", pkgName)
-			if parseNpmManaged(out) {
-				st.CLI.Managed = "npm"
-			}
+		if st.NpmAvailable && s.cliManaged(ctx) {
+			st.CLI.Managed = "npm"
 		}
 		if latest, err := s.latest(ctx); err == nil && latest != "" {
 			st.CLI.LatestVersion = latest
@@ -98,12 +93,19 @@ func (s *Service) Status(ctx context.Context) (EcoStatus, error) {
 	return st, nil
 }
 
-// runSkillStatus runs `openobserve-cli skill status --format json` with the
-// skill-loaded handshake env so the CLI does not print discovery hints.
+// cliManaged reports whether the installed CLI is npm-managed. Cheap: runs only
+// `npm ls` (no registry fetch, no skill exec). npmAvailable must be true.
+func (s *Service) cliManaged(ctx context.Context) bool {
+	// `npm ls` exits non-zero when the package is absent but still prints JSON,
+	// so parse stdout regardless of err.
+	out, _, _ := s.run.Run(ctx, "npm", "ls", "-g", "--depth=0", "--json", pkgName)
+	return parseNpmManaged(out)
+}
+
+// runSkillStatus runs openobserve-cli skill status --format json. The
+// OPENOBSERVE_CLI_SKILL=1 handshake env is set once in NewProduction and
+// inherited by the child, so the CLI suppresses its stderr discovery nudge.
 func (s *Service) runSkillStatus(ctx context.Context) (string, string, error) {
-	// The env is set on the process by execRunner via os.Environ(); we set it in
-	// the current process env so children inherit it. Setting per-call keeps it
-	// scoped to detection.
 	return s.run.Run(ctx, "openobserve-cli", "skill", "status", "--format", "json")
 }
 
@@ -134,8 +136,8 @@ func (s *Service) UpgradeCLI(ctx context.Context) error {
 }
 
 func (s *Service) UninstallCLI(ctx context.Context) error {
-	st, _ := s.Status(ctx)
-	if st.CLI.Managed != "npm" {
+	_, npmAvailable := s.run.LookPath("npm")
+	if !npmAvailable || !s.cliManaged(ctx) {
 		return fmt.Errorf("openobserve-cli is not managed by npm; uninstall it the way it was installed")
 	}
 	_, stderr, err := s.run.Run(ctx, "npm", "uninstall", "-g", pkgName)

@@ -599,7 +599,7 @@ function App() {
               state: ecoStatus ? dotState(ecoStatus.cli) : 'off',
               title: ecoStatus ? ecoTooltip(ecoStatus.cli) : 'openobserve-cli not installed',
             }}
-            onOpenEcosystem={() => { setSettingsOpen(true); setSettingsTab('agent'); }}
+            onOpenEcosystem={() => { setSettingsOpen(true); setSettingsTab('agent'); refreshEco(); }}
           />
 
           {/* main column — design line 75. Nav routing: Logs renders the query
