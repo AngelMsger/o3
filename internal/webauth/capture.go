@@ -7,6 +7,14 @@ import (
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
 )
 
+// VerifyFunc confirms that a captured session actually authenticates against the
+// instance's API. When a verifier is supplied, Capture reports success only once
+// it returns true, so a login that merely set a benign preference/language cookie
+// — or an in-progress SSO redirect that briefly leaves the login path — is never
+// mistaken for a completed sign-in. A nil verifier disables the probe and falls
+// back to the pure cookie/URL heuristic (used off-darwin and in unit tests).
+type VerifyFunc func(pkgauth.Session) bool
+
 // nativeProbe is the JSON payload the native window hands to Go on each capture
 // probe: the current WebView URL plus the cookies and any Authorization/email
 // observed. Parsing it here (rather than in Objective-C) keeps the native shell

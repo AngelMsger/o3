@@ -83,6 +83,12 @@ func firstString(hit map[string]any, keys []string) string {
 
 // buildKVs expands every key, sorted, typing each value. The levelKey (if any)
 // is marked "lvl" so the drawer colors it.
+//
+// V is the RAW field value, never a display-formatted one: strings are stored
+// unquoted and numbers as their plain digits. Kind carries the type so the
+// frontend can add quotes for rendering, reconstruct typed values for Copy JSON,
+// and — critically — feed the unquoted value straight into the SQL filter
+// builder (a value of `foo` must yield `field = 'foo'`, not `field = '"foo"'`).
 func buildKVs(hit map[string]any, levelKey string) []KV {
 	keys := make([]string, 0, len(hit))
 	for k := range hit {
@@ -92,17 +98,15 @@ func buildKVs(hit map[string]any, levelKey string) []KV {
 	kvs := make([]KV, 0, len(keys))
 	for _, k := range keys {
 		v := hit[k]
-		kv := KV{K: k}
+		kv := KV{K: k, V: asString(v)}
 		switch {
 		case k == levelKey:
 			kv.Kind = "lvl"
-			kv.V = `"` + asString(v) + `"`
 		case isNumber(v):
 			kv.Kind = "num"
 			kv.V = formatNumber(v)
 		default:
 			kv.Kind = "str"
-			kv.V = `"` + asString(v) + `"`
 		}
 		kvs = append(kvs, kv)
 	}

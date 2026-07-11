@@ -7,6 +7,7 @@ import { EChart } from '../charts/EChart';
 import { buildMetricsOption } from '../charts/buildMetricsOption';
 import type { MetricSeries } from '../charts/buildMetricsOption';
 import { RunMetricsQuery } from '../../../wailsjs/go/main/App';
+import { createLatest } from '../../lib/latest';
 
 // Quick relative ranges for the metrics window (self-contained; the Logs time
 // picker is SQL-specific). ms = window length back from now.
@@ -40,24 +41,30 @@ export function MetricsView({ accent, isDark }: { accent: string; isDark: boolea
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ran, setRan] = useState(false);
+  // Newest-wins guard: a slow older query must not overwrite fresher results
+  // when the user changes the range or re-runs quickly.
+  const latest = useRef(createLatest()).current;
 
   const run = async () => {
     if (!promql.trim()) return;
+    const token = latest.begin();
     setLoading(true);
     setError(null);
     const now = Date.now() * 1000; // micros
     const start = Math.round(now - rangeMs * 1000);
     try {
       const res = await RunMetricsQuery({ promql, startMicros: start, endMicros: Math.round(now) } as any);
+      if (!latest.isCurrent(token)) return; // superseded by a newer run
       setSeries((res.series ?? []) as unknown as MetricSeries[]);
       setStep(res.step ?? '');
       setRan(true);
     } catch (e) {
+      if (!latest.isCurrent(token)) return;
       setError(parseAppError(e));
       setSeries([]);
       setRan(true);
     } finally {
-      setLoading(false);
+      if (latest.isCurrent(token)) setLoading(false);
     }
   };
 

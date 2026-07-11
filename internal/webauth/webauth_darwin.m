@@ -110,6 +110,13 @@ void o3StartWebAuth(const char *loginURL) {
         gAuth = auth;
 
         WKWebViewConfiguration *cfg = [[WKWebViewConfiguration alloc] init];
+        // Isolate every login in a private, non-persistent data store so no
+        // cookies or site data survive between captures. This makes account
+        // switching reliable — Browser Login can never silently recapture a
+        // prior user's session — and leaves Sign Out with no stale WebView
+        // state to clear. The captured cookies are replayed by o3's own HTTP
+        // client, independent of this store.
+        cfg.websiteDataStore = [WKWebsiteDataStore nonPersistentDataStore];
         // Fallback capture: observe the Authorization header the SPA sends to
         // /api/ and the logged-in email from localStorage, posted back to Go for
         // instances whose REST API expects the header rather than the cookie.
@@ -158,5 +165,14 @@ void o3StartWebAuth(const char *loginURL) {
 
         auth.timer = [NSTimer scheduledTimerWithTimeInterval:0.7 repeats:YES
             block:^(NSTimer *t){ [auth probe]; }];
+    });
+}
+
+void o3FinishWebAuth(void) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"[webauth] o3FinishWebAuth (main thread) hasWindow=%d", gAuth != nil);
+        if (gAuth != nil) {
+            [gAuth finish];
+        }
     });
 }

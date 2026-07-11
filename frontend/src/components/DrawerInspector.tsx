@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import type { LogRow } from '../types';
 import { hexA } from '../lib/format';
 import { copyText } from '../lib/clipboard';
+import { displayKvValue, rowToPlainObject } from '../lib/logRow';
 import styles from './DrawerInspector.module.css';
 
 // Level → color map — design line 750
@@ -58,7 +59,7 @@ export function DrawerInspector({ row, visible, onClose, onKvCtx }: DrawerInspec
           <button
             className={styles.copyBtn}
             title="Copy this record as JSON"
-            onClick={() => copyText(JSON.stringify(Object.fromEntries(row.json.map((kv) => [kv.k, kv.v])), null, 2))}
+            onClick={() => copyText(JSON.stringify(rowToPlainObject(row.json), null, 2))}
           >
             ⧉ Copy
           </button>
@@ -81,7 +82,7 @@ export function DrawerInspector({ row, visible, onClose, onKvCtx }: DrawerInspec
                 <span className={styles.kvKey}>{kv.k}</span>
                 <span className={styles.kvColon}>:</span>
                 <span style={{ color: kv.kind === 'lvl' ? (LEVEL_COLOR[row.level] ?? '#7c8696') : KIND_COLOR[kv.kind], minWidth: 0, wordBreak: 'break-all' }}>
-                  {kv.v}
+                  {displayKvValue(kv)}
                 </span>
               </div>
             ))}

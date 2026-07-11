@@ -73,14 +73,17 @@ func TestMapHitsKVTypingAndOrder(t *testing.T) {
 	if !reflect.DeepEqual(gotKeys, wantKeys) {
 		t.Fatalf("keys = %v, want %v", gotKeys, wantKeys)
 	}
+	// Values are the RAW field value (no display quotes): the frontend adds
+	// quotes for rendering and reconstructs types for Copy JSON, while the
+	// value-action menu feeds the unquoted value straight into the SQL builder.
 	if kv, _ := findKV(kvs, "count"); kv.Kind != "num" || kv.V != "42" {
 		t.Fatalf("count kv = %+v, want num/42", kv)
 	}
-	if kv, _ := findKV(kvs, "name"); kv.Kind != "str" || kv.V != `"alpha"` {
-		t.Fatalf("name kv = %+v, want str/\"alpha\"", kv)
+	if kv, _ := findKV(kvs, "name"); kv.Kind != "str" || kv.V != "alpha" {
+		t.Fatalf("name kv = %+v, want str/alpha", kv)
 	}
-	if kv, _ := findKV(kvs, "severity"); kv.Kind != "lvl" || kv.V != `"warn"` {
-		t.Fatalf("severity kv = %+v, want lvl/\"warn\"", kv)
+	if kv, _ := findKV(kvs, "severity"); kv.Kind != "lvl" || kv.V != "warn" {
+		t.Fatalf("severity kv = %+v, want lvl/warn", kv)
 	}
 	if kv, _ := findKV(kvs, "_timestamp"); kv.Kind != "num" || kv.V != "1751337480530000" {
 		t.Fatalf("_timestamp kv = %+v, want num/1751337480530000", kv)
