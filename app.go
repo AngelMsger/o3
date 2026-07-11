@@ -125,6 +125,46 @@ func contextInfos(f cfgshared.File, has func(url, scheme string) bool) []Context
 	return out
 }
 
+// sameAccount reports whether two (url, scheme) pairs resolve to the same
+// keychain account. Secrets are keyed by host+scheme (see pkgauth.AccountKey),
+// so differing orgs or paths on one instance share a stored secret.
+func sameAccount(url1, scheme1, url2, scheme2 string) bool {
+	return pkgauth.AccountKey(url1, schemeOrBasic(scheme1)) == pkgauth.AccountKey(url2, schemeOrBasic(scheme2))
+}
+
+// accountInUse reports whether any context in f (other than one named except)
+// resolves to the same keychain account as (url, scheme). Because secrets are
+// shared by host+scheme, a secret must survive as long as any context still
+// references it — deleting it would break those siblings. Pass except="" to
+// count every context.
+func accountInUse(f cfgshared.File, url, scheme, except string) bool {
+	target := pkgauth.AccountKey(url, schemeOrBasic(scheme))
+	for _, c := range f.Contexts {
+		if except != "" && strings.EqualFold(c.Name, except) {
+			continue
+		}
+		if pkgauth.AccountKey(c.BaseURL, schemeOrBasic(c.Auth.Scheme)) == target {
+			return true
+		}
+	}
+	return false
+}
+
+// fileDefaults reads the shared config Defaults (timeout/retries), falling back
+// to zero values when the config cannot be read, so live and probe clients use
+// the same connection settings.
+func (a *App) fileDefaults() cfgshared.Defaults {
+	dir, err := configDir()
+	if err != nil {
+		return cfgshared.Defaults{}
+	}
+	f, _, err := cfgshared.ReadFile(dir)
+	if err != nil {
+		return cfgshared.Defaults{}
+	}
+	return f.Defaults
+}
+
 // buildClient assembles an authenticated client for a context with a secret.
 func buildClient(url, org, scheme, username, secret string, def cfgshared.Defaults) (api.Client, error) {
 	cred := pkgauth.Credential{Scheme: schemeOrBasic(scheme), Username: username, Secret: secret}
@@ -250,6 +290,14 @@ func (a *App) SaveContext(c ConnConfig) error {
 	if c.Name == "" || c.URL == "" {
 		return apperr.Wrap(fmt.Errorf("context name and URL are required"))
 	}
+	// I2: normalize the URL (add scheme, trim trailing slash) before it is
+	// stored or used as a secret key, so config.BaseURL always builds a valid
+	// client and every keychain lookup — including SessionStatus/SignOut, which
+	// normalize their input — resolves to the same account.
+	base, err := normalizeURL(c.URL)
+	if err != nil {
+		return apperr.Wrap(err)
+	}
 	scheme := schemeOrBasic(c.Scheme)
 	dir, err := configDir()
 	if err != nil {
@@ -259,6 +307,13 @@ func (a *App) SaveContext(c ConnConfig) error {
 	if err != nil {
 		return apperr.Wrap(err)
 	}
+	// Snapshot the pre-change entry (by its old name) so a URL/scheme change can
+	// clean up the now-orphaned secret below.
+	oldName := c.Name
+	if c.OrigName != "" {
+		oldName = c.OrigName
+	}
+	oldCtx, hadOld := f.Context(oldName)
 	// I1: when the context was renamed, remove the old entry before upserting
 	// the new name so the shared config.yaml never accumulates duplicates.
 	if c.OrigName != "" && !strings.EqualFold(c.OrigName, c.Name) {
@@ -269,19 +324,32 @@ func (a *App) SaveContext(c ConnConfig) error {
 	}
 	f.Upsert(cfgshared.NamedContext{
 		Name:    c.Name,
-		BaseURL: c.URL,
+		BaseURL: base,
 		Org:     orgOrDefault(c.Org),
 		Auth:    cfgshared.AuthConfig{Scheme: scheme, Username: c.Username},
 	})
 	if f.CurrentContext == "" {
 		f.CurrentContext = c.Name // first context becomes current
 	}
+	// I3 (transactional): persist the secret BEFORE config.yaml. If the keychain
+	// is locked or denies access, neither is written — rather than leaving a
+	// context that points at a missing credential and starts the app unusable.
+	if c.Secret != "" {
+		if err := config.SaveSecret(base, scheme, c.Secret); err != nil {
+			return apperr.Wrap(err)
+		}
+	}
 	if err := cfgshared.WriteFile(dir, f); err != nil {
 		return apperr.Wrap(err)
 	}
-	if c.Secret != "" {
-		if err := config.SaveSecret(c.URL, scheme, c.Secret); err != nil {
-			return apperr.Wrap(err)
+	// Clean up an orphaned secret after a URL/scheme change: delete the old
+	// account only when nothing else references it (secrets are shared by
+	// host+scheme).
+	if hadOld {
+		oldScheme := schemeOrBasic(oldCtx.Auth.Scheme)
+		if !sameAccount(oldCtx.BaseURL, oldScheme, base, scheme) &&
+			!accountInUse(f, oldCtx.BaseURL, oldScheme, "") {
+			_ = config.DeleteSecret(oldCtx.BaseURL, oldScheme)
 		}
 	}
 	if c.Name == f.CurrentContext {
@@ -318,7 +386,14 @@ func (a *App) RemoveContext(name string) error {
 	if err := cfgshared.WriteFile(dir, f); err != nil {
 		return apperr.Wrap(err)
 	}
-	_ = config.DeleteSecret(ctx.BaseURL, schemeOrBasic(ctx.Auth.Scheme))
+	// I4: only delete the secret when no remaining context shares its
+	// host+scheme account; otherwise sibling contexts (e.g. another org on the
+	// same instance) would lose their credential as a side effect of removing
+	// this one.
+	oldScheme := schemeOrBasic(ctx.Auth.Scheme)
+	if !accountInUse(f, ctx.BaseURL, oldScheme, "") {
+		_ = config.DeleteSecret(ctx.BaseURL, oldScheme)
+	}
 	a.mu.Lock()
 	a.client = nil
 	a.mu.Unlock()
@@ -411,6 +486,32 @@ func rfc3339OrEmpty(t time.Time) string {
 	return t.UTC().Format(time.RFC3339)
 }
 
+// sessionVerifier returns a webauth.VerifyFunc that confirms a captured session
+// by making a real authenticated request (Ping) to the instance. Only a session
+// whose cookies (or Authorization fallback) actually authenticate counts as a
+// completed login, so an in-progress SSO redirect or a benign login-page cookie
+// can never be mistaken for success. This is the signal that stops capture.
+func sessionVerifier(ctx context.Context, base, org string, def cfgshared.Defaults) webauth.VerifyFunc {
+	return func(sess pkgauth.Session) bool {
+		blob, err := pkgauth.EncodeSession(sess)
+		if err != nil {
+			return false
+		}
+		client, err := buildClient(base, org, pkgauth.SchemeSession, sess.Email, blob, def)
+		if err != nil {
+			return false
+		}
+		reqCtx := ctx
+		if reqCtx == nil {
+			reqCtx = context.Background()
+		}
+		cctx, cancel := context.WithTimeout(reqCtx, 20*time.Second)
+		defer cancel()
+		_, err = client.Ping(cctx)
+		return err == nil
+	}
+}
+
 // BrowserSignIn opens the native login window for the instance URL, captures the
 // authenticated session, and returns it for the frontend consent step. It does
 // NOT persist anything; the frontend calls SaveContext once the user authorizes.
@@ -420,7 +521,8 @@ func (a *App) BrowserSignIn(rawURL, org string) (SessionResult, error) {
 		return SessionResult{}, apperr.Wrap(err)
 	}
 	host := hostOf(base)
-	sess, err := webauth.Capture(base+"/web/login", host)
+	verify := sessionVerifier(a.ctx, base, orgOrDefault(org), a.fileDefaults())
+	sess, err := webauth.Capture(base+"/web/login", host, verify)
 	if err != nil {
 		return SessionResult{}, apperr.Wrap(err)
 	}
@@ -466,8 +568,20 @@ func (a *App) SignOut(rawURL string) error {
 	if err != nil {
 		return apperr.Wrap(err)
 	}
-	if err := config.DeleteSecret(base, pkgauth.SchemeSession); err != nil {
-		return apperr.Wrap(err)
+	// I4: a captured session is shared by host+scheme. Only remove it when no
+	// OTHER context references the same account, so signing out of the current
+	// context never silently breaks a sibling that reuses the same login. When a
+	// sibling shares it, we keep the secret and just drop the live client.
+	remove := true
+	if dir, derr := configDir(); derr == nil {
+		if f, ok, rerr := cfgshared.ReadFile(dir); rerr == nil && ok {
+			remove = !accountInUse(f, base, pkgauth.SchemeSession, f.CurrentContext)
+		}
+	}
+	if remove {
+		if err := config.DeleteSecret(base, pkgauth.SchemeSession); err != nil {
+			return apperr.Wrap(err)
+		}
 	}
 	a.mu.Lock()
 	a.client = nil

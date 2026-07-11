@@ -34,6 +34,8 @@ import { BrowserOpenURL } from '../wailsjs/runtime/runtime';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab, ThemePref } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
+import { relativeRange, rangeToMicros, rangeLabel, parseAbsolute, type TimeRange } from './lib/timeRange';
+import { createLatest } from './lib/latest';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
@@ -295,6 +297,15 @@ function App() {
   const [relUnit, setRelUnit] = useState<string>('m');
   const [absFrom, setAbsFrom] = useState<string>('');
   const [absTo, setAbsTo] = useState<string>('');
+  // appliedRange is the COMMITTED time window the query layer reads. The rel*/abs*
+  // fields above are only the picker's draft inputs until Apply / a quick-range
+  // pick commits them here, so the picker actually drives queries.
+  const [appliedRange, setAppliedRange] = useState<TimeRange>(relativeRange(15, 'm'));
+
+  // queryLatest guards against out-of-order query responses: each run takes a
+  // token and only the newest applies, so a slow older query (or one from a
+  // context the user has since left) can never overwrite fresher results.
+  const queryLatest = useRef(createLatest()).current;
 
   /* Live-data state — M2 */
   const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
@@ -388,16 +399,10 @@ function App() {
     { lo: number; hi: number; startMicros: number; endMicros: number; label: string } | null
   >(null);
 
-  /* Step 5: Compute the PRIMARY time window from the relative picker state. */
-  const computeRange = (): { startMicros: number; endMicros: number } => {
-    const now = Date.now() * 1000; // micros
-    const amount = parseInt(relAmount, 10) || 15;
-    const unitMicros: Record<string, number> = {
-      s: 1e6, m: 60e6, h: 3600e6, d: 86400e6, w: 604800e6,
-    };
-    const span = amount * (unitMicros[relUnit] ?? 60e6);
-    return { startMicros: Math.round(now - span), endMicros: Math.round(now) };
-  };
+  /* Step 5: Compute the PRIMARY time window from the committed range. Relative
+     ranges resolve against the current wall clock at call time; absolute ranges
+     use their fixed bounds. */
+  const computeRange = (): { startMicros: number; endMicros: number } => rangeToMicros(appliedRange);
 
   // buildRequest returns the effective SQL and stream for the current query mode.
   const buildRequest = (): { sql: string; effStream: string } => {
@@ -415,6 +420,7 @@ function App() {
     pageNum: number,
     opts?: { resultsRange?: { startMicros: number; endMicros: number }; withHistogram?: boolean },
   ) => {
+    const token = queryLatest.begin(); // newest-wins guard against out-of-order responses
     setRunning(true); setLoading(true); setQueryError(null);
     // Results honor the secondary drill-down window when one is active; an explicit
     // resultsRange (from a brush apply/clear) is used verbatim to avoid racing state.
@@ -433,18 +439,22 @@ function App() {
         size: PAGE_SIZE,
         histogram: withHistogram,
       } as any);
+      if (!queryLatest.isCurrent(token)) return; // a newer run/switch superseded this one
       setLiveRows((res.rows ?? []) as unknown as TLogRow[]);
       if (withHistogram) setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
       setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
       setPage(pageNum);
       if (effStream && effStream !== stream) setActiveStream(effStream); // sync tab to the queried FROM
     } catch (e: any) {
+      if (!queryLatest.isCurrent(token)) return;
       const ae = parseAppError(e);
       setQueryError({ message: ae.message, hint: ae.hint });
       setLiveRows([]);
       if (withHistogram) setLiveBars([]);
     } finally {
-      setRunning(false); setLoading(false);
+      // Only the current run controls the busy state; a superseded run must not
+      // flip loading off while the newer one is still in flight.
+      if (queryLatest.isCurrent(token)) { setRunning(false); setLoading(false); }
     }
   };
   // A fresh Run (or Cmd+Enter) resets to page 1 and drops any drill-down so the primary
@@ -476,6 +486,8 @@ function App() {
   // handleSwitchContext switches the active context and reloads streams.
   const handleSwitchContext = async (name: string) => {
     const seedTabId = activeTab; // capture before any awaits
+    queryLatest.invalidate(); // discard queries in flight against the previous context
+    setRunning(false); setLoading(false); // invalidated query won't clear the spinner itself
     try {
       await SwitchContext(name);
       setCurrentName(name);
@@ -552,8 +564,10 @@ function App() {
     setSignInOpen(true);
   };
 
-  // handleAuthorizeSession persists a captured session under the target context.
+  // handleAuthorizeSession persists a captured session under the target context,
+  // then loads its streams so the workspace is usable immediately.
   const handleAuthorizeSession = async (s: CapturedSession): Promise<void> => {
+    const seedTabId = activeTab; // capture before any awaits
     await SaveContext({
       name: signInTarget.name, url: signInTarget.url, org: s.org || signInTarget.org,
       scheme: 'session', username: s.email, secret: s.secret, origName: signInTarget.origName,
@@ -561,6 +575,25 @@ function App() {
     setConfigured(true);
     await refreshContexts();
     setSessionInfo({ email: s.email, expiresAt: s.expiresAt, valid: true });
+    // Load streams for the freshly connected session — mirrors the wizard's
+    // onSave and startup. Without this, a successful browser sign-in left the
+    // stream list (and fields) empty until the next context switch or restart.
+    try {
+      const streams = await ListStreams();
+      const mapped = withColors(streams.map((x) => ({ name: x.name, size: x.size })));
+      setLiveStreams(mapped);
+      if (mapped.length > 0) {
+        const first = mapped[0].name;
+        setTabs((ts) => ts.map((t) =>
+          t.id === seedTabId
+            ? (t.sql.trim() ? { ...t, stream: first } : { ...t, stream: first, sql: setFromStream('', first) })
+            : t,
+        ));
+      }
+    } catch (e: any) {
+      if (parseAppError(e).category === 'not_configured') { setConfigured(false); }
+      // other errors (e.g. zero streams) are non-fatal here
+    }
   };
 
   // handleSignOut clears the stored session for the active context.
@@ -608,6 +641,7 @@ function App() {
   const handlePickAccent = (c: string) => setAccent(c);
 
   const selectTab = (id: string) => {
+    queryLatest.invalidate(); // drop any in-flight query for the tab we are leaving
     setActiveTab(id);
     setPage(1);
     setHistoSel(null);
@@ -615,6 +649,9 @@ function App() {
     setLiveBars([]);
     setLiveMeta({ total: 0, tookMs: 0, shown: 0 });
     setQueryError(null);
+    // The invalidated query no longer clears the busy state, so reset it here to
+    // avoid a spinner sticking on the freshly selected (empty) tab.
+    setRunning(false); setLoading(false);
   };
 
   const handleNewTab = () => {
@@ -765,20 +802,36 @@ function App() {
                   relUnit={relUnit}
                   absFrom={absFrom}
                   absTo={absTo}
-                  onPickQuick={(label) => { setHistoSel(null); setTimeRange(label); setTimeOpen(false); }}
+                  onPickQuick={(label) => {
+                    // Commit the quick range so it actually drives queries, and
+                    // mirror it into the relative draft inputs for consistency.
+                    const q = QUICK_RANGES.find((r) => r[0] === label);
+                    if (q) {
+                      const [, amount, unit] = q;
+                      setRelAmount(String(amount)); setRelUnit(unit); setTimeTab('relative');
+                      setAppliedRange(relativeRange(amount, unit));
+                    }
+                    setHistoSel(null); setTimeRange(label); setTimeOpen(false);
+                  }}
                   onSetTab={setTimeTab}
                   onRelAmount={setRelAmount}
                   onRelUnit={setRelUnit}
                   onApplyRelative={() => {
+                    const r = relativeRange(parseInt(relAmount, 10), relUnit);
+                    setAppliedRange(r);
                     setHistoSel(null);
-                    setTimeRange(`Last ${relAmount}${relUnit}`);
+                    setTimeRange(rangeLabel(r));
                     setTimeOpen(false);
                   }}
                   onAbsFrom={setAbsFrom}
                   onAbsTo={setAbsTo}
                   onApplyAbsolute={() => {
+                    const abs = parseAbsolute(absFrom, absTo);
+                    if (!abs) return; // invalid/empty input — keep the picker open to correct
+                    const r: TimeRange = { kind: 'absolute', ...abs };
+                    setAppliedRange(r);
                     setHistoSel(null);
-                    setTimeRange(`${absFrom} — ${absTo}`);
+                    setTimeRange(rangeLabel(r));
                     setTimeOpen(false);
                   }}
                 />

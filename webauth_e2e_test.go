@@ -93,6 +93,32 @@ func TestSessionCaptureStoreReplay(t *testing.T) {
 	}
 }
 
+// TestSessionVerifier proves the browser-sign-in success signal is a real
+// authenticated request: a session whose cookie authenticates passes, while an
+// unauthenticated one (the SSO / benign-cookie false-positive) and a cookieless
+// one are rejected — so capture never closes on a login that has not completed.
+func TestSessionVerifier(t *testing.T) {
+	srv := mockInstance(t)
+	defer srv.Close()
+	host, cookieDomain := hostPort(t, srv.URL)
+
+	verify := sessionVerifier(t.Context(), srv.URL, "default", cfgshared.Defaults{})
+
+	good := webauth.AssembleSession(
+		[]webauth.Cookie{{Name: "auth_ext", Value: "SESSION123", Domain: cookieDomain, Path: "/"}}, host, "", "ops@x")
+	if !verify(good) {
+		t.Fatal("verifier rejected a session that authenticates")
+	}
+	bad := webauth.AssembleSession(
+		[]webauth.Cookie{{Name: "auth_ext", Value: "WRONG", Domain: cookieDomain, Path: "/"}}, host, "", "")
+	if verify(bad) {
+		t.Fatal("verifier accepted an unauthenticated session (SSO false-positive)")
+	}
+	if verify(webauth.AssembleSession(nil, host, "", "")) {
+		t.Fatal("verifier accepted a session with no cookies")
+	}
+}
+
 // TestSessionKeychainRoundTrip proves the blob survives the shared keychain
 // under the session scheme, so the CLI (which loads any scheme's secret from the
 // same store) can reuse it. Skipped where the OS keychain is unavailable (CI).
