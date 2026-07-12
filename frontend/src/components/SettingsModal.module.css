@@ -642,15 +642,9 @@
   box-shadow: var(--card-sh);
 }
 
+/* Layout wrapper only; the o3 monogram (BrandMark) styles itself. */
 .brandIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--accent, #2dd4bf);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 22px -4px var(--accent, #2dd4bf);
+  display: inline-flex;
   flex: none;
 }
 

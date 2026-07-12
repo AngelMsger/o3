@@ -1,7 +1,9 @@
-/* BrandMark — o3's "log-lines" app mark (design/Icon.dc.html), rendered inline
-   for in-app chrome (title bar, etc.). Two theme variants matching the app icon:
-   "void" (dark squircle, glowing teal signal) and "signal" (teal squircle,
-   dark-ink signal). Geometry is the icon's 220-space mark, verbatim. */
+/* BrandMark — o3's app icon: the "o3" monogram on a macOS-style squircle,
+   matching the Dock icon (build/icon/gen_icon_html.py) so the brand reads the
+   same in the Dock, title bar, setup wizard and settings. Two theme variants:
+   "void" (dark squircle, glowing teal wordmark) for dark mode and "signal"
+   (teal squircle, dark-ink wordmark) for light. Rendered inline in JetBrains
+   Mono ExtraBold so it stays crisp at any size. */
 import type { ReactElement } from 'react';
 
 export function BrandMark({
@@ -13,42 +15,46 @@ export function BrandMark({
 }): ReactElement {
   const dark = variant === 'void';
   const body = dark
-    ? 'radial-gradient(120% 120% at 30% 8%, #123039, #06121a)'
-    : 'linear-gradient(165deg, #39e6d0, #18b7a4)';
-  const shadow = dark
-    ? '0 0 0 1px rgba(45,212,191,.25) inset'
-    : '0 0 12px -3px #2dd4bf';
-  const noiseDot = dark ? 'rgba(122,206,196,.42)' : 'rgba(6,24,26,.55)';
-  const noiseBar = dark ? 'rgba(122,206,196,.24)' : 'rgba(6,24,26,.34)';
-  const signal = dark ? '#5df0dd' : '#06181a';
+    ? 'radial-gradient(120% 120% at 30% 8%, #123039, #0a1a20 42%, #06121a)'
+    : 'linear-gradient(165deg, #39e6d0, #2dd4bf 46%, #18b7a4)';
+  const boxShadow = dark
+    ? '0 0 0 1px rgba(45,212,191,.22) inset'
+    : 'inset 0 1px 0 rgba(255,255,255,.35)';
+  const ink = dark ? '#5df0dd' : '#06181a';
+  const glow = dark
+    ? `drop-shadow(0 0 ${Math.round(size * 0.28)}px rgba(45,212,191,.6))`
+    : 'none';
 
   return (
     <span
+      aria-label="o3"
+      role="img"
       style={{
         width: size,
         height: size,
         borderRadius: Math.round(size * 0.28),
         background: body,
-        boxShadow: shadow,
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'inline-block',
+        boxShadow,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         flex: 'none',
+        overflow: 'hidden',
       }}
     >
-      <svg width={size} height={size} viewBox="0 0 220 220" style={{ position: 'absolute', inset: 0 }}>
-        {/* noise rows */}
-        <circle cx="42" cy="59" r="8" fill={noiseDot} />
-        <rect x="58" y="51" width="74" height="16" rx="8" fill={noiseBar} />
-        <circle cx="42" cy="93" r="8" fill={noiseDot} />
-        <rect x="58" y="85" width="100" height="16" rx="8" fill={noiseBar} />
-        <circle cx="42" cy="161" r="8" fill={noiseDot} />
-        <rect x="58" y="153" width="62" height="16" rx="8" fill={noiseBar} />
-        {/* signal row */}
-        <circle cx="42" cy="127" r="8" fill={signal} />
-        <rect x="58" y="119" width="104" height="16" rx="8" fill={signal} />
-        <circle cx="178" cy="127" r="8" fill={signal} />
-      </svg>
+      <span
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontWeight: 800,
+          fontSize: Math.round(size * 0.52),
+          letterSpacing: `${(-0.06 * size).toFixed(2)}px`,
+          lineHeight: 1,
+          color: ink,
+          filter: glow,
+        }}
+      >
+        o3
+      </span>
     </span>
   );
 }

@@ -42,6 +42,17 @@
   .o3card:hover { transform: translateY(-3px); border-color: rgba(45,212,191,.32) !important; }
   .o3dl:hover { border-color: rgba(45,212,191,.5) !important; background: rgba(45,212,191,.07) !important; }
 
+  /* Slogan — SQL-styled hero kicker; mirrors the app title bar. On hover the
+     tracking opens up, the SELECT/FROM keywords glow, and an accent underline
+     sweeps in left-to-right under "signal". */
+  .o3slogan { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: .3px; cursor: default; user-select: none; transition: letter-spacing .3s ease; }
+  .o3slogan .kw { color: #5b6371; transition: color .3s ease, text-shadow .3s ease; }
+  .o3slogan .sig { position: relative; color: #cfd6e4; }
+  .o3slogan .sig::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -3px; height: 1px; background: #2dd4bf; box-shadow: 0 0 6px #2dd4bf; transition: right .38s cubic-bezier(.4,0,.2,1); }
+  .o3slogan:hover { letter-spacing: 1.5px; }
+  .o3slogan:hover .kw { color: #5df0dd; text-shadow: 0 0 10px rgba(45,212,191,.7); }
+  .o3slogan:hover .sig::after { right: 0; }
+
   /* Responsive — collapse the desktop grids and shrink the hero on narrow screens. */
   @media (max-width: 760px) {
     .o3nav { flex-wrap: wrap; padding: 20px 20px !important; }
@@ -78,9 +89,12 @@
 
   <!-- hero -->
   <div style="max-width:900px; margin:0 auto; padding:56px 40px 26px; text-align:center;">
-    <div style="display:inline-flex; align-items:center; gap:9px; padding:6px 14px; border-radius:999px; border:1px solid rgba(45,212,191,.24); background:rgba(45,212,191,.06); margin-bottom:30px;">
+    <div style="display:inline-flex; align-items:center; gap:9px; padding:6px 14px; border-radius:999px; border:1px solid rgba(45,212,191,.24); background:rgba(45,212,191,.06); margin-bottom:18px;">
       <span style="width:7px; height:7px; border-radius:50%; background:#34e0a1; box-shadow:0 0 8px #34e0a1;"></span>
       <span style="font-size:12.5px; color:#8fe8dc; font-weight:500; letter-spacing:.2px;">Free &amp; Open Source</span>
+    </div>
+    <div style="margin-bottom:22px;">
+      <span class="o3slogan" title="SELECT signal FROM noise"><span class="kw">SELECT</span> <span class="sig">signal</span> <span class="kw">FROM</span> <span style="color:#5b6371;">noise</span></span>
     </div>
     <h1 class="o3h1" style="margin:0 0 22px; font-size:62px; line-height:1.04; letter-spacing:-2px; font-weight:700; color:#f4f7fb;">OpenObserve,<br><span style="color:#5df0dd; filter:drop-shadow(0 0 24px rgba(45,212,191,.35));">as a Native App.</span></h1>
     <p style="margin:0 auto 38px; max-width:600px; font-size:18px; line-height:1.6; color:#9aa3b2;">A fast, native desktop client for OpenObserve. Query logs, explore metrics, and manage connections from a purpose-built app — no browser tab, no context switching.</p>

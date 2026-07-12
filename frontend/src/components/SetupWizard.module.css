@@ -50,16 +50,9 @@
   flex-direction: column;
 }
 
-/* Logo icon */
+/* Logo icon — layout wrapper only; the o3 monogram (BrandMark) styles itself. */
 .logoIcon {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  background: var(--accent, #2dd4bf);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 26px -4px var(--accent, #2dd4bf);
+  display: inline-flex;
   margin-top: 44px;
   margin-bottom: 22px;
 }

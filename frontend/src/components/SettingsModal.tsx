@@ -5,6 +5,7 @@ import { authTabToScheme, expiryLabel, schemeToAuthTab } from '../lib/signin';
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AIEcosystem } from './AIEcosystem';
 import type { EcosystemPaneProps } from './AIEcosystem';
+import { BrandMark } from './BrandMark';
 import styles from './SettingsModal.module.css';
 
 // Project links. REPO_URL is the GitHub repository; DOCS_URL is the GitHub
@@ -31,6 +32,7 @@ interface SettingsContextsProps {
 
 interface SettingsModalProps extends SettingsContextsProps {
   visible: boolean;
+  isDark: boolean;
   tab: SettingsTab;
   accent: string;
   density: Density;
@@ -79,6 +81,7 @@ const THEME_ICONS: Record<ThemePref, string> = {
 
 export function SettingsModal({
   visible,
+  isDark,
   tab,
   accent,
   density,
@@ -525,13 +528,8 @@ export function SettingsModal({
 
                   {/* Brand card — design line 540 */}
                   <div className={styles.brandCard}>
-                    <span
-                      className={styles.brandIcon}
-                      style={{ background: accent, boxShadow: `0 0 22px -4px ${accent}` }}
-                    >
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 12h4l3 8 4-16 3 8h6"/>
-                      </svg>
+                    <span className={styles.brandIcon}>
+                      <BrandMark variant={isDark ? 'void' : 'signal'} size={44} />
                     </span>
                     <div style={{ flex: 1 }}>
                       <div className={styles.brandName}>

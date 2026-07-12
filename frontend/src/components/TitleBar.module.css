@@ -40,6 +40,53 @@
   font-weight: 500;
 }
 
+/* Slogan — SQL-styled tagline, design/Observe.dc.html (.oo-slogan). On hover the
+   tracking opens up, the SELECT/FROM keywords glow accent, and an accent
+   underline sweeps in left-to-right under "signal". */
+.slogan {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  margin-right: 4px;
+  cursor: default;
+  user-select: none;
+  transition: letter-spacing 0.3s ease;
+}
+.slogan .kw {
+  color: var(--tx-11);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.slogan .sig {
+  position: relative;
+  color: var(--tx-04);
+}
+.slogan .noise {
+  color: var(--tx-11);
+}
+.slogan .sig::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -2px;
+  height: 1px;
+  background: var(--accent, #2dd4bf);
+  box-shadow: 0 0 6px var(--accent, #2dd4bf);
+  transition: right 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slogan:hover {
+  letter-spacing: 1px;
+}
+.slogan:hover .kw {
+  color: var(--accent, #2dd4bf);
+  text-shadow: 0 0 10px var(--accent, #2dd4bf);
+}
+.slogan:hover .sig::after {
+  right: 0;
+}
+
 /* line 57 */
 .avatar {
   width: 24px;

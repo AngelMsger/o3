@@ -970,6 +970,7 @@ function App() {
         {settingsT.mounted && (
           <SettingsModal
             visible={settingsT.visible}
+            isDark={effectiveTheme(themePref, systemDark) === 'dark'}
             tab={settingsTab}
             accent={accent}
             density={density}
@@ -1016,6 +1017,7 @@ function App() {
         {setupT.mounted && (
           <SetupWizard
             visible={setupT.visible}
+            isDark={effectiveTheme(themePref, systemDark) === 'dark'}
             contexts={contexts}
             currentName={currentName}
             tested={tested}

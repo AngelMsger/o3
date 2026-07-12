@@ -3,6 +3,7 @@
    selected context (name, URL, org, auth, test, save). */
 import type { ReactElement } from 'react';
 import { authTabToScheme, schemeToAuthTab } from '../lib/signin';
+import { BrandMark } from './BrandMark';
 import styles from './SetupWizard.module.css';
 
 // UICtx mirrors the interface in App.tsx (kept local to avoid a shared types file)
@@ -19,6 +20,7 @@ interface UICtx {
 
 interface SetupWizardProps {
   visible: boolean;
+  isDark: boolean;
   contexts: UICtx[];
   currentName: string;
   // authTab and onAuthTab removed — Fix 3: scheme is now the source of truth
@@ -45,6 +47,7 @@ const AUTH_TABS: Array<{ id: 'session' | 'password' | 'token' | 'sso'; label: st
 
 export function SetupWizard({
   visible,
+  isDark,
   contexts,
   currentName,
   tested,
@@ -74,11 +77,9 @@ export function SetupWizard({
 
       {/* ===== Left brand panel — design line 563 ===== */}
       <div className={styles.left}>
-        {/* Logo icon — design line 569 */}
+        {/* Logo icon — the o3 monogram, matching the Dock (design line 569) */}
         <span className={styles.logoIcon}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 12h4l3 8 4-16 3 8h6" />
-          </svg>
+          <BrandMark variant={isDark ? 'void' : 'signal'} size={40} />
         </span>
 
         {/* Welcome text — design lines 570-572 */}
