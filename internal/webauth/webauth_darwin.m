@@ -117,16 +117,23 @@ void o3StartWebAuth(const char *loginURL) {
         // state to clear. The captured cookies are replayed by o3's own HTTP
         // client, independent of this store.
         cfg.websiteDataStore = [WKWebsiteDataStore nonPersistentDataStore];
-        // Fallback capture: observe the Authorization header the SPA sends to
-        // /api/ and the logged-in email from localStorage, posted back to Go for
-        // instances whose REST API expects the header rather than the cookie.
+        // Fallback capture: observe the Authorization header the SPA sends to its
+        // backend (the DURABLE credential — e.g. Basic email:token — that survives
+        // the short-lived session cookie) plus the logged-in email. OpenObserve's
+        // web app issues requests via axios (XMLHttpRequest), so we MUST hook both
+        // fetch AND XMLHttpRequest.setRequestHeader — hooking fetch alone captured
+        // nothing on real instances, leaving only the expiring session cookie.
         NSString *js =
-          @"(function(){try{var o=window.fetch;window.fetch=function(){try{"
+          @"(function(){try{"
+          @"function post(a){try{a=String(a||'');if(a){window.webkit.messageHandlers.o3.postMessage({authorization:a});}}catch(e){}}"
+          @"try{var of=window.fetch;window.fetch=function(){try{"
           @"var h=arguments[1]&&arguments[1].headers;"
-          @"var a=h&&(h['Authorization']||h['authorization']);"
-          @"var u=String(arguments[0]||'');"
-          @"if(a&&u.indexOf('/api/')>=0){window.webkit.messageHandlers.o3.postMessage({authorization:String(a)});}"
-          @"}catch(e){}return o.apply(this,arguments);};"
+          @"if(h){var a=h['Authorization']||h['authorization']||(h.get&&(h.get('Authorization')||h.get('authorization')));if(a)post(a);}"
+          @"}catch(e){}return of.apply(this,arguments);};}catch(e){}"
+          @"try{var XS=XMLHttpRequest.prototype.setRequestHeader;"
+          @"XMLHttpRequest.prototype.setRequestHeader=function(k,v){try{"
+          @"if(k&&String(k).toLowerCase()==='authorization')post(v);"
+          @"}catch(e){}return XS.apply(this,arguments);};}catch(e){}"
           @"try{var raw=localStorage.getItem('user_info')||localStorage.getItem('userInfo');"
           @"if(raw){var j=JSON.parse(raw);var em=j.email||(j.data&&j.data.email);"
           @"if(em){window.webkit.messageHandlers.o3.postMessage({email:em});}}}catch(e){}"

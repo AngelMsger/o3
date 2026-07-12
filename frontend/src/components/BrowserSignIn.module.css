@@ -1,7 +1,10 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  /* Above SettingsModal (80) and SetupWizard (100): browser sign-in is launched
+     FROM those modals, so its consent/done steps must render on top of them —
+     otherwise the "Authorize" step is hidden behind the wizard after capture. */
+  z-index: 120;
   display: flex;
   align-items: center;
   justify-content: center;
