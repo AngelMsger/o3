@@ -12,7 +12,18 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+// version is the application version. It defaults to "dev" for local builds and
+// is overridden at release time via the linker:
+//
+//	go build -ldflags "-X main.version=1.2.3"
+//
+// (the release workflow injects the git tag). Kept as a package-level var so it
+// is available for surfacing in-app or in logs without changing call sites.
+var version = "dev"
+
 func main() {
+	println("o3", version)
+
 	// Create an instance of the app structure
 	app := NewApp()
 

@@ -15,7 +15,7 @@ no browser tab, no context switching.
 
 Built with [Wails v2](https://wails.io) (Go backend) + [React](https://react.dev) / [TypeScript](https://www.typescriptlang.org) frontend.
 
-[Features](#features) · [Screenshots](#screenshots) · [Getting started](#getting-started) · [Architecture](#architecture) · [Roadmap](#roadmap)
+[Features](#features) · [Screenshots](#screenshots) · [Download](#download--install) · [Getting started](#getting-started) · [Architecture](#architecture) · [Roadmap](#roadmap)
 
 </div>
 
@@ -69,6 +69,26 @@ cannot drift apart.
 
 > _Screenshots coming soon._ Run `wails dev` to see the app live.
 
+## Download & install
+
+Grab the latest installer for your OS from the
+[Releases page](https://github.com/AngelMsger/o3/releases):
+
+| OS | File | Install |
+| --- | --- | --- |
+| macOS (Apple Silicon + Intel) | `o3-<version>-universal.dmg` | Open the DMG, drag **o3** to Applications. |
+| Windows | `o3-<version>-windows-amd64-setup.exe` | Run the installer. A portable `-portable.zip` is also provided. |
+| Linux | `o3-<version>-x86_64.AppImage` | `chmod +x` it and run. |
+
+> **Heads-up: the builds are currently unsigned.** Until code signing is in
+> place, your OS will warn on first launch:
+>
+> - **macOS** — Gatekeeper says the app "cannot be opened". Right-click **o3** →
+>   **Open** → **Open**, or clear the quarantine flag once:
+>   `xattr -dr com.apple.quarantine /Applications/o3.app`
+> - **Windows** — SmartScreen shows "Windows protected your PC". Click
+>   **More info** → **Run anyway**.
+
 ## Getting started
 
 ### Prerequisites
@@ -99,6 +119,25 @@ wails build
 ```
 
 Produces a native `.app` bundle under `build/bin/`.
+
+### Package installers
+
+The [`Makefile`](Makefile) wraps `wails build` with the per-OS packaging steps —
+each target builds on its own platform (Windows cross-compiles from any host):
+
+```sh
+make dmg        # macOS  → build/bin/o3-<version>-universal.dmg
+make installer  # Windows → build/bin/o3-<version>-windows-amd64-setup.exe (needs makensis)
+make appimage   # Linux  → build/bin/o3-<version>-x86_64.AppImage
+```
+
+`VERSION` defaults to the current git tag; override with `make dmg VERSION=1.2.3`.
+
+Releases are automated: pushing a `v*.*.*` tag runs
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which builds
+all three platforms in a matrix and attaches the installers to a **draft**
+GitHub Release for review. The workflow checks out the sibling `openobserve-cli`
+repo automatically to satisfy the `go.work` dependency.
 
 ### Test
 
@@ -154,7 +193,8 @@ navigation surfaces are scaffolded and being built out.
 | **Streams** — schema browser, retention & ingestion stats | 🚧 Scaffolded |
 | **Alerts** — rule authoring and status | 🚧 Scaffolded |
 | Saved queries & shareable links | 📋 Planned |
-| Cross-platform builds (Windows, Linux) | 📋 Planned |
+| Cross-platform builds (macOS · Windows · Linux) + GitHub Release automation | ✅ Shipped |
+| Code signing / notarization & auto-update | 📋 Planned |
 
 Legend: ✅ shipped · 🚧 in progress · 📋 planned
 

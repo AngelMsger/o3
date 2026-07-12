@@ -1,5 +1,16 @@
-build/bin
-build/
+# Wails build output. Ignore everything under build/ except the source icon,
+# the icon scripts, and the committed platform packaging templates (darwin /
+# windows / linux). Compiled binaries and the downloaded WebView2 bootstrapper
+# stay ignored — they are regenerated on every build.
+build/*
+!build/appicon.png
+!build/icon/
+!build/darwin/
+!build/windows/
+!build/linux/
+build/bin/
+build/windows/installer/tmp/
+
 node_modules
 frontend/dist
 .superpowers/

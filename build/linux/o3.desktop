@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=o3
+GenericName=OpenObserve client
+Comment=A fast, native desktop client for OpenObserve
+Exec=o3
+Icon=o3
+Categories=Development;Utility;
+Terminal=false
+StartupWMClass=o3

@@ -7,7 +7,11 @@
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "info": {
-    "productName": "o3"
+    "companyName": "AngelMsger",
+    "productName": "o3",
+    "productVersion": "0.0.0",
+    "copyright": "Copyright © 2026 AngelMsger",
+    "comments": "A fast, native desktop client for OpenObserve."
   },
   "author": {
     "name": "AngelMsger",
