@@ -15,11 +15,14 @@ const DOCS_URL = 'https://angelmsger.github.io/o3';
 
 // Props for the kubectl-style contexts manager (Task 4)
 interface SettingsContextsProps {
-  contexts: { name: string; color: string; isCurrent: boolean }[];
+  // isCurrent = the active connection (badge); isEditing = the row the form edits;
+  // isDraft = not yet saved (cannot be switched to).
+  contexts: { name: string; color: string; isCurrent: boolean; isEditing: boolean; isDraft: boolean }[];
   active: { name: string; url: string; org: string; scheme: string; username: string; password: string; token: string } | null;
   canRemove: boolean;
   onAddContext: () => void;
-  onUse: (name: string) => void;
+  onSelect: (name: string) => void; // pick a context to edit (does NOT switch)
+  onUse: (name: string) => void;    // switch the active connection
   onRemove: (name: string) => void;
   onField: (key: string, value: string) => void;
   onTest: () => void;
@@ -95,6 +98,7 @@ export function SettingsModal({
   active,
   canRemove,
   onAddContext,
+  onSelect,
   onUse,
   onRemove,
   onField,
@@ -171,10 +175,12 @@ export function SettingsModal({
                         key={c.name}
                         className={styles.ctxRow}
                         style={{
-                          border: `1px solid ${c.isCurrent ? hexA(c.color, 0.45) : 'rgba(255,255,255,.07)'}`,
-                          background: c.isCurrent ? hexA(c.color, 0.08) : 'var(--sf-05)',
+                          // The EDITING row is highlighted (its form is shown below);
+                          // the ACTIVE row carries the "active" badge separately.
+                          border: `1px solid ${c.isEditing ? hexA(c.color, 0.45) : 'rgba(255,255,255,.07)'}`,
+                          background: c.isEditing ? hexA(c.color, 0.08) : 'var(--sf-05)',
                         }}
-                        onClick={() => !c.isCurrent && onUse(c.name)}
+                        onClick={() => onSelect(c.name)}
                       >
                         {/* color dot — design line 1360 */}
                         <span
@@ -191,8 +197,9 @@ export function SettingsModal({
                             )}
                           </div>
                         </div>
-                        {/* "Use" button — only on non-active rows — design line 455-457 */}
-                        {!c.isCurrent && (
+                        {/* "Use" switches the active connection — hidden on the
+                            active row and on unsaved drafts (nothing to switch to). */}
+                        {!c.isCurrent && !c.isDraft && (
                           <button
                             className={styles.ctxUseBtn}
                             onClick={(e) => { e.stopPropagation(); onUse(c.name); }}
@@ -200,6 +207,8 @@ export function SettingsModal({
                             Use
                           </button>
                         )}
+                        {/* Draft badge so an unsaved context reads clearly. */}
+                        {c.isDraft && <span className={styles.ctxActiveBadge} style={{ color: 'var(--tx-09)', background: 'rgba(255,255,255,.06)' }}>draft</span>}
                         {/* Delete "X" — only when canRemove — design line 458-460 */}
                         {canRemove && (
                           <button

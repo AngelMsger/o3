@@ -36,6 +36,7 @@ import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import { relativeRange, rangeToMicros, rangeLabel, parseAbsolute, type TimeRange } from './lib/timeRange';
 import { createLatest } from './lib/latest';
+import { preserveDrafts } from './lib/contexts';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
@@ -121,6 +122,10 @@ function App() {
   // Contexts state — kubectl-style named contexts loaded from shared config
   const [contexts, setContexts] = useState<UICtx[]>([]);
   const [currentName, setCurrentName] = useState<string>('');
+  // editingName is which context the Settings form is EDITING — deliberately
+  // separate from currentName (the active connection). Adding/browsing a context
+  // in Settings must not hijack the live connection.
+  const [editingName, setEditingName] = useState<string>('');
   const [ctxSwitchOpen, setCtxSwitchOpen] = useState(false);
 
   // Browser sign-in overlay state. signInTarget carries the context being
@@ -319,11 +324,13 @@ function App() {
   const [configured, setConfigured] = useState<boolean>(true);
   const [wizardError, setWizardError] = useState<string | null>(null);
 
-  // refreshContexts loads contexts from the backend and syncs state.
+  // refreshContexts loads contexts from the backend and syncs state. Unsaved
+  // drafts (frontend-only until SaveContext) are preserved across the reload so
+  // switching/removing a context never discards a half-configured new one.
   const refreshContexts = async (): Promise<UICtx[]> => {
     const infos = await ListContexts();
     const ui = toUICtx(infos as any);
-    setContexts(ui);
+    setContexts((prev) => preserveDrafts(ui, prev));
     const cur = ui.find((c) => c.isCurrent) ?? ui[0];
     setCurrentName(cur?.name ?? '');
     return ui;
@@ -363,18 +370,20 @@ function App() {
       .catch(() => { setConfigured(false); setSetupOpen(true); });
   }, []);
 
-  /* Keep the browser-session status (email/expiry) synced with the active
-     context so Settings > Connection can render the session card. */
+  /* Keep the browser-session status (email/expiry) synced with the context the
+     Settings form is editing (falling back to the active one) so its session
+     card reflects the right context. */
   useEffect(() => {
-    const active = contexts.find((c) => c.name === currentName);
-    if (active && active.scheme === 'session' && active.url) {
-      SessionStatus(active.url)
+    const sel = contexts.some((c) => c.name === editingName) ? editingName : currentName;
+    const ctx = contexts.find((c) => c.name === sel);
+    if (ctx && ctx.scheme === 'session' && ctx.url) {
+      SessionStatus(ctx.url)
         .then((s) => setSessionInfo(s as { email: string; expiresAt: string; valid: boolean }))
         .catch(() => setSessionInfo(null));
     } else {
       setSessionInfo(null);
     }
-  }, [currentName, contexts]);
+  }, [editingName, currentName, contexts]);
 
   /* Step 4: Wire stream selector to load fields */
   useEffect(() => {
@@ -491,6 +500,7 @@ function App() {
     try {
       await SwitchContext(name);
       setCurrentName(name);
+      setEditingName(name); // the newly active context is what Settings now edits
       await refreshContexts();
       setConfigured(true);
       setQueryError(null);
@@ -527,9 +537,12 @@ function App() {
     }
   };
 
-  // handleAddContext appends a draft context held in state until SaveContext persists it.
-  // Fix 5: dedupe the draft name so two "+ Add" clicks never produce the same key.
-  const handleAddContext = () => {
+  // handleAddContext appends a draft context held in state until SaveContext
+  // persists it. `activate` distinguishes the two entry points: the Setup Wizard
+  // (true) tracks its selection via currentName, whereas Settings (false) only
+  // SELECTS the draft for editing and must NOT switch the live connection onto an
+  // unconfigured context. Dedupe the draft name so repeat clicks never collide.
+  const handleAddContext = (activate: boolean = true) => {
     const color = CTX_PALETTE[contexts.length % CTX_PALETTE.length];
     let draftName = 'new-context';
     let seq = 2;
@@ -543,8 +556,13 @@ function App() {
       origName: '', // I1: never persisted yet, so no old entry to remove
     };
     setContexts((cs) => [...cs, draft]);
-    setCurrentName(draftName);
+    if (activate) setCurrentName(draftName);
+    else setEditingName(draftName);
   };
+
+  // handleSelectContext picks which context the Settings form edits, without
+  // switching the active connection.
+  const handleSelectContext = (name: string) => setEditingName(name);
 
   // handleSaveContext persists the named context (upsert + secret) then refreshes.
   const handleSaveContext = async (ctx: UICtx): Promise<void> => {
@@ -624,18 +642,31 @@ function App() {
     }
   };
 
-  // handleRemoveContext deletes the named context from the shared config and
-  // switches to whichever context the backend promotes as current.
+  // handleRemoveContext deletes a context. An unsaved draft lives only in the
+  // frontend, so it is removed locally (calling the backend would 404 — that was
+  // the "delete does nothing" bug). A persisted context is removed on the backend
+  // and the app follows whichever context is promoted to current.
   const handleRemoveContext = async (name: string) => {
+    const target = contexts.find((c) => c.name === name);
+    if (target?.draft) {
+      setContexts((cs) => cs.filter((c) => c.name !== name));
+      if (editingName === name) setEditingName(''); // fall back to the active context
+      return;
+    }
     try {
       await RemoveContext(name);
       const ui = await refreshContexts();
       const cur = ui.find((c) => c.isCurrent) ?? ui[0];
-      if (cur) await handleSwitchContext(cur.name);
+      if (cur) { setEditingName(cur.name); await handleSwitchContext(cur.name); }
     } catch (e: any) {
       setWizardError(parseAppError(e).message);
     }
   };
+
+  // editSel is the context the Settings form edits; editingCtx is its full record.
+  // Falls back to the active context when the selection is empty or stale.
+  const editSel = contexts.some((c) => c.name === editingName) ? editingName : currentName;
+  const editingCtx = contexts.find((c) => c.name === editSel) ?? null;
 
   // The [accent] effect above syncs the --accent CSS var; just update state.
   const handlePickAccent = (c: string) => setAccent(c);
@@ -784,12 +815,12 @@ function App() {
               editorRef={editorRef}
               contextSwitcher={
                 <ContextSwitcher
-                  contexts={contexts.map((c) => ({ name: c.name, url: c.url, color: c.color, isCurrent: c.name === currentName }))}
+                  contexts={contexts.filter((c) => !c.draft).map((c) => ({ name: c.name, url: c.url, color: c.color, isCurrent: c.name === currentName }))}
                   currentName={currentName}
                   open={ctxSwitchOpen}
                   onToggle={() => setCtxSwitchOpen((v) => !v)}
                   onSwitch={(name) => { setCtxSwitchOpen(false); handleSwitchContext(name); }}
-                  onAddContext={() => { setCtxSwitchOpen(false); handleAddContext(); setSettingsOpen(true); setSettingsTab('connection'); }}
+                  onAddContext={() => { setCtxSwitchOpen(false); handleAddContext(false); setSettingsOpen(true); setSettingsTab('connection'); }}
                   onManage={() => { setCtxSwitchOpen(false); setSettingsOpen(true); setSettingsTab('connection'); }}
                 />
               }
@@ -957,7 +988,7 @@ function App() {
             }}
             showHistogram={showHistogram}
             conn={conn}
-            onClose={() => setSettingsOpen(false)}
+            onClose={() => { setSettingsOpen(false); setEditingName(''); }}
             onTab={setSettingsTab}
             onPickAccent={handlePickAccent}
             onPickDensity={setDensity}
@@ -965,16 +996,17 @@ function App() {
             onToggleHisto={() => setShowHistogram((v) => !v)}
             onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
             onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
-            contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName }))}
-            active={(() => { const a = contexts.find((c) => c.name === currentName); return a ? { name: a.name, url: a.url, org: a.org, scheme: a.scheme, username: a.username, password: a.password, token: a.token } : null; })()}
+            contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName, isEditing: c.name === editSel, isDraft: c.draft }))}
+            active={editingCtx ? { name: editingCtx.name, url: editingCtx.url, org: editingCtx.org, scheme: editingCtx.scheme, username: editingCtx.username, password: editingCtx.password, token: editingCtx.token } : null}
             canRemove={contexts.length > 1}
-            onAddContext={handleAddContext}
+            onAddContext={() => handleAddContext(false)}
+            onSelect={handleSelectContext}
             onUse={(name) => handleSwitchContext(name)}
             onRemove={(name) => handleRemoveContext(name)}
-            onField={(key, value) => setContexts((cs) => cs.map((c) => (c.name === currentName ? { ...c, [key]: value } : c)))}
-            onTest={() => { const a = contexts.find((c) => c.name === currentName); if (a) handleTestContext(a); }}
-            onSave={() => { const a = contexts.find((c) => c.name === currentName); if (a) handleSaveContext(a); }}
-            onBrowserSignIn={() => { const a = contexts.find((c) => c.name === currentName); if (a) startBrowserSignIn(a); }}
+            onField={(key, value) => { setContexts((cs) => cs.map((c) => (c.name === editSel ? { ...c, [key]: value } : c))); if (key === 'name') setEditingName(value); }}
+            onTest={() => { const a = contexts.find((c) => c.name === editSel); if (a) handleTestContext(a); }}
+            onSave={() => { const a = contexts.find((c) => c.name === editSel); if (a) handleSaveContext(a); }}
+            onBrowserSignIn={() => { const a = contexts.find((c) => c.name === editSel); if (a) startBrowserSignIn(a); }}
             onSignOut={handleSignOut}
             session={sessionInfo}
           />
