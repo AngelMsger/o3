@@ -156,6 +156,14 @@ body {
   to   { opacity: 1; transform: translateY(0);    }
 }
 
-/* Wails drag-region helpers */
-.oo-drag    { --wails-draggable: drag;    }
+/* Wails drag-region helpers. The drag region must show the default arrow cursor
+   and never start a text selection — otherwise click-dragging the title bar to
+   move the window flips the cursor to the text I-beam. cursor/user-select inherit,
+   so this covers the region's text (brand/crumb) too. */
+.oo-drag {
+  --wails-draggable: drag;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .oo-no-drag { --wails-draggable: no-drag; }
