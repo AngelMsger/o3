@@ -27,7 +27,10 @@ on:
 # CI reproduces that side-by-side layout by cloning it directly (see below).
 env:
   OACLI_REPO: AngelMsger/openobserve-cli
-  OACLI_REF: main
+  # Pin the shared client to an immutable tag so a given o3 release is
+  # reproducible — 'main' would let a later rebuild compile different dependency
+  # code. Bump this in lockstep when a release needs a newer openobserve-cli.
+  OACLI_REF: v0.6.0
   WAILS_VERSION: v2.12.0
   GO_VERSION: "1.24"
   NODE_VERSION: "20"
@@ -47,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
+      winVersion: ${{ steps.v.outputs.winVersion }}
       tag: ${{ steps.v.outputs.tag }}
     steps:
       - id: v
@@ -61,9 +65,16 @@ jobs:
             echo "::error::Invalid version '$VERSION' (expected semver like 1.2.3 or 1.2.3-rc.1)"
             exit 1
           fi
+          # Windows .exe/NSIS version resources must be numeric X.Y.Z(.0); a
+          # prerelease like 0.1.0-rc.1 would produce an invalid "0.1.0-rc.1.0"
+          # and fail makensis. Strip any -prerelease / +build suffix for the
+          # Windows metadata only (artifact filenames still carry the full tag).
+          WIN_VERSION="${VERSION%%-*}"
+          WIN_VERSION="${WIN_VERSION%%+*}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "winVersion=$WIN_VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Building version $VERSION (tag v$VERSION)"
+          echo "Building version $VERSION (Windows metadata $WIN_VERSION, tag v$VERSION)"
 
   build:
     needs: meta
@@ -75,7 +86,11 @@ jobs:
             platform: darwin/universal
           - os: windows-latest
             platform: windows/amd64
-          - os: ubuntu-latest
+          # Build the AppImage on the OLDEST supported base (Ubuntu 22.04,
+          # glibc 2.35). AppImage does not bundle glibc, so building on a newer
+          # base (24.04 = glibc 2.39) would produce a binary that refuses to
+          # start on 22.04/Debian 12/etc. 22.04 ships webkit2gtk 4.0.
+          - os: ubuntu-22.04
             platform: linux/amd64
     runs-on: ${{ matrix.os }}
     env:
@@ -115,12 +130,12 @@ jobs:
           go install github.com/wailsapp/wails/v2/cmd/wails@${WAILS_VERSION}
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-      # ---- Linux system dependencies (Ubuntu 24.04 ships webkit2gtk 4.1) ----
+      # ---- Linux system dependencies (Ubuntu 22.04 ships webkit2gtk 4.0) ----
       - name: Install Linux build deps
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
 
       # ---- Windows installer toolchain ----
       - name: Install NSIS
@@ -140,7 +155,13 @@ jobs:
       # ---- Windows: .exe + NSIS installer -> setup.exe + portable.zip ----
       - name: Build & package (Windows)
         if: runner.os == 'Windows'
+        env:
+          WIN_VERSION: ${{ needs.meta.outputs.winVersion }}
         run: |
+          # Re-stamp with the numeric-only version so the .exe / NSIS version
+          # resources are valid even for prerelease tags (the in-app main.version
+          # ldflag keeps the full tag).
+          node scripts/set-version.mjs "$WIN_VERSION"
           wails build -platform windows/amd64 -nsis -clean -ldflags "-X main.version=$VERSION"
           mv "build/bin/o3-amd64-installer.exe" "build/bin/o3-${VERSION}-windows-amd64-setup.exe"
           # Zip the portable exe with o3.exe at the archive root (run from build/bin).
@@ -150,7 +171,8 @@ jobs:
       - name: Build & package (Linux)
         if: runner.os == 'Linux'
         run: |
-          wails build -platform linux/amd64 -tags webkit2_41 -clean -ldflags "-X main.version=$VERSION"
+          # No webkit2_41 tag: 22.04 provides webkit2gtk 4.0 (the Wails default).
+          wails build -platform linux/amd64 -clean -ldflags "-X main.version=$VERSION"
           VERSION="$VERSION" scripts/appimage.sh
 
       - name: Upload artifacts

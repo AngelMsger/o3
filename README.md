@@ -76,9 +76,9 @@ Grab the latest installer for your OS from the
 
 | OS | File | Install |
 | --- | --- | --- |
-| macOS (Apple Silicon + Intel) | `o3-<version>-universal.dmg` | Open the DMG, drag **o3** to Applications. |
+| macOS 11+ (Apple Silicon + Intel) | `o3-<version>-universal.dmg` | Open the DMG, drag **o3** to Applications. |
 | Windows | `o3-<version>-windows-amd64-setup.exe` | Run the installer. A portable `-portable.zip` is also provided. |
-| Linux | `o3-<version>-x86_64.AppImage` | `chmod +x` it and run. |
+| Linux (glibc 2.35+) | `o3-<version>-x86_64.AppImage` | `chmod +x` it and run. |
 
 > **Heads-up: the builds are currently unsigned.** Until code signing is in
 > place, your OS will warn on first launch:
