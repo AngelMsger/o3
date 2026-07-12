@@ -50,31 +50,45 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
-      winVersion: ${{ steps.v.outputs.winVersion }}
+      numericVersion: ${{ steps.v.outputs.numericVersion }}
       tag: ${{ steps.v.outputs.tag }}
     steps:
       - id: v
         # Pass the (attacker-influenceable) tag / dispatch input through an env
         # var rather than interpolating it into the script, then validate it is
-        # strict semver so it can only contain [0-9A-Za-z.-] downstream.
+        # strict semver so it can only contain [0-9A-Za-z.+-] downstream.
         env:
           RAW: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
         run: |
           VERSION="${RAW#v}"
-          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
-            echo "::error::Invalid version '$VERSION' (expected semver like 1.2.3 or 1.2.3-rc.1)"
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?(\+[0-9A-Za-z.]+)?$'; then
+            echo "::error::Invalid version '$VERSION' (expected semver like 1.2.3, 1.2.3-rc.1 or 1.2.3+build.5)"
             exit 1
           fi
-          # Windows .exe/NSIS version resources must be numeric X.Y.Z(.0); a
-          # prerelease like 0.1.0-rc.1 would produce an invalid "0.1.0-rc.1.0"
-          # and fail makensis. Strip any -prerelease / +build suffix for the
-          # Windows metadata only (artifact filenames still carry the full tag).
-          WIN_VERSION="${VERSION%%-*}"
-          WIN_VERSION="${WIN_VERSION%%+*}"
+          # Windows .exe/NSIS and macOS CFBundle* version resources must be a
+          # numeric X.Y.Z: a prerelease like 0.1.0-rc.1 is rejected by makensis
+          # and by Apple. Strip any -prerelease / +build suffix for those bundle
+          # metadata fields only (artifact filenames still carry the full tag).
+          NUMERIC="${VERSION%%-*}"
+          NUMERIC="${NUMERIC%%+*}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "winVersion=$WIN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "numericVersion=$NUMERIC" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Building version $VERSION (Windows metadata $WIN_VERSION, tag v$VERSION)"
+          echo "Building version $VERSION (numeric bundle version $NUMERIC, tag v$VERSION)"
+
+      # A manual dispatch creates the tag, so refuse to clobber an existing one
+      # (a re-dispatch would attach fresh binaries to an already-published tag).
+      - name: Reject existing tag on manual dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists — push a new tag or delete it first."
+            exit 1
+          fi
+          echo "Tag $TAG is free."
 
   build:
     needs: meta
@@ -142,13 +156,22 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install nsis -y
 
+      # Default stamp (full version) — used as-is by the Linux build. The macOS
+      # and Windows steps re-stamp a numeric version below because their bundle
+      # metadata rejects a -prerelease suffix.
       - name: Stamp version into wails.json
         run: node scripts/set-version.mjs "$VERSION"
 
       # ---- macOS: universal .app -> .dmg ----
       - name: Build & package (macOS)
         if: runner.os == 'macOS'
+        env:
+          NUMERIC_VERSION: ${{ needs.meta.outputs.numericVersion }}
         run: |
+          # CFBundleVersion / CFBundleShortVersionString must be numeric X.Y.Z;
+          # re-stamp so a prerelease tag produces a valid bundle (the in-app
+          # main.version ldflag and the .dmg filename keep the full tag).
+          node scripts/set-version.mjs "$NUMERIC_VERSION"
           wails build -platform darwin/universal -clean -ldflags "-X main.version=$VERSION"
           VERSION="$VERSION" scripts/dmg.sh
 
@@ -156,12 +179,12 @@ jobs:
       - name: Build & package (Windows)
         if: runner.os == 'Windows'
         env:
-          WIN_VERSION: ${{ needs.meta.outputs.winVersion }}
+          NUMERIC_VERSION: ${{ needs.meta.outputs.numericVersion }}
         run: |
           # Re-stamp with the numeric-only version so the .exe / NSIS version
           # resources are valid even for prerelease tags (the in-app main.version
           # ldflag keeps the full tag).
-          node scripts/set-version.mjs "$WIN_VERSION"
+          node scripts/set-version.mjs "$NUMERIC_VERSION"
           wails build -platform windows/amd64 -nsis -clean -ldflags "-X main.version=$VERSION"
           mv "build/bin/o3-amd64-installer.exe" "build/bin/o3-${VERSION}-windows-amd64-setup.exe"
           # Zip the portable exe with o3.exe at the archive root (run from build/bin).
@@ -204,6 +227,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.meta.outputs.tag }}
+          # Point a newly-created tag (manual dispatch) at the exact commit these
+          # binaries were built from — without this the action would create the
+          # tag on the default branch, so the tag could reference a different
+          # commit than the artifacts. Ignored when the tag already exists.
+          target_commitish: ${{ github.sha }}
           name: o3 ${{ needs.meta.outputs.tag }}
           draft: true
           generate_release_notes: true

@@ -13,16 +13,17 @@
 VERSION ?= $(shell git describe --tags 2>/dev/null | sed 's/^v//' || echo 0.0.0-dev)
 LDFLAGS := -X main.version=$(VERSION)
 
-# Numeric-only version for the Windows .exe / NSIS resources (they reject a
-# -prerelease suffix like 0.0.0-dev). Strips everything from the first "-".
-WIN_VERSION := $(firstword $(subst -, ,$(VERSION)))
+# Numeric-only version for the macOS CFBundle* and Windows .exe/NSIS resources
+# (they reject a -prerelease / +build suffix like 0.0.0-dev). Strips from the
+# first "-" and the first "+".
+NUMERIC_VERSION := $(firstword $(subst +, ,$(firstword $(subst -, ,$(VERSION)))))
 
 # Linux webkit binding tag. Empty is correct for webkit2gtk-4.0 (Ubuntu 22.04,
 # the CI/release base). On webkit2gtk-4.1-only systems (Ubuntu 24.04+) build with:
 #   make appimage LINUX_TAGS=webkit2_41
 LINUX_TAGS ?=
 
-.PHONY: help stamp stamp-win dev \
+.PHONY: help stamp stamp-numeric dev \
         build-mac dmg \
         build-windows installer \
         build-linux appimage \
@@ -38,26 +39,26 @@ help:
 	@echo ""
 	@echo "VERSION=$(VERSION)"
 
-# Stamp the version into wails.json so it flows into Info.plist / installer.
+# Stamp the version into wails.json. Linux uses the full version; macOS and
+# Windows use the numeric-only one (their bundle metadata rejects a suffix).
 stamp:
 	node scripts/set-version.mjs $(VERSION)
 
-# Windows needs a numeric version in the .exe / NSIS resources.
-stamp-win:
-	node scripts/set-version.mjs $(WIN_VERSION)
+stamp-numeric:
+	node scripts/set-version.mjs $(NUMERIC_VERSION)
 
 dev:
 	wails dev
 
 # ---- macOS -----------------------------------------------------------------
-build-mac: stamp
+build-mac: stamp-numeric
 	wails build -platform darwin/universal -clean -ldflags "$(LDFLAGS)"
 
 dmg: build-mac
 	VERSION=$(VERSION) scripts/dmg.sh
 
 # ---- Windows (cross-compiles from any host; NSIS needs makensis) -----------
-build-windows: stamp-win
+build-windows: stamp-numeric
 	wails build -platform windows/amd64 -nsis -clean -ldflags "$(LDFLAGS)"
 
 installer: build-windows
