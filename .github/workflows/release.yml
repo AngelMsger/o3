@@ -38,11 +38,17 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 concurrency:
-  group: release-${{ github.ref }}
+  # Key by the requested version, not the ref, so two manual dispatches for the
+  # same version (even from different branches) serialize instead of racing to
+  # create the same tag. Tag pushes fall back to the tag ref (already versioned).
+  group: release-${{ github.event.inputs.version || github.ref_name }}
   cancel-in-progress: false
 
+# Least privilege by default: the meta and build jobs only read. Only the
+# release job is granted write (below), so a compromised build-time tool cannot
+# push to the repo or alter other releases.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   # Resolve the version once so artifact names and the release tag agree.
@@ -52,6 +58,7 @@ jobs:
       version: ${{ steps.v.outputs.version }}
       numericVersion: ${{ steps.v.outputs.numericVersion }}
       tag: ${{ steps.v.outputs.tag }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
     steps:
       - id: v
         # Pass the (attacker-influenceable) tag / dispatch input through an env
@@ -71,10 +78,15 @@ jobs:
           # metadata fields only (artifact filenames still carry the full tag).
           NUMERIC="${VERSION%%-*}"
           NUMERIC="${NUMERIC%%+*}"
+          # A semver "-" suffix (e.g. -rc.1) marks a prerelease; "+build" alone
+          # does not. Mark the GitHub release accordingly so an RC never appears
+          # as a stable release.
+          case "$VERSION" in *-*) PRERELEASE=true ;; *) PRERELEASE=false ;; esac
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "numericVersion=$NUMERIC" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Building version $VERSION (numeric bundle version $NUMERIC, tag v$VERSION)"
+          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "Building version $VERSION (numeric $NUMERIC, tag v$VERSION, prerelease=$PRERELEASE)"
 
       # A manual dispatch creates the tag, so refuse to clobber an existing one
       # (a re-dispatch would attach fresh binaries to an already-published tag).
@@ -213,6 +225,9 @@ jobs:
   release:
     needs: [meta, build]
     runs-on: ubuntu-latest
+    # Only this job needs to create the tag/release.
+    permissions:
+      contents: write
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -222,6 +237,20 @@ jobs:
 
       - name: List artifacts
         run: ls -la dist
+
+      # Re-check right before publishing (version-keyed concurrency serializes
+      # same-version dispatches, and this final guard closes any residual race so
+      # binaries are never attached to a tag a concurrent run already created).
+      - name: Reject existing tag on manual dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.meta.outputs.tag }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists — refusing to attach artifacts to it."
+            exit 1
+          fi
 
       - name: Create draft release
         uses: softprops/action-gh-release@v2
@@ -234,6 +263,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: o3 ${{ needs.meta.outputs.tag }}
           draft: true
+          prerelease: ${{ needs.meta.outputs.prerelease }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: dist/*
