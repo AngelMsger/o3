@@ -79,7 +79,7 @@ mkdir -p \
 # Stage binary, desktop entry and icon into the AppDir.
 cp "${BIN}" "${APPDIR}/usr/bin/${APP}"
 cp "build/linux/${APP}.desktop" "${APPDIR}/usr/share/applications/${APP}.desktop"
-cp "build/appicon.png" "${APPDIR}/usr/share/icons/hicolor/512x512/apps/${APP}.png"
+cp "build/linux/${APP}.png" "${APPDIR}/usr/share/icons/hicolor/512x512/apps/${APP}.png"
 
 # Fetch + verify the build tools (cached across runs in build/linux/tools).
 LD="${TOOLS}/linuxdeploy-x86_64.AppImage"
