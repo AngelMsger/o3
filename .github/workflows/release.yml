@@ -38,10 +38,11 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 concurrency:
-  # Key by the requested version, not the ref, so two manual dispatches for the
-  # same version (even from different branches) serialize instead of racing to
-  # create the same tag. Tag pushes fall back to the tag ref (already versioned).
-  group: release-${{ github.event.inputs.version || github.ref_name }}
+  # Serialize every run that targets the same tag. The manual (bare) input is
+  # normalized to the v-prefixed tag so a manual run and a tag push for the same
+  # version share ONE group — otherwise "1.2.3" and "v1.2.3" would land in
+  # different groups yet both operate on tag v1.2.3 and could race.
+  group: release-${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}
   cancel-in-progress: false
 
 # Least privilege by default: the meta and build jobs only read. Only the
@@ -100,19 +101,19 @@ jobs:
           echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
           echo "Building version $VERSION (numeric $NUMERIC, tag v$VERSION, prerelease=$PRERELEASE)"
 
-      # A manual dispatch creates the tag, so refuse to clobber an existing one
-      # (a re-dispatch would attach fresh binaries to an already-published tag).
-      - name: Reject existing tag on manual dispatch
-        if: github.event_name == 'workflow_dispatch'
+      # Fail fast if a release for this version is already PUBLISHED — that can't
+      # be recovered and must not be clobbered (bump the version instead). A
+      # leftover DRAFT from a partial run is fine: the release job recovers it.
+      - name: Fail fast if the release is already published
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.v.outputs.tag }}
         run: |
-          if gh api "repos/${{ github.repository }}/git/ref/tags/$TAG" >/dev/null 2>&1; then
-            echo "::error::Tag $TAG already exists — push a new tag or delete it first."
+          if [ "$(gh release view "$TAG" --json isDraft -q .isDraft 2>/dev/null)" = "false" ]; then
+            echo "::error::Release $TAG is already published — bump the version."
             exit 1
           fi
-          echo "Tag $TAG is free."
+          echo "Release $TAG is absent or a draft — ok to build."
 
   build:
     needs: meta
@@ -250,28 +251,14 @@ jobs:
       - name: List artifacts
         run: ls -la dist
 
-      # Re-check right before publishing (version-keyed concurrency serializes
-      # same-version dispatches, and this final guard closes any residual race so
-      # binaries are never attached to a tag a concurrent run already created).
-      - name: Reject existing tag on manual dispatch
-        if: github.event_name == 'workflow_dispatch'
+      # Create-or-update the DRAFT release with the first-party gh CLI (no
+      # third-party write action). Idempotent so a rerun after a partial upload
+      # recovers instead of failing: a draft release does not create the git tag
+      # until it is published, so a leftover draft is safe to update in place.
+      - name: Create or update the draft release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.meta.outputs.tag }}
-        run: |
-          if gh api "repos/${{ github.repository }}/git/ref/tags/$TAG" >/dev/null 2>&1; then
-            echo "::error::Tag $TAG already exists — refusing to attach artifacts to it."
-            exit 1
-          fi
-
-      # Use the first-party gh CLI (preinstalled on runners) rather than a
-      # third-party, mutable-tag action for the one write-capable step.
-      - name: Create draft release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.meta.outputs.tag }}
-          # --target points a newly-created tag at the exact built commit (a
-          # manual dispatch creates the tag); it is ignored if the tag exists.
           SHA: ${{ github.sha }}
           PRERELEASE: ${{ needs.meta.outputs.prerelease }}
         run: |
@@ -281,6 +268,27 @@ jobs:
             echo "::error::No artifacts found to attach to the release."
             exit 1
           fi
-          flags=(--draft --generate-notes --target "$SHA" --title "o3 $TAG")
-          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
-          gh release create "$TAG" "${flags[@]}" "${files[@]}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # A release already exists — only recover it when it is still a draft
+            # and was targeted at the exact commit we built (never touch a
+            # published release or one drafted from a different commit).
+            if [ "$(gh release view "$TAG" --json isDraft -q .isDraft)" != "true" ]; then
+              echo "::error::Release $TAG is already published — refusing to modify it."
+              exit 1
+            fi
+            target="$(gh release view "$TAG" --json targetCommitish -q .targetCommitish)"
+            if [ "$target" != "$SHA" ]; then
+              echo "::error::Draft $TAG targets $target, not the built commit $SHA."
+              exit 1
+            fi
+            echo "Recovering existing draft $TAG — re-uploading assets."
+            gh release edit "$TAG" --draft --title "o3 $TAG"
+            gh release upload "$TAG" --clobber "${files[@]}"
+          else
+            # First run: create the draft. --target points the (eventual) tag at
+            # the exact built commit when the draft is published.
+            create=(--draft --generate-notes --target "$SHA" --title "o3 $TAG")
+            if [ "$PRERELEASE" = "true" ]; then create+=(--prerelease); fi
+            gh release create "$TAG" "${create[@]}" "${files[@]}"
+          fi
