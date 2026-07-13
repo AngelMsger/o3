@@ -271,19 +271,30 @@ jobs:
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             # A release already exists — only recover it when it is still a draft
-            # and was targeted at the exact commit we built (never touch a
-            # published release or one drafted from a different commit).
+            # built from the exact commit we built (never touch a published
+            # release or one built from a different commit).
             if [ "$(gh release view "$TAG" --json isDraft -q .isDraft)" != "true" ]; then
               echo "::error::Release $TAG is already published — refusing to modify it."
               exit 1
             fi
-            target="$(gh release view "$TAG" --json targetCommitish -q .targetCommitish)"
-            if [ "$target" != "$SHA" ]; then
-              echo "::error::Draft $TAG targets $target, not the built commit $SHA."
+            # Resolve the commit this release is built from. If the git tag exists
+            # (a tag push), peel it to its commit via the commits endpoint — do
+            # NOT trust targetCommitish, which GitHub reports as the default
+            # branch once the tag exists. A draft has no tag yet, so then fall
+            # back to the draft's recorded target commit.
+            if built="$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" -q .sha 2>/dev/null)"; then
+              :
+            else
+              built="$(gh release view "$TAG" --json targetCommitish -q .targetCommitish)"
+            fi
+            if [ "$built" != "$SHA" ]; then
+              echo "::error::Existing $TAG points at $built, not the built commit $SHA."
               exit 1
             fi
             echo "Recovering existing draft $TAG — re-uploading assets."
-            gh release edit "$TAG" --draft --title "o3 $TAG"
+            # Normalize draft metadata (incl. prerelease, in case an older draft
+            # had it wrong) before re-uploading.
+            gh release edit "$TAG" --draft --prerelease="$PRERELEASE" --title "o3 $TAG"
             gh release upload "$TAG" --clobber "${files[@]}"
           else
             # First run: create the draft. --target points the (eventual) tag at
