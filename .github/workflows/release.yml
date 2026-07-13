@@ -179,7 +179,11 @@ jobs:
       # ---- Windows installer toolchain ----
       - name: Install NSIS
         if: runner.os == 'Windows'
-        run: choco install nsis -y
+        run: |
+          choco install nsis -y --no-progress
+          # Put makensis on PATH for later steps — wails build -nsis shells out to
+          # it, and choco's PATH change is not visible without this.
+          echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
 
       # Default stamp (full version) — used as-is by the Linux build. The macOS
       # and Windows steps re-stamp a numeric version below because their bundle
@@ -198,7 +202,7 @@ jobs:
           # main.version ldflag and the .dmg filename keep the full tag).
           node scripts/set-version.mjs "$NUMERIC_VERSION"
           wails build -platform darwin/universal -clean -ldflags "-X main.version=$VERSION"
-          VERSION="$VERSION" scripts/dmg.sh
+          VERSION="$VERSION" bash scripts/dmg.sh
 
       # ---- Windows: .exe + NSIS installer -> setup.exe + portable.zip ----
       - name: Build & package (Windows)
@@ -221,7 +225,7 @@ jobs:
         run: |
           # No webkit2_41 tag: 22.04 provides webkit2gtk 4.0 (the Wails default).
           wails build -platform linux/amd64 -clean -ldflags "-X main.version=$VERSION"
-          VERSION="$VERSION" scripts/appimage.sh
+          VERSION="$VERSION" bash scripts/appimage.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
