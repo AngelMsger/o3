@@ -107,6 +107,7 @@ jobs:
       - name: Fail fast if the release is already published
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ steps.v.outputs.tag }}
         run: |
           if [ "$(gh release view "$TAG" --json isDraft -q .isDraft 2>/dev/null)" = "false" ]; then
@@ -262,6 +263,7 @@ jobs:
       - name: Create or update the draft release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.meta.outputs.tag }}
           SHA: ${{ github.sha }}
           PRERELEASE: ${{ needs.meta.outputs.prerelease }}
