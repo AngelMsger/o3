@@ -68,8 +68,20 @@ jobs:
           RAW: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
         run: |
           VERSION="${RAW#v}"
-          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?(\+[0-9A-Za-z.]+)?$'; then
-            echo "::error::Invalid version '$VERSION' (expected semver like 1.2.3, 1.2.3-rc.1 or 1.2.3+build.5)"
+          # A manual dispatch must give the bare version (no leading "v"): the
+          # concurrency group keys on the raw input while the tag is v-prefixed,
+          # so allowing both "1.2.3" and "v1.2.3" would put two runs that create
+          # the SAME tag into DIFFERENT groups and let them race.
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$RAW" != "$VERSION" ]; then
+            echo "::error::Enter the version without a leading 'v' (e.g. 1.2.3, not v1.2.3)."
+            exit 1
+          fi
+          # Full SemVer 2.0.0 grammar (POSIX ERE): no leading zeros in the core or
+          # numeric prerelease identifiers, no empty identifiers, hyphens allowed
+          # inside alphanumeric identifiers, optional +build metadata.
+          SEMVER='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
+          if ! printf '%s' "$VERSION" | grep -Eq "$SEMVER"; then
+            echo "::error::Invalid version '$VERSION' (expected SemVer like 1.2.3, 1.2.3-rc.1 or 1.2.3+build.5)"
             exit 1
           fi
           # Windows .exe/NSIS and macOS CFBundle* version resources must be a
@@ -127,7 +139,7 @@ jobs:
         working-directory: o3
     steps:
       - name: Checkout o3
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: o3
 
@@ -135,19 +147,19 @@ jobs:
       # o3: ../oa-cli/src/openobserve-cli. openobserve-cli is self-contained
       # (module at repo root, no submodules), so no recursive checkout is needed.
       - name: Checkout openobserve-cli
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: ${{ env.OACLI_REPO }}
           ref: ${{ env.OACLI_REF }}
           path: oa-cli/src/openobserve-cli
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -211,7 +223,7 @@ jobs:
           VERSION="$VERSION" scripts/appimage.sh
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: o3-${{ matrix.os }}
           path: |
@@ -230,7 +242,7 @@ jobs:
       contents: write
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: dist
           merge-multiple: true
@@ -252,18 +264,23 @@ jobs:
             exit 1
           fi
 
+      # Use the first-party gh CLI (preinstalled on runners) rather than a
+      # third-party, mutable-tag action for the one write-capable step.
       - name: Create draft release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.meta.outputs.tag }}
-          # Point a newly-created tag (manual dispatch) at the exact commit these
-          # binaries were built from — without this the action would create the
-          # tag on the default branch, so the tag could reference a different
-          # commit than the artifacts. Ignored when the tag already exists.
-          target_commitish: ${{ github.sha }}
-          name: o3 ${{ needs.meta.outputs.tag }}
-          draft: true
-          prerelease: ${{ needs.meta.outputs.prerelease }}
-          generate_release_notes: true
-          fail_on_unmatched_files: true
-          files: dist/*
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.meta.outputs.tag }}
+          # --target points a newly-created tag at the exact built commit (a
+          # manual dispatch creates the tag); it is ignored if the tag exists.
+          SHA: ${{ github.sha }}
+          PRERELEASE: ${{ needs.meta.outputs.prerelease }}
+        run: |
+          shopt -s nullglob
+          files=(dist/*)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::No artifacts found to attach to the release."
+            exit 1
+          fi
+          flags=(--draft --generate-notes --target "$SHA" --title "o3 $TAG")
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "$TAG" "${flags[@]}" "${files[@]}"
