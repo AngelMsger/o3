@@ -6,6 +6,8 @@ import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AIEcosystem } from './AIEcosystem';
 import type { EcosystemPaneProps } from './AIEcosystem';
 import { BrandMark } from './BrandMark';
+import { platformLine } from '../lib/update';
+import type { AppInfo, CheckState, UpdateResult } from '../lib/update';
 import styles from './SettingsModal.module.css';
 
 // Project links. REPO_URL is the GitHub repository; DOCS_URL is the GitHub
@@ -30,6 +32,20 @@ interface SettingsContextsProps {
   onSave: () => void;
 }
 
+// The About tab's update surface. `state` is derived by lib/update's checkState,
+// shared with the UpdateSheet so the two views cannot disagree.
+export interface SettingsUpdatesProps {
+  appInfo: AppInfo | null;
+  state: CheckState;
+  result: UpdateResult | null;
+  error: string;
+  autoCheck: boolean;
+  skipVersion: string;
+  onCheck: () => void;
+  onToggleAutoCheck: () => void;
+  onClearSkip: () => void;
+}
+
 interface SettingsModalProps extends SettingsContextsProps {
   visible: boolean;
   isDark: boolean;
@@ -38,6 +54,7 @@ interface SettingsModalProps extends SettingsContextsProps {
   density: Density;
   themePref: ThemePref;
   ecosystem: EcosystemPaneProps;
+  updates: SettingsUpdatesProps;
   showHistogram: boolean;
   conn: { url: string; org: string; email?: string; password?: string; token?: string };
   onClose: () => void;
@@ -87,6 +104,7 @@ export function SettingsModal({
   density,
   themePref,
   ecosystem,
+  updates,
   showHistogram,
   conn,
   onClose,
@@ -536,10 +554,55 @@ export function SettingsModal({
                         o3 <span style={{ fontSize: 11, color: 'var(--tx-09)', fontWeight: 400 }}>· OpenObserve desktop client</span>
                       </div>
                       <div className={styles.brandTagline} style={{ color: accent }}>SELECT signal FROM noise</div>
-                      <div className={styles.brandVersion}>v0.1.0 · Wails v2 · macOS arm64</div>
+                      <div className={styles.brandVersion}>{platformLine(updates.appInfo)}</div>
                     </div>
-                    <button className={styles.updateBtn} onClick={() => BrowserOpenURL(`${REPO_URL}/releases/latest`)}>Check For Updates</button>
+                    <button
+                      className={`${styles.updateBtn}${updates.state === 'available' ? ` ${styles.updateBtnHot}` : ''}`}
+                      disabled={updates.state === 'checking'}
+                      onClick={updates.onCheck}
+                    >
+                      {updates.state === 'checking'
+                        ? 'Checking…'
+                        : updates.state === 'available' && updates.result
+                          ? `Update To ${updates.result.latestVersion}`
+                          : 'Check For Updates'}
+                    </button>
                   </div>
+
+                  {updates.error && (
+                    <div className={styles.updateError}>{updates.error}</div>
+                  )}
+
+                  {/* Auto-check toggle — same card idiom as "Show Histogram". */}
+                  <div className={styles.histoCard}>
+                    <div style={{ flex: 1 }}>
+                      <div className={styles.histoCardLabel}>Check For Updates Automatically</div>
+                      <div className={styles.histoCardSub}>
+                        Asks GitHub for a new release at most once a day. o3 never installs anything on its own.
+                      </div>
+                    </div>
+                    <button
+                      className={`${styles.toggle}${updates.autoCheck ? ` ${styles.toggleOn}` : ''}`}
+                      style={updates.autoCheck ? { background: accent } : undefined}
+                      onClick={updates.onToggleAutoCheck}
+                    >
+                      <span className={`${styles.knob}${updates.autoCheck ? ` ${styles.knobOn}` : ''}`} />
+                    </button>
+                  </div>
+
+                  {/* Without this, skipping a version is a one-way door. */}
+                  {updates.skipVersion && (
+                    <div className={styles.skipRow}>
+                      Skipping v{updates.skipVersion}.{' '}
+                      <button
+                        className={styles.skipClear}
+                        style={{ color: accent }}
+                        onClick={updates.onClearSkip}
+                      >
+                        Stop skipping
+                      </button>
+                    </div>
+                  )}
 
                   {/* Doc links — design line 545 */}
                   <div className={styles.aboutLinks}>

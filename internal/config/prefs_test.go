@@ -26,7 +26,10 @@ func TestLoadPrefsDefaultsWhenMissing(t *testing.T) {
 
 func TestSaveLoadRoundTrip(t *testing.T) {
 	dir := t.TempDir()
-	want := Prefs{Theme: "system", Accent: "#7c83ff", Density: "cozy"}
+	want := Prefs{
+		Theme: "system", Accent: "#7c83ff", Density: "cozy",
+		UpdateCheck: "off", SkipVersion: "1.3.0", LastUpdateCheck: "2026-07-14T10:00:00Z",
+	}
 	if err := savePrefsTo(dir, want); err != nil {
 		t.Fatal(err)
 	}
@@ -65,5 +68,64 @@ func TestLoadPrefsInvalidThemeFallsBackToDark(t *testing.T) {
 	}
 	if got.Theme != "dark" {
 		t.Fatalf("invalid theme should fall back to dark, got %q", got.Theme)
+	}
+}
+
+// A prefs.json written before the update fields existed must load with the check
+// enabled — the whole reason UpdateCheck is a string and not a bool.
+func TestLoadPrefsUpdateCheckDefaultsToAuto(t *testing.T) {
+	dir := t.TempDir()
+	if err := writeRawPrefs(dir, `{"theme":"light"}`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.UpdateCheck != "auto" {
+		t.Fatalf("UpdateCheck = %q, want auto", got.UpdateCheck)
+	}
+	// An empty SkipVersion / LastUpdateCheck is meaningful ("none" / "never"),
+	// so applyDefaults must leave them alone.
+	if got.SkipVersion != "" || got.LastUpdateCheck != "" {
+		t.Fatalf("want empty skip/last-check, got %+v", got)
+	}
+}
+
+func TestLoadPrefsInvalidUpdateCheckFallsBackToAuto(t *testing.T) {
+	dir := t.TempDir()
+	if err := writeRawPrefs(dir, `{"updateCheck":"sometimes"}`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.UpdateCheck != "auto" {
+		t.Fatalf("UpdateCheck = %q, want auto", got.UpdateCheck)
+	}
+}
+
+func TestMutatePrefsPreservesUntouchedFields(t *testing.T) {
+	dir := t.TempDir()
+	start := Prefs{
+		Theme: "light", Accent: "#ff0000", Density: "cozy",
+		UpdateCheck: "off", SkipVersion: "1.3.0", LastUpdateCheck: "2026-07-14T10:00:00Z",
+	}
+	if err := savePrefsTo(dir, start); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := mutatePrefsIn(dir, func(p *Prefs) { p.SkipVersion = "1.4.0" }); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := start
+	want.SkipVersion = "1.4.0"
+	if got != want {
+		t.Fatalf("mutate: want %+v got %+v", want, got)
 	}
 }

@@ -54,6 +54,9 @@ func main() {
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 		},
+		// macOS only (nil elsewhere): the standard app + edit menus, plus a Help
+		// menu carrying "Check for Updates…". See menu_darwin.go.
+		Menu:             appMenu(app),
 		BackgroundColour: &options.RGBA{R: 5, G: 6, B: 8, A: 1}, // #050608 opaque
 		AssetServer: &assetserver.Options{
 			Assets: assets,

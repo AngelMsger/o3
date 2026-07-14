@@ -25,12 +25,16 @@ import { ValueActionMenu } from './components/ValueActionMenu';
 import { TabContextMenu } from './components/TabContextMenu';
 import type { TabMenuAction } from './lib/tabMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
+import { UpdateSheet } from './components/UpdateSheet';
+import { checkState } from './lib/update';
+import type { UpdateResult, AppInfo as TAppInfo } from './lib/update';
+import type { config } from '../wailsjs/go/models';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
 import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
 import { copyText } from './lib/clipboard';
 import { dotState, ecoTooltip } from './lib/ecosystem';
 import type { EcoStatus } from './lib/ecosystem';
-import { BrowserOpenURL } from '../wailsjs/runtime/runtime';
+import { BrowserOpenURL, EventsOn } from '../wailsjs/runtime/runtime';
 import type { QueryMode, QueryTab, TimeTab, Density, SettingsTab, ThemePref } from './types';
 import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
@@ -42,6 +46,7 @@ import {
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
   EcosystemStatus, InstallCLI, UpgradeCLI, UninstallCLI, InstallSkill, UninstallSkill,
   BrowserSignIn as BrowserSignInCall, SessionStatus, SignOut,
+  AppInfo, CheckForUpdates, PendingUpdate, SkipUpdateVersion, SetAutoUpdateCheck,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -60,6 +65,13 @@ function parseAppError(e: unknown): { category: string; message: string; hint: s
 }
 
 // Stream color palette — assigned round-robin since the API does not return colors
+// The shape SavePrefs is sent when the prefs load failed. The backend merges and
+// backfills, so the empty update fields are inert — this only satisfies the type.
+const EMPTY_PREFS = {
+  theme: '', accent: '', density: '',
+  updateCheck: '', skipVersion: '', lastUpdateCheck: '',
+};
+
 const STREAM_PALETTE = ['#2dd4bf', '#60a5fa', '#f59e0b', '#a78bfa', '#f4685f', '#34d399'];
 const withColors = (streams: { name: string; size: string }[]) =>
   streams.map((s, i) => ({ ...s, color: STREAM_PALETTE[i % STREAM_PALETTE.length] }));
@@ -210,20 +222,99 @@ function App() {
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
   const [density, setDensity] = useState<Density>('ultra');
 
+  /* Updates. `prefs` keeps the last-loaded prefs so a UI-only save can send back
+     the update-owned fields untouched. */
+  const prefs = useRef<config.Prefs | null>(null);
+  const [appInfo, setAppInfo] = useState<TAppInfo | null>(null);
+  const [update, setUpdate] = useState<UpdateResult | null>(null);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateError, setUpdateError] = useState('');
+  const [autoCheck, setAutoCheck] = useState(true);
+  const [skipVersion, setSkipVersion] = useState('');
+  const updateT = useDelayedUnmount(updateOpen);
+  const updateState = checkState(update, updateBusy, updateError);
+
   /* Theme prefs — Phase 4: load once, persist on change, follow OS appearance. */
   useEffect(() => {
     GetPrefs().then((p) => {
+      prefs.current = p;
       if (p.theme) setThemePref(p.theme as ThemePref);
       if (p.accent) setAccent(p.accent);
       if (p.density) setDensity(p.density as Density);
+      setAutoCheck(p.updateCheck !== 'off');
+      setSkipVersion(p.skipVersion ?? '');
       prefsLoaded.current = true;
     }).catch(() => { prefsLoaded.current = true; });
   }, []);
 
   useEffect(() => {
     if (!prefsLoaded.current) return;
-    SavePrefs({ theme: themePref, accent, density }).catch(() => {});
+    // Spread the loaded prefs so the update-owned fields survive the round trip.
+    // App.SavePrefs also merges server-side — that is the load-bearing guard, since
+    // it holds for any caller; this just keeps the object we send honest.
+    SavePrefs({ ...(prefs.current ?? EMPTY_PREFS), theme: themePref, accent, density })
+      .catch(() => {});
   }, [themePref, accent, density]);
+
+  /* ===== Updates =====
+     o3 checks GitHub Releases for a newer stable build. It never installs
+     anything (the builds are unsigned): the sheet's primary button opens the
+     platform artifact in the user's real browser. */
+  const runUpdateCheck = () => {
+    setUpdateBusy(true);
+    setUpdateError('');
+    setUpdateOpen(true);
+    CheckForUpdates()
+      .then((r) => setUpdate(r as UpdateResult))
+      .catch((e) => setUpdateError(parseAppError(e).message))
+      .finally(() => setUpdateBusy(false));
+  };
+
+  useEffect(() => {
+    AppInfo().then((i) => setAppInfo(i as TAppInfo)).catch(() => {});
+
+    // The background check emits when it finds something...
+    const offAvailable = EventsOn('update:available', (r: UpdateResult) => {
+      setUpdate(r);
+      setUpdateError('');
+      setUpdateOpen(true);
+    });
+    // ...and the macOS Help menu's "Check for Updates…" runs the explicit one.
+    const offRequested = EventsOn('update:check-requested', () => {
+      setSettingsOpen(false);
+      runUpdateCheck();
+    });
+
+    // Closes a race: the background goroutine can emit before this effect has
+    // subscribed, and Wails drops events with no listener. The backend caches its
+    // result, so ask for it directly rather than trusting the timing.
+    PendingUpdate()
+      .then((r) => {
+        const res = r as UpdateResult;
+        if (res?.updateAvailable) { setUpdate(res); setUpdateOpen(true); }
+      })
+      .catch(() => {});
+
+    return () => { offAvailable(); offRequested(); };
+  }, []);
+
+  const handleSkipVersion = (v: string) => {
+    setSkipVersion(v);
+    setUpdateOpen(false);
+    SkipUpdateVersion(v).catch(() => {});
+  };
+
+  const handleToggleAutoCheck = () => {
+    const next = !autoCheck;
+    setAutoCheck(next);
+    SetAutoUpdateCheck(next).catch(() => {});
+  };
+
+  const handleClearSkip = () => {
+    setSkipVersion('');
+    SkipUpdateVersion('').catch(() => {});
+  };
 
   // AI Ecosystem: detect CLI + Skill state. Refresh on mount and whenever the
   // settings modal opens (so it reflects installs done in another terminal).
@@ -987,6 +1078,17 @@ function App() {
               onOpenDocs: () => BrowserOpenURL(CLI_DOCS_URL),
               onCopy: (cmd: string) => { copyText(cmd); },
             }}
+            updates={{
+              appInfo,
+              state: updateState,
+              result: update,
+              error: updateError,
+              autoCheck,
+              skipVersion,
+              onCheck: runUpdateCheck,
+              onToggleAutoCheck: handleToggleAutoCheck,
+              onClearSkip: handleClearSkip,
+            }}
             showHistogram={showHistogram}
             conn={conn}
             onClose={() => { setSettingsOpen(false); setEditingName(''); }}
@@ -1010,6 +1112,21 @@ function App() {
             onBrowserSignIn={() => { const a = contexts.find((c) => c.name === editSel); if (a) startBrowserSignIn(a); }}
             onSignOut={handleSignOut}
             session={sessionInfo}
+          />
+        )}
+
+        {/* UpdateSheet — a newer release was found, or an explicit check finished.
+            Sits above SettingsModal so a check launched from About lands on top. */}
+        {updateT.mounted && (
+          <UpdateSheet
+            visible={updateT.visible}
+            accent={accent}
+            isDark={effectiveTheme(themePref, systemDark) === 'dark'}
+            state={updateState}
+            result={update}
+            error={updateError}
+            onSkip={handleSkipVersion}
+            onClose={() => setUpdateOpen(false)}
           />
         )}
 

@@ -4,6 +4,9 @@ export namespace config {
 	    theme: string;
 	    accent: string;
 	    density: string;
+	    updateCheck: string;
+	    skipVersion: string;
+	    lastUpdateCheck: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Prefs(source);
@@ -14,6 +17,9 @@ export namespace config {
 	        this.theme = source["theme"];
 	        this.accent = source["accent"];
 	        this.density = source["density"];
+	        this.updateCheck = source["updateCheck"];
+	        this.skipVersion = source["skipVersion"];
+	        this.lastUpdateCheck = source["lastUpdateCheck"];
 	    }
 	}
 
@@ -98,6 +104,26 @@ export namespace ecosystem {
 
 export namespace main {
 	
+	export class AppInfo {
+	    version: string;
+	    os: string;
+	    arch: string;
+	    wails: string;
+	    isDev: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AppInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.os = source["os"];
+	        this.arch = source["arch"];
+	        this.wails = source["wails"];
+	        this.isDev = source["isDev"];
+	    }
+	}
 	export class ConnConfig {
 	    name: string;
 	    url: string;
@@ -483,6 +509,45 @@ export namespace query {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace update {
+	
+	export class Result {
+	    checked: boolean;
+	    currentVersion: string;
+	    latestVersion: string;
+	    updateAvailable: boolean;
+	    releaseName: string;
+	    notes: string;
+	    publishedAt: string;
+	    releaseURL: string;
+	    downloadURL: string;
+	    assetName: string;
+	    os: string;
+	    arch: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Result(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.checked = source["checked"];
+	        this.currentVersion = source["currentVersion"];
+	        this.latestVersion = source["latestVersion"];
+	        this.updateAvailable = source["updateAvailable"];
+	        this.releaseName = source["releaseName"];
+	        this.notes = source["notes"];
+	        this.publishedAt = source["publishedAt"];
+	        this.releaseURL = source["releaseURL"];
+	        this.downloadURL = source["downloadURL"];
+	        this.assetName = source["assetName"];
+	        this.os = source["os"];
+	        this.arch = source["arch"];
+	    }
 	}
 
 }

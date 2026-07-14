@@ -696,3 +696,40 @@
   font-family: inherit;
   padding: 0;
 }
+
+/* An update is waiting — the amber tone shared with the AI Ecosystem pane. */
+.updateBtnHot {
+  border-color: rgba(245, 179, 64, 0.35);
+  background: rgba(245, 179, 64, 0.12);
+  color: #f5b340;
+  font-weight: 600;
+}
+
+.updateBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.updateError {
+  font-size: 12px;
+  color: #f4685f;
+  margin-bottom: 16px;
+}
+
+.skipRow {
+  font-size: 12px;
+  color: var(--tx-10);
+  margin-top: 12px;
+}
+
+.skipClear {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.skipClear:hover {
+  text-decoration: underline;
+}

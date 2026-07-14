@@ -16,6 +16,18 @@ type Prefs struct {
 	Theme   string `json:"theme"`
 	Accent  string `json:"accent"`
 	Density string `json:"density"`
+
+	// UpdateCheck is "auto" (the default) or "off". It is a string rather than a
+	// bool because applyDefaults backfills empty fields, and encoding/json cannot
+	// distinguish a missing bool from an explicit false — so a bool that defaults
+	// to true has no representation here.
+	UpdateCheck string `json:"updateCheck"`
+	// SkipVersion is a release the user chose never to be told about again; ""
+	// means none. Empty is meaningful, so applyDefaults must not touch it.
+	SkipVersion string `json:"skipVersion"`
+	// LastUpdateCheck is when the background check last succeeded (RFC3339); ""
+	// means never. Empty is meaningful, so applyDefaults must not touch it.
+	LastUpdateCheck string `json:"lastUpdateCheck"`
 }
 
 // prefsFileName is the file name for the persisted prefs, relative to o3's
@@ -25,11 +37,14 @@ const prefsFileName = "prefs.json"
 // defaultPrefs returns the built-in defaults, kept in one place so both the
 // missing-file case and the field-backfill case agree.
 func defaultPrefs() Prefs {
-	return Prefs{Theme: "dark", Accent: "#2dd4bf", Density: "ultra"}
+	return Prefs{Theme: "dark", Accent: "#2dd4bf", Density: "ultra", UpdateCheck: "auto"}
 }
 
 // validThemes are the only accepted values for Prefs.Theme.
 var validThemes = map[string]bool{"light": true, "dark": true, "system": true}
+
+// validUpdateChecks are the only accepted values for Prefs.UpdateCheck.
+var validUpdateChecks = map[string]bool{"auto": true, "off": true}
 
 // applyDefaults fills any empty/invalid field of p with the default value,
 // and normalizes an unrecognized Theme to "dark".
@@ -43,6 +58,9 @@ func applyDefaults(p Prefs) Prefs {
 	}
 	if p.Density == "" {
 		p.Density = d.Density
+	}
+	if p.UpdateCheck == "" || !validUpdateChecks[p.UpdateCheck] {
+		p.UpdateCheck = d.UpdateCheck
 	}
 	return p
 }
@@ -128,4 +146,28 @@ func SavePrefs(p Prefs) error {
 		return err
 	}
 	return savePrefsTo(dir, p)
+}
+
+// mutatePrefsIn applies fn to the prefs stored in dir and writes the result back.
+func mutatePrefsIn(dir string, fn func(*Prefs)) error {
+	p, err := loadPrefsFrom(dir)
+	if err != nil {
+		return err
+	}
+	fn(&p)
+	return savePrefsTo(dir, applyDefaults(p))
+}
+
+// MutatePrefs applies fn to the persisted prefs and saves the result.
+//
+// Callers that own only some of the fields must use this rather than
+// LoadPrefs/SavePrefs by hand: SavePrefs writes the whole struct, so passing a
+// partially-populated Prefs silently resets every field the caller did not set.
+// Serialize concurrent callers yourself — this is a read-modify-write.
+func MutatePrefs(fn func(*Prefs)) error {
+	dir, err := prefsDir()
+	if err != nil {
+		return err
+	}
+	return mutatePrefsIn(dir, fn)
 }

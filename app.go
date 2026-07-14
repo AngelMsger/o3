@@ -18,6 +18,7 @@ import (
 	"github.com/angelmsger/o3/internal/ecosystem"
 	"github.com/angelmsger/o3/internal/metrics"
 	"github.com/angelmsger/o3/internal/query"
+	"github.com/angelmsger/o3/internal/update"
 	"github.com/angelmsger/o3/internal/webauth"
 )
 
@@ -30,19 +31,30 @@ type App struct {
 	client api.Client // nil until built for the current context
 
 	eco *ecosystem.Service
+
+	upd *update.Service
+	// updMu guards the pending result and every prefs read-modify-write. It is
+	// deliberately NOT a.mu: that one is held across query paths, and taking it
+	// around a 10-second HTTP call would stall the UI.
+	updMu   sync.Mutex
+	pending update.Result // the last background result; the zero value means none
 }
 
 // NewApp creates a new App application struct.
 func NewApp() *App {
-	return &App{}
+	return &App{upd: update.NewProduction(version)}
 }
 
-// startup records the Wails context and best-effort builds the client for the
-// current context.
+// startup records the Wails context, best-effort builds the client for the
+// current context, and kicks off the background update check.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.eco = ecosystem.NewProduction(ctx)
+	if a.upd == nil { // tests construct App literals
+		a.upd = update.NewProduction(version)
+	}
 	_ = a.rebuildClient() // best-effort; data methods re-report if it fails
+	go a.backgroundUpdateCheck(ctx)
 }
 
 // ConnConfig is a connection's settings exchanged with the frontend. Secret and
@@ -709,8 +721,20 @@ func (a *App) RunMetricsQuery(p metrics.Params) (metrics.Result, error) {
 // falling back to defaults when no prefs file exists yet.
 func (a *App) GetPrefs() (config.Prefs, error) { return config.LoadPrefs() }
 
-// SavePrefs persists the UI preferences.
-func (a *App) SavePrefs(p config.Prefs) error { return config.SavePrefs(p) }
+// SavePrefs persists the UI-owned preferences.
+//
+// It merges rather than overwrites: the frontend sends only theme/accent/density,
+// so writing p wholesale would reset the update-owned fields (updateCheck,
+// skipVersion, lastUpdateCheck) to their defaults on every theme change — wiping
+// a skipped version and the check throttle. Keeping the merge here means it holds
+// for any caller, not just the one frontend that happens to send a full object.
+func (a *App) SavePrefs(p config.Prefs) error {
+	a.updMu.Lock()
+	defer a.updMu.Unlock()
+	return apperr.Wrap(config.MutatePrefs(func(cur *config.Prefs) {
+		cur.Theme, cur.Accent, cur.Density = p.Theme, p.Accent, p.Density
+	}))
+}
 
 // SetDockTheme swaps the macOS Dock icon to match the active theme: the Void
 // (dark) variant when dark is true, the Signal (light) variant otherwise.
