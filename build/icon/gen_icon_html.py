@@ -2,10 +2,11 @@
 """Generate the o3 monogram icon variants as self-contained 1024x1024 HTML.
 
 The app icon is the "o3" wordmark in JetBrains Mono ExtraBold, centered on a
-macOS-standard squircle: an 824x824 rounded rect (radius 185) inside a 1024
-canvas with 100px transparent padding on every side, so the Dock renders it at
-the same visual size as system icons. Void ships for dark appearance, Signal
-for light. Usage: gen_icon_html.py <font.ttf> <outdir>
+macOS-standard squircle: an 814x814 rounded rect (radius 176) inside a 1024
+canvas with 105px transparent padding on every side, so the Dock renders it at
+the same visual size as system icons (measured: Safari is 814/1024, radius
+~0.215 of the side). Void ships for dark appearance, Signal for light.
+Usage: gen_icon_html.py <font.ttf> <outdir>
 """
 import base64
 import pathlib
@@ -20,13 +21,13 @@ HEAD = """<!doctype html><html><head><meta charset="utf-8">
   src:url(data:font/ttf;base64,{b64}) format('truetype'); }}
 html,body {{ margin:0; padding:0; width:1024px; height:1024px; background:transparent; }}
 .wrap {{ width:1024px; height:1024px; position:relative; }}
-.sq {{ position:absolute; left:100px; top:100px; width:824px; height:824px;
-  border-radius:185px; overflow:hidden; display:flex; align-items:center; justify-content:center; }}
-.glow {{ position:absolute; left:50%; top:54%; width:584px; height:584px;
+.sq {{ position:absolute; left:105px; top:105px; width:814px; height:814px;
+  border-radius:176px; overflow:hidden; display:flex; align-items:center; justify-content:center; }}
+.glow {{ position:absolute; left:50%; top:54%; width:577px; height:577px;
   transform:translate(-50%,-50%); border-radius:50%; }}
 .hi {{ position:absolute; inset:0; }}
 .mark {{ position:relative; font-family:'JBMono',monospace; font-weight:800;
-  font-size:453px; letter-spacing:-17px; line-height:1; }}
+  font-size:448px; letter-spacing:-16.8px; line-height:1; }}
 </style></head><body><div class="wrap">
 """.format(b64=b64)
 TAIL = "</div></body></html>"

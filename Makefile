@@ -54,6 +54,8 @@ dev:
 build-mac: stamp-numeric
 	wails build -platform darwin/universal -clean -ldflags "$(LDFLAGS)"
 
+# Requires dmgbuild (pip install dmgbuild) to lay out the install window. The
+# committed background/volume-icon assets are regenerated with build/dmg/render.sh.
 dmg: build-mac
 	VERSION=$(VERSION) scripts/dmg.sh
 

@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 #
-# Package the macOS build of o3 into a distributable .dmg with a drag-to-install
-# Applications shortcut. Uses hdiutil (built into macOS) — no extra tooling, and
-# reliable in headless CI (unlike AppleScript-driven layout tools).
+# Package the macOS build of o3 into a distributable .dmg with a designed install
+# window: a Void-themed background, a drag-to-Applications arrow, fixed icon
+# positions, and a custom volume icon.
+#
+# Uses dmgbuild (pure Python) rather than AppleScript/Finder, so the layout is
+# written headlessly and reproducibly in CI. The committed assets it consumes
+# (build/dmg/background.tiff, build/dmg/volume.icns) are regenerated with
+# build/dmg/render.sh; see the design spec under docs/superpowers/specs/.
 #
 # Prerequisites:
+#   - dmgbuild:  pip install dmgbuild
 #   - The .app already built by Wails at build/bin/o3.app, e.g.
 #         wails build -platform darwin/universal
 #   - Run on macOS.
@@ -31,21 +37,21 @@ if [[ ! -d "${APP_BUNDLE}" ]]; then
   exit 1
 fi
 
-STAGING="build/darwin/dmg-staging"
+if ! command -v dmgbuild >/dev/null 2>&1; then
+  echo "error: dmgbuild not found. Install it first:" >&2
+  echo "  pip install dmgbuild" >&2
+  exit 1
+fi
+
 OUTPUT="build/bin/${APP}-${VERSION}-universal.dmg"
+rm -f "${OUTPUT}"
 
-rm -rf "${STAGING}" "${OUTPUT}"
-mkdir -p "${STAGING}"
-cp -R "${APP_BUNDLE}" "${STAGING}/"
-ln -s /Applications "${STAGING}/Applications"
-
-hdiutil create \
-  -volname "${APP}" \
-  -srcfolder "${STAGING}" \
-  -fs HFS+ \
-  -format UDZO \
-  -ov \
+dmgbuild \
+  -s build/dmg/settings.py \
+  -D app="${ROOT}/${APP_BUNDLE}" \
+  -D volicon="${ROOT}/build/dmg/volume.icns" \
+  -D background="${ROOT}/build/dmg/background.tiff" \
+  "${APP}" \
   "${OUTPUT}"
 
-rm -rf "${STAGING}"
 echo "Built ${OUTPUT}"
