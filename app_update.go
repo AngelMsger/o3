@@ -105,17 +105,21 @@ func (a *App) SetAutoUpdateCheck(on bool) error {
 	return apperr.Wrap(config.MutatePrefs(func(p *config.Prefs) { p.UpdateCheck = mode }))
 }
 
-// backgroundUpdateCheck runs once per launch, a few seconds in. Every failure is
-// silent: a laptop that launched on a plane, a rate-limited IP and a GitHub
-// outage must all look like "nothing to report", not an error the user has to
-// dismiss. There is no toast system to show one in anyway.
+// backgroundUpdateCheck waits out the startup delay, then runs the check.
 func (a *App) backgroundUpdateCheck(ctx context.Context) {
 	select {
 	case <-time.After(updateStartupDelay):
 	case <-ctx.Done(): // never hold up a quit
 		return
 	}
+	a.runBackgroundUpdateCheck(ctx)
+}
 
+// runBackgroundUpdateCheck is the check itself, split from the delay so tests can
+// call it directly. Every failure is silent: a laptop that launched on a plane, a
+// rate-limited IP and a GitHub outage must all look like "nothing to report", not
+// an error the user has to dismiss. There is no toast system to show one in anyway.
+func (a *App) runBackgroundUpdateCheck(ctx context.Context) {
 	prefs, err := config.LoadPrefs()
 	if err != nil || prefs.UpdateCheck == "off" {
 		return
@@ -137,13 +141,35 @@ func (a *App) backgroundUpdateCheck(ctx context.Context) {
 
 	a.updMu.Lock()
 	_ = config.MutatePrefs(func(p *config.Prefs) { p.LastUpdateCheck = nowRFC3339() })
-	a.pending = res
 	a.updMu.Unlock()
 
+	// Nothing to report, or the user already told us to drop this version.
+	//
+	// This gate must come BEFORE a.pending is set, not just before the emit:
+	// PendingUpdate() is a second route to the same sheet (it closes the
+	// emit-before-listen race), so anything cached here surfaces on mount whether
+	// or not the event fired. Filtering only the emit let a skipped version come
+	// back through the cache.
 	if !res.UpdateAvailable || res.LatestVersion == prefs.SkipVersion {
 		return
 	}
-	wruntime.EventsEmit(ctx, EventUpdateAvailable, res)
+
+	a.updMu.Lock()
+	a.pending = res
+	a.updMu.Unlock()
+	a.emitEvent(ctx, EventUpdateAvailable, res)
+}
+
+// emitEvent sends a Wails event, going through a.emit when set. Only tests set
+// it: wruntime.EventsEmit rejects any context that did not come from a Wails
+// lifecycle hook, so a test calling the check body directly cannot use the real
+// one.
+func (a *App) emitEvent(ctx context.Context, name string, data ...interface{}) {
+	if a.emit != nil {
+		a.emit(ctx, name, data...)
+		return
+	}
+	wruntime.EventsEmit(ctx, name, data...)
 }
 
 func nowRFC3339() string { return time.Now().UTC().Format(time.RFC3339) }

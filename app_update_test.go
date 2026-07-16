@@ -20,6 +20,8 @@ func newUpdateApp(t *testing.T, current string, rel update.Release, fetchErr err
 	return &App{
 		ctx: context.Background(),
 		upd: update.New(current, fetch, "darwin", "arm64"),
+		// Swallow events: the real emitter rejects a non-Wails context.
+		emit: func(context.Context, string, ...interface{}) {},
 	}
 }
 
@@ -155,5 +157,47 @@ func TestAppInfo(t *testing.T) {
 	}
 	if info.OS == "" || info.Arch == "" || info.Wails == "" {
 		t.Errorf("AppInfo() = %+v, want the platform populated", info)
+	}
+}
+
+// A version the user skipped must not come back through PendingUpdate. The event
+// path and the PendingUpdate path both open the sheet, so filtering only the
+// event let the cache smuggle a dismissed release onto the screen at mount.
+func TestBackgroundCheckDoesNotCacheASkippedVersion(t *testing.T) {
+	a := newUpdateApp(t, "1.2.0", newerRelease(), nil) // the release is v1.3.0
+	if err := a.SkipUpdateVersion("1.3.0"); err != nil {
+		t.Fatal(err)
+	}
+
+	a.runBackgroundUpdateCheck(context.Background())
+
+	if got := a.PendingUpdate(); got.UpdateAvailable {
+		t.Fatalf("PendingUpdate() = %q, want nothing: the user skipped that version", got.LatestVersion)
+	}
+}
+
+// The ordinary case still caches, otherwise the race fix does nothing.
+func TestBackgroundCheckCachesAnUnskippedVersion(t *testing.T) {
+	a := newUpdateApp(t, "1.2.0", newerRelease(), nil)
+
+	a.runBackgroundUpdateCheck(context.Background())
+
+	got := a.PendingUpdate()
+	if !got.UpdateAvailable || got.LatestVersion != "1.3.0" {
+		t.Fatalf("PendingUpdate() = %+v, want the 1.3.0 update cached for mount", got)
+	}
+}
+
+// "off" means off: no cache, no event.
+func TestBackgroundCheckRespectsAutoCheckOff(t *testing.T) {
+	a := newUpdateApp(t, "1.2.0", newerRelease(), nil)
+	if err := a.SetAutoUpdateCheck(false); err != nil {
+		t.Fatal(err)
+	}
+
+	a.runBackgroundUpdateCheck(context.Background())
+
+	if got := a.PendingUpdate(); got.UpdateAvailable {
+		t.Fatal("PendingUpdate() returned a result with the background check disabled")
 	}
 }

@@ -45,6 +45,10 @@ type App struct {
 	// around a 10-second HTTP call would stall the UI.
 	updMu   sync.Mutex
 	pending update.Result // the last background result; the zero value means none
+	// emit overrides the Wails event emitter; nil means production. Tests only:
+	// wruntime.EventsEmit rejects any context that did not come from a Wails
+	// lifecycle hook. See App.emitEvent.
+	emit func(ctx context.Context, name string, data ...interface{})
 }
 
 // NewApp creates a new App application struct.
