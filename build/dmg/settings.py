@@ -3,7 +3,13 @@
 #
 # The window is 660x440 points; build/dmg/gen_bg_html.py renders the background
 # on the matching grid, so the drag arrow lines up with the icon positions below
-# (app on the left, Applications on the right, both centred at y=230).
+# (app on the left, Applications on the right, both centred at y=226).
+#
+# y=226 is not arbitrary: it centres each icon in the pale "well" painted on the
+# background. The wells exist because Finder always draws the filename labels in
+# black once a background image is set, in Dark Mode as well as Light. Move the
+# icons and the labels walk off their wells onto the dark ground, where nobody
+# can read them — so keep these coordinates in step with gen_bg_html.py.
 import os.path
 
 # -D app=/abs/o3.app  -D volicon=/abs/volume.icns  -D background=/abs/background.tiff
@@ -35,6 +41,6 @@ label_pos = "bottom"
 arrange_by = None
 
 icon_locations = {
-    appname: (160, 230),
-    "Applications": (500, 230),
+    appname: (160, 226),
+    "Applications": (500, 226),
 }
