@@ -30,7 +30,14 @@ type App struct {
 	mu     sync.Mutex
 	client api.Client // nil until built for the current context
 
-	eco *ecosystem.Service
+	// eco is built lazily through ecoService, never assigned directly: Wails can
+	// dispatch bound-method calls before startup() finishes building it.
+	// ecoOnce makes that construction happen exactly once, and publishes it
+	// safely to the goroutines serving those calls. newEco overrides the
+	// production builder in tests; nil means production.
+	eco     *ecosystem.Service
+	ecoOnce sync.Once
+	newEco  func() *ecosystem.Service
 
 	upd *update.Service
 	// updMu guards the pending result and every prefs read-modify-write. It is
@@ -49,7 +56,10 @@ func NewApp() *App {
 // current context, and kicks off the background update check.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.eco = ecosystem.NewProduction(ctx)
+	// Warm the ecosystem service off the startup path. Building it resolves PATH
+	// from a login shell (seconds), and Wails dispatches bound-method calls before
+	// startup returns — so it must not be assigned here directly. See ecoService.
+	go a.ecoService()
 	if a.upd == nil { // tests construct App literals
 		a.upd = update.NewProduction(version)
 	}
@@ -747,25 +757,61 @@ func (a *App) SetDockTheme(dark bool) { branding.SetDock(dark) }
 // "System" theme can resolve to light. No-op on non-darwin platforms.
 func (a *App) SetAppearance(pref string) { branding.SetAppearance(pref) }
 
+// ecoService returns the ecosystem service, building it on first use.
+//
+// Every eco-backed bound method must go through here. Wails serves frontend
+// calls before startup() returns, and building the service resolves PATH from a
+// login shell ("$SHELL -lic 'echo $PATH'") — seconds. Assigning a.eco at the end
+// of startup therefore left a window where the frontend's on-mount
+// EcosystemStatus call dereferenced a nil *Service and panicked.
+//
+// Callers racing the warm-up block on the Once rather than seeing nil, and a
+// pre-set a.eco (tests) is left alone.
+func (a *App) ecoService() *ecosystem.Service {
+	a.ecoOnce.Do(func() {
+		if a.eco != nil {
+			return
+		}
+		build := a.newEco
+		if build == nil {
+			// context.Background, not a.ctx: the ctx is only used for the one-time
+			// PATH probe at construction, and a.ctx may not be set yet. Per-call
+			// contexts are passed to the methods below.
+			build = func() *ecosystem.Service { return ecosystem.NewProduction(context.Background()) }
+		}
+		a.eco = build()
+	})
+	return a.eco
+}
+
+// ecoCtx is the context for eco calls, falling back to Background when a bound
+// method beats startup() to setting a.ctx.
+func (a *App) ecoCtx() context.Context {
+	if a.ctx != nil {
+		return a.ctx
+	}
+	return context.Background()
+}
+
 // EcosystemStatus reports the openobserve-cli + companion Skill install state.
 func (a *App) EcosystemStatus() (ecosystem.EcoStatus, error) {
-	return a.eco.Status(a.ctx)
+	return a.ecoService().Status(a.ecoCtx())
 }
 
 // InstallCLI installs openobserve-cli via npm.
-func (a *App) InstallCLI() error { return apperr.Wrap(a.eco.InstallCLI(a.ctx)) }
+func (a *App) InstallCLI() error { return apperr.Wrap(a.ecoService().InstallCLI(a.ecoCtx())) }
 
 // UpgradeCLI upgrades openobserve-cli to the latest npm release.
-func (a *App) UpgradeCLI() error { return apperr.Wrap(a.eco.UpgradeCLI(a.ctx)) }
+func (a *App) UpgradeCLI() error { return apperr.Wrap(a.ecoService().UpgradeCLI(a.ecoCtx())) }
 
 // UninstallCLI removes openobserve-cli (npm-managed installs only).
-func (a *App) UninstallCLI() error { return apperr.Wrap(a.eco.UninstallCLI(a.ctx)) }
+func (a *App) UninstallCLI() error { return apperr.Wrap(a.ecoService().UninstallCLI(a.ecoCtx())) }
 
 // InstallSkill deploys the companion Skill into every detected agent.
-func (a *App) InstallSkill() error { return apperr.Wrap(a.eco.InstallSkill(a.ctx)) }
+func (a *App) InstallSkill() error { return apperr.Wrap(a.ecoService().InstallSkill(a.ecoCtx())) }
 
 // UninstallSkill removes the companion Skill from all agents.
-func (a *App) UninstallSkill() error { return apperr.Wrap(a.eco.UninstallSkill(a.ctx)) }
+func (a *App) UninstallSkill() error { return apperr.Wrap(a.ecoService().UninstallSkill(a.ecoCtx())) }
 
 // humanBytes formats a byte count as a short human string (e.g. "1.2 MB").
 func humanBytes(b float64) string {
