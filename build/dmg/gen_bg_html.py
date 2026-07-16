@@ -11,11 +11,16 @@ shows up until you actually open the .dmg:
 
 1. THE FILENAME LABELS ARE ALWAYS BLACK. Once a background image is set, Finder
    stops adapting the label colour to the system appearance: "o3" and
-   "Applications" are drawn in black in BOTH Light and Dark Mode. A dark panel
-   behind them is unreadable for everyone, not just Light Mode users. That is
-   what the pale wells are for — they exist so the black text has something to
-   land on. Keep their luminance high (~245); darkening them is a regression.
+   "Applications" are drawn in black in BOTH Light and Dark Mode. Dark ground
+   behind them is unreadable for everyone, not just Light Mode users, and going
+   dark enough to hide them instead just yields an illegible smudge.
    See https://c-command.com/dropdmg/help/layouts
+
+   So the black text needs somewhere pale to land. Rather than light up the
+   whole icon slot — which drowns the Void ground in two big pale slabs — only
+   the label line gets a chip, sized to its filename. It reads as the pill
+   badge the app's own UI uses, and it is the smallest light area that does the
+   job. Keep the chips' luminance high (~220+); darkening them is a regression.
 
 2. THE BOTTOM OF THE IMAGE IS CLIPPED. Finder draws the background into the
    window's CONTENT area, so the ~28pt title bar eats the bottom of a
@@ -26,14 +31,14 @@ shows up until you actually open the .dmg:
    and its bottom edge was simply cut off.
 
 Layout (2x px; halve for the settings.py point grid):
-  - icon wells      y 280..652, centred x=320 and x=1000 (352 wide)
   - icon slots      centred at (320, 452) and (1000, 452) -> points (160, 226)
-  - teal arrow      y=452, spanning the well gap (px 540..780)
+  - label chips     y 570..630, centred on each icon's x
+  - teal arrow      y=452, spanning the gap (px 540..780)
   - safe zone ends  y=762 (=381pt); below that is plain gradient
 
-The wells are deliberately roomy around the 128pt icon: Finder's exact label
-baseline is its own business, and the padding means a few points either way
-still lands the text on the pale panel.
+The chips are deliberately taller and wider than the text they carry. Finder
+picks its own label baseline and we cannot query it, so the padding is the
+margin of error: a few points adrift still lands the text on the chip.
 
 The dark Void palette matches the app icon (build/icon/gen_icon_html.py) and the
 site: deep #06121a ground, teal #2dd4bf accents. Usage: gen_bg_html.py <font.ttf> <outdir>
@@ -62,16 +67,16 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
 .caption {{ position:absolute; left:0; right:0; top:206px; text-align:center;
   font-family:-apple-system,'Helvetica Neue',sans-serif; font-weight:500; font-size:30px;
   letter-spacing:1px; color:rgba(210,244,239,.72); }}
-/* Pale wells: these carry Finder's always-black filename labels (see the module
-   docstring). The icon occupies the upper part; the label lands below it. */
-.well {{ position:absolute; top:280px; width:352px; height:372px; border-radius:44px;
-  background:linear-gradient(180deg, rgba(236,251,248,.97) 0%, rgba(211,238,233,.94) 100%);
-  box-shadow: 0 18px 44px rgba(0,0,0,.5),
-              0 0 0 1px rgba(45,212,191,.10),
-              inset 0 0 0 2px rgba(45,212,191,.55),
-              inset 0 3px 0 rgba(255,255,255,.9); }}
-.well.left {{ left:144px; }}
-.well.right {{ left:824px; }}
+/* Label chips: the pale landing pad for Finder's always-black filenames (see the
+   module docstring). Sized per filename — "o3" needs far less room than
+   "Applications" — and centred under each icon. */
+.chip {{ position:absolute; top:570px; height:60px; border-radius:30px;
+  background:linear-gradient(180deg, rgba(206,238,233,.97) 0%, rgba(178,214,209,.95) 100%);
+  box-shadow: 0 6px 18px rgba(0,0,0,.45),
+              inset 0 0 0 2px rgba(45,212,191,.5),
+              inset 0 2px 0 rgba(255,255,255,.7); }}
+.chip.left {{ left:260px; width:120px; }}    /* "o3" */
+.chip.right {{ left:890px; width:220px; }}   /* "Applications" */
 /* arrow: shaft + head, teal with a soft glow, at the icon vertical centre. The
    shaft runs right up to the head so the two read as one mark. */
 .arrow {{ position:absolute; top:452px; left:540px; width:240px; height:0;
@@ -86,8 +91,8 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
   <div class="glow"></div>
   <div class="wordmark">o3</div>
   <div class="caption">Drag&nbsp; o3 &nbsp;onto&nbsp; Applications</div>
-  <div class="well left"></div>
-  <div class="well right"></div>
+  <div class="chip left"></div>
+  <div class="chip right"></div>
   <div class="arrow"><div class="shaft"></div><div class="head"></div></div>
 </div>
 </body></html>

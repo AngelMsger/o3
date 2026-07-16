@@ -5,11 +5,14 @@
 # on the matching grid, so the drag arrow lines up with the icon positions below
 # (app on the left, Applications on the right, both centred at y=226).
 #
-# y=226 is not arbitrary: it centres each icon in the pale "well" painted on the
-# background. The wells exist because Finder always draws the filename labels in
-# black once a background image is set, in Dark Mode as well as Light. Move the
-# icons and the labels walk off their wells onto the dark ground, where nobody
-# can read them — so keep these coordinates in step with gen_bg_html.py.
+# y=226 is not arbitrary: it lands each icon's filename on the pale chip painted
+# on the background. The chips exist because Finder always draws the labels in
+# black once a background image is set — in Dark Mode as well as Light. Move the
+# icons and the labels walk off their chips onto the Void ground, where nobody
+# can read them, so keep these coordinates in step with gen_bg_html.py.
+#
+# icon_size is load-bearing here too: the label hangs off the bottom of the icon,
+# so resizing the icon moves the text without moving the chip.
 import os.path
 
 # -D app=/abs/o3.app  -D volicon=/abs/volume.icns  -D background=/abs/background.tiff
