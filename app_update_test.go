@@ -37,7 +37,7 @@ func newerRelease() update.Release {
 	}
 }
 
-func TestCheckForUpdatesReportsAndCaches(t *testing.T) {
+func TestCheckForUpdatesReportsWithoutPopulatingBackgroundCache(t *testing.T) {
 	a := newUpdateApp(t, "1.2.0", newerRelease(), nil)
 
 	res, err := a.CheckForUpdates()
@@ -47,10 +47,11 @@ func TestCheckForUpdatesReportsAndCaches(t *testing.T) {
 	if !res.UpdateAvailable || res.LatestVersion != "1.3.0" {
 		t.Fatalf("got %+v, want an update to 1.3.0", res)
 	}
-	// The result is cached so the frontend can pick it up on mount even if the
-	// emitted event arrived before it subscribed.
-	if got := a.PendingUpdate(); got.LatestVersion != "1.3.0" {
-		t.Errorf("PendingUpdate() = %+v, want the checked result", got)
+	// Explicit checks return their result directly to the caller. PendingUpdate
+	// is only the background event-race cache; putting an explicit result there
+	// makes a version reappear after the user skips it and the frontend remounts.
+	if got := a.PendingUpdate(); got.UpdateAvailable {
+		t.Errorf("PendingUpdate() = %+v after explicit check, want empty background cache", got)
 	}
 	// An explicit check is still a check: it stamps the throttle.
 	p, err := config.LoadPrefs()
@@ -185,6 +186,57 @@ func TestBackgroundCheckCachesAnUnskippedVersion(t *testing.T) {
 	got := a.PendingUpdate()
 	if !got.UpdateAvailable || got.LatestVersion != "1.3.0" {
 		t.Fatalf("PendingUpdate() = %+v, want the 1.3.0 update cached for mount", got)
+	}
+}
+
+func TestSkippingCachedVersionClearsPendingUpdate(t *testing.T) {
+	a := newUpdateApp(t, "1.2.0", newerRelease(), nil)
+	a.runBackgroundUpdateCheck(context.Background())
+	if !a.PendingUpdate().UpdateAvailable {
+		t.Fatal("background result was not cached")
+	}
+
+	if err := a.SkipUpdateVersion("1.3.0"); err != nil {
+		t.Fatal(err)
+	}
+	if got := a.PendingUpdate(); got.UpdateAvailable {
+		t.Fatalf("PendingUpdate() = %+v after skip, want cache cleared", got)
+	}
+}
+
+// The preferences used after a slow network call must be current, not the
+// snapshot taken before the call. Otherwise a manual check can skip a release
+// while the startup check is in flight, only for the startup check to emit and
+// cache that same release a moment later.
+func TestBackgroundCheckHonorsSkipChangedWhileRequestIsInFlight(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	started := make(chan struct{})
+	release := make(chan struct{})
+	fetch := func(context.Context) (update.Release, error) {
+		close(started)
+		<-release
+		return newerRelease(), nil
+	}
+	a := &App{
+		ctx:  context.Background(),
+		upd:  update.New("1.2.0", fetch, "darwin", "arm64"),
+		emit: func(context.Context, string, ...interface{}) { t.Error("skipped release was emitted") },
+	}
+	done := make(chan struct{})
+	go func() {
+		a.runBackgroundUpdateCheck(context.Background())
+		close(done)
+	}()
+	<-started
+	if err := a.SkipUpdateVersion("1.3.0"); err != nil {
+		t.Fatal(err)
+	}
+	close(release)
+	<-done
+
+	if got := a.PendingUpdate(); got.UpdateAvailable {
+		t.Fatalf("PendingUpdate() = %+v, want in-flight skipped release suppressed", got)
 	}
 }
 

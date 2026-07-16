@@ -11,11 +11,11 @@ func TestPromStep(t *testing.T) {
 		spanSec    int64
 		wantPrefix string
 	}{
-		{"5 minutes", 300, "15s"},     // 300/120 = 2.5 -> first ladder rung >=2 is 15s
-		{"1 hour", 3600, "30s"},       // 3600/120 = 30 -> 30s
-		{"6 hours", 21600, "5m"},      // 21600/120 = 180 -> 5m
-		{"1 day", 86400, "15m"},       // 86400/120 = 720 -> 15m
-		{"30 days", 2592000, "6h"},    // 2592000/120 = 21600 -> 6h
+		{"5 minutes", 300, "15s"},  // 300/120 = 2.5 -> first ladder rung >=2 is 15s
+		{"1 hour", 3600, "30s"},    // 3600/120 = 30 -> 30s
+		{"6 hours", 21600, "5m"},   // 21600/120 = 180 -> 5m
+		{"1 day", 86400, "15m"},    // 86400/120 = 720 -> 15m
+		{"30 days", 2592000, "6h"}, // 2592000/120 = 21600 -> 6h
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

@@ -124,18 +124,28 @@ func TestRemoveContextKeepsSharedSecret(t *testing.T) {
 	}
 }
 
-// TestSignOutKeepsSiblingSession proves signing out of the current context leaves a
-// sibling's shared session intact, but fully removes an unshared one. (#5)
-func TestSignOutKeepsSiblingSession(t *testing.T) {
+// TestSignOutRemovesSharedSession proves explicit sign-out actually signs the
+// account out. Session credentials are keyed by host+scheme, so sibling contexts
+// on the same host necessarily lose that shared session too; keeping it would let
+// rebuildClient immediately sign the current context back in.
+func TestSignOutRemovesSharedSession(t *testing.T) {
 	a := newTestApp(t)
 	mustSave(t, a, ConnConfig{Name: "team-a", URL: "https://obs.example.com", Org: "a", Scheme: "session", Secret: `{"cookies":"auth_ext=x"}`})
 	mustSave(t, a, ConnConfig{Name: "team-b", URL: "https://obs.example.com", Org: "b", Scheme: "session", Secret: `{"cookies":"auth_ext=x"}`})
-	// team-b is current (last saved). Signing it out must keep team-a working.
 	if err := a.SignOut("https://obs.example.com"); err != nil {
 		t.Fatalf("SignOut: %v", err)
 	}
-	if _, has, _ := config.LoadSecret("https://obs.example.com", "session"); !has {
-		t.Fatal("shared session removed on sign-out; sibling team-a would break")
+	if _, has, _ := config.LoadSecret("https://obs.example.com", "session"); has {
+		t.Fatal("shared session survived sign-out; the current context would be signed straight back in")
+	}
+	contexts, err := a.ListContexts()
+	if err != nil {
+		t.Fatalf("ListContexts: %v", err)
+	}
+	for _, c := range contexts {
+		if c.HasSecret {
+			t.Fatalf("context %q still reports the shared session after sign-out", c.Name)
+		}
 	}
 
 	// A lone session context: sign-out fully removes it.
@@ -146,6 +156,34 @@ func TestSignOutKeepsSiblingSession(t *testing.T) {
 	}
 	if _, has, _ := config.LoadSecret("https://lone.example.com", "session"); has {
 		t.Fatal("unshared session should be removed on sign-out")
+	}
+}
+
+// Changing the URL or auth scheme without supplying a replacement credential
+// must fail before config.yaml or the old keychain entry is touched. The UI does
+// not read existing credentials back, so an empty secret is valid only while the
+// keychain account stays the same.
+func TestSaveContextRejectsCredentiallessAccountChange(t *testing.T) {
+	a := newTestApp(t)
+	mustSave(t, a, ConnConfig{
+		Name: "prod", URL: "https://old.example.com", Org: "default",
+		Scheme: "basic", Username: "ops", Secret: "pw",
+	})
+
+	err := a.SaveContext(ConnConfig{
+		Name: "prod", OrigName: "prod", URL: "https://new.example.com", Org: "default",
+		Scheme: "basic", Username: "ops",
+	})
+	if err == nil {
+		t.Fatal("SaveContext accepted an account change with no replacement credential")
+	}
+	f := readConfig(t)
+	c, ok := f.Context("prod")
+	if !ok || c.BaseURL != "https://old.example.com" {
+		t.Fatalf("context changed despite rejected save: %+v", c)
+	}
+	if _, has, _ := config.LoadSecret("https://old.example.com", "basic"); !has {
+		t.Fatal("old credential was deleted despite rejected save")
 	}
 }
 

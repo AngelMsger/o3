@@ -43,6 +43,8 @@ func TestHostMatches(t *testing.T) {
 		{"leading dot", ".example.com", "observe.example.com", true},
 		{"subdomain", "example.com", "observe.example.com", true},
 		{"host with port", "observe.example.com", "observe.example.com:5080", true},
+		{"ipv6 with port", "::1", "[::1]:5080", true},
+		{"ipv6 without port", "::1", "[::1]", true},
 		{"empty domain matches", "", "observe.example.com", true},
 		{"mismatch", "other.com", "observe.example.com", false},
 		{"suffix but not subdomain", "ample.com", "example.com", false},

@@ -588,7 +588,10 @@
       apply(FALLBACK); // baked snapshot first: hero OS label + sizes without the API
       var cached = null;
       try { cached = JSON.parse(sessionStorage.getItem('o3-release-assets') || 'null'); } catch (e) {}
-      if (cached && cached.length) { apply(cached); return; }
+      // Paint cached assets immediately, but still revalidate. sessionStorage
+      // survives reloads for the life of a tab; returning here left that tab on
+      // an old release indefinitely after a new version was published.
+      if (cached && cached.length) apply(cached);
       fetch('https://api.github.com/repos/' + REPO + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {

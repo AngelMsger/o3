@@ -8,9 +8,9 @@ import (
 func TestParseCLIVersion(t *testing.T) {
 	cases := map[string]string{
 		"openobserve-cli v0.5.0 (commit abc1234, built 2025-06-29T15:12:00Z)": "0.5.0",
-		"openobserve-cli v1.10.2\n":                                           "1.10.2",
-		"garbage output":                                                      "",
-		"":                                                                    "",
+		"openobserve-cli v1.10.2\n": "1.10.2",
+		"garbage output":            "",
+		"":                          "",
 	}
 	for in, want := range cases {
 		if got := parseCLIVersion(in); got != want {

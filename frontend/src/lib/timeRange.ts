@@ -70,8 +70,22 @@ function parseWallClock(s: string): number | null {
   const m = s.trim().match(WALL_RE);
   if (!m) return null;
   const [, y, mo, d, h, mi, se] = m;
-  const utc = Date.UTC(+y, +mo - 1, +d, +h, +mi, se ? +se : 0);
+  const parts = [+y, +mo, +d, +h, +mi, se ? +se : 0];
+  const [year, month, day, hour, minute, second] = parts;
+  const utc = Date.UTC(year, month - 1, day, hour, minute, second);
   if (Number.isNaN(utc)) return null;
+  // Date.UTC normalizes invalid inputs (2026-02-30 -> March 2, 25:00 -> the
+  // next day). Round-trip every component so malformed picker input is rejected
+  // instead of silently querying a different window.
+  const check = new Date(utc);
+  if (
+    check.getUTCFullYear() !== year
+    || check.getUTCMonth() + 1 !== month
+    || check.getUTCDate() !== day
+    || check.getUTCHours() !== hour
+    || check.getUTCMinutes() !== minute
+    || check.getUTCSeconds() !== second
+  ) return null;
   return utc - SHANGHAI_OFFSET_MS;
 }
 

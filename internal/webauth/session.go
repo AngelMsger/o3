@@ -10,6 +10,7 @@
 package webauth
 
 import (
+	"net"
 	"net/url"
 	"sort"
 	"strings"
@@ -56,13 +57,14 @@ func SerializeCookies(cs []Cookie) string {
 	return strings.Join(parts, "; ")
 }
 
-// hostname strips any port and lowercases a host.
+// hostname strips any port/brackets and lowercases a host. net.SplitHostPort is
+// required here: splitting at the first colon truncates IPv6 hosts to "[".
 func hostname(host string) string {
 	host = strings.ToLower(strings.TrimSpace(host))
-	if i := strings.IndexByte(host, ':'); i >= 0 {
-		host = host[:i]
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		return strings.Trim(h, "[]")
 	}
-	return host
+	return strings.Trim(host, "[]")
 }
 
 // HostMatches reports whether a cookie's Domain applies to host. An empty

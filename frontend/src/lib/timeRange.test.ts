@@ -43,6 +43,8 @@ describe('parseAbsolute', () => {
 
   it('rejects malformed or inverted ranges', () => {
     expect(parseAbsolute('nonsense', '2026-06-25 09:00:00')).toBeNull();
+    expect(parseAbsolute('2026-02-30 08:00:00', '2026-03-01 09:00:00')).toBeNull();
+    expect(parseAbsolute('2026-06-25 24:00:00', '2026-06-26 01:00:00')).toBeNull();
     expect(parseAbsolute('2026-06-25 09:00:00', '2026-06-25 08:00:00')).toBeNull();
     expect(parseAbsolute('2026-06-25 09:00:00', '2026-06-25 09:00:00')).toBeNull();
   });

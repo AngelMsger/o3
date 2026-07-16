@@ -63,13 +63,12 @@ func (a *App) CheckForUpdates() (update.Result, error) {
 	if err != nil {
 		return update.Result{}, apperr.Wrap(err)
 	}
-	a.updMu.Lock()
-	a.pending = res
 	if res.Checked {
 		// Stamp the throttle: an explicit check is still a check.
+		a.updMu.Lock()
 		_ = config.MutatePrefs(func(p *config.Prefs) { p.LastUpdateCheck = nowRFC3339() })
+		a.updMu.Unlock()
 	}
-	a.updMu.Unlock()
 	return res, nil
 }
 
@@ -91,7 +90,13 @@ func (a *App) PendingUpdate() update.Result {
 func (a *App) SkipUpdateVersion(v string) error {
 	a.updMu.Lock()
 	defer a.updMu.Unlock()
-	return apperr.Wrap(config.MutatePrefs(func(p *config.Prefs) { p.SkipVersion = v }))
+	if err := config.MutatePrefs(func(p *config.Prefs) { p.SkipVersion = v }); err != nil {
+		return apperr.Wrap(err)
+	}
+	if v != "" && a.pending.LatestVersion == v {
+		a.pending = update.Result{}
+	}
+	return nil
 }
 
 // SetAutoUpdateCheck enables or disables the background check on launch.
@@ -139,10 +144,6 @@ func (a *App) runBackgroundUpdateCheck(ctx context.Context) {
 		return // a dev build
 	}
 
-	a.updMu.Lock()
-	_ = config.MutatePrefs(func(p *config.Prefs) { p.LastUpdateCheck = nowRFC3339() })
-	a.updMu.Unlock()
-
 	// Nothing to report, or the user already told us to drop this version.
 	//
 	// This gate must come BEFORE a.pending is set, not just before the emit:
@@ -150,11 +151,21 @@ func (a *App) runBackgroundUpdateCheck(ctx context.Context) {
 	// emit-before-listen race), so anything cached here surfaces on mount whether
 	// or not the event fired. Filtering only the emit let a skipped version come
 	// back through the cache.
-	if !res.UpdateAvailable || res.LatestVersion == prefs.SkipVersion {
+	// Re-read the mutable settings while holding the same lock as the UI write
+	// methods. The network request can take ten seconds; a manual check may have
+	// skipped this version, or the user may have disabled auto checks, while it
+	// was in flight. Using the pre-request snapshot would resurrect that result.
+	a.updMu.Lock()
+	currentMode, currentSkip := prefs.UpdateCheck, prefs.SkipVersion
+	_ = config.MutatePrefs(func(p *config.Prefs) {
+		p.LastUpdateCheck = nowRFC3339()
+		currentMode, currentSkip = p.UpdateCheck, p.SkipVersion
+	})
+	if !res.UpdateAvailable || res.LatestVersion == currentSkip || currentMode == "off" {
+		a.pending = update.Result{}
+		a.updMu.Unlock()
 		return
 	}
-
-	a.updMu.Lock()
 	a.pending = res
 	a.updMu.Unlock()
 	a.emitEvent(ctx, EventUpdateAvailable, res)

@@ -340,6 +340,19 @@ func (a *App) SaveContext(c ConnConfig) error {
 		oldName = c.OrigName
 	}
 	oldCtx, hadOld := f.Context(oldName)
+	// An empty secret means "keep the credential already stored for this
+	// account", not "save a context that cannot authenticate". This matters when
+	// editing an existing context: the UI intentionally does not read passwords
+	// back out of the keychain. If the URL or scheme changed, however, there may
+	// be no credential under the new account. Reject that before touching either
+	// config.yaml or the old credential.
+	if c.Secret == "" {
+		if _, has, loadErr := config.LoadSecret(base, scheme); loadErr != nil {
+			return apperr.Wrap(loadErr)
+		} else if !has {
+			return apperr.Wrap(fmt.Errorf("a credential is required for %s authentication at %s", scheme, base))
+		}
+	}
 	// I1: when the context was renamed, remove the old entry before upserting
 	// the new name so the shared config.yaml never accumulates duplicates.
 	if c.OrigName != "" && !strings.EqualFold(c.OrigName, c.Name) {
@@ -360,12 +373,27 @@ func (a *App) SaveContext(c ConnConfig) error {
 	// I3 (transactional): persist the secret BEFORE config.yaml. If the keychain
 	// is locked or denies access, neither is written — rather than leaving a
 	// context that points at a missing credential and starts the app unusable.
+	// Keep the previous value so a later config write failure can roll the
+	// keychain back as well.
+	var previousSecret string
+	var previousSecretPresent bool
 	if c.Secret != "" {
+		previousSecret, previousSecretPresent, err = config.LoadSecret(base, scheme)
+		if err != nil {
+			return apperr.Wrap(err)
+		}
 		if err := config.SaveSecret(base, scheme, c.Secret); err != nil {
 			return apperr.Wrap(err)
 		}
 	}
 	if err := cfgshared.WriteFile(dir, f); err != nil {
+		if c.Secret != "" {
+			if previousSecretPresent {
+				_ = config.SaveSecret(base, scheme, previousSecret)
+			} else {
+				_ = config.DeleteSecret(base, scheme)
+			}
+		}
 		return apperr.Wrap(err)
 	}
 	// Clean up an orphaned secret after a URL/scheme change: delete the old
@@ -431,10 +459,16 @@ func (a *App) RemoveContext(name string) error {
 // existing context the user did not re-type. It uses the file Defaults so the
 // timeout and retry settings match the live client (I2).
 func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
+	base, err := normalizeURL(c.URL)
+	if err != nil {
+		return ConnInfo{}, apperr.Wrap(err)
+	}
 	scheme := schemeOrBasic(c.Scheme)
 	secret := c.Secret
 	if secret == "" {
-		if stored, has, _ := config.LoadSecret(c.URL, scheme); has {
+		if stored, has, loadErr := config.LoadSecret(base, scheme); loadErr != nil {
+			return ConnInfo{}, apperr.Wrap(loadErr)
+		} else if has {
 			secret = stored
 		}
 	}
@@ -445,7 +479,7 @@ func (a *App) TestConnection(c ConnConfig) (ConnInfo, error) {
 			fileDef = f.Defaults
 		}
 	}
-	client, err := buildClient(c.URL, c.Org, scheme, c.Username, secret, fileDef)
+	client, err := buildClient(base, c.Org, scheme, c.Username, secret, fileDef)
 	if err != nil {
 		return ConnInfo{}, apperr.Wrap(err)
 	}
@@ -588,26 +622,17 @@ func (a *App) SessionStatus(rawURL string) (SessionInfo, error) {
 }
 
 // SignOut removes the stored browser session for a context URL and drops the
-// live client so the app returns to a signed-out state.
+// live client so the app returns to a signed-out state. Session credentials are
+// keyed by host+scheme, so every context for the same host signs out together;
+// retaining the shared key would let rebuildClient immediately sign the current
+// context back in.
 func (a *App) SignOut(rawURL string) error {
 	base, err := normalizeURL(rawURL)
 	if err != nil {
 		return apperr.Wrap(err)
 	}
-	// I4: a captured session is shared by host+scheme. Only remove it when no
-	// OTHER context references the same account, so signing out of the current
-	// context never silently breaks a sibling that reuses the same login. When a
-	// sibling shares it, we keep the secret and just drop the live client.
-	remove := true
-	if dir, derr := configDir(); derr == nil {
-		if f, ok, rerr := cfgshared.ReadFile(dir); rerr == nil && ok {
-			remove = !accountInUse(f, base, pkgauth.SchemeSession, f.CurrentContext)
-		}
-	}
-	if remove {
-		if err := config.DeleteSecret(base, pkgauth.SchemeSession); err != nil {
-			return apperr.Wrap(err)
-		}
+	if err := config.DeleteSecret(base, pkgauth.SchemeSession); err != nil {
+		return apperr.Wrap(err)
 	}
 	a.mu.Lock()
 	a.client = nil
