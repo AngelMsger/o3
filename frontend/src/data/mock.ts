@@ -1,5 +1,5 @@
 import type {
-  Field, StreamInfo, LogRow, HistoryItem, GuideSection, NavItem,
+  Field, StreamInfo, HistoryItem, GuideSection, NavItem,
 } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -65,13 +65,6 @@ export const STREAMS: StreamInfo[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// TIMES — design line 709
-// ---------------------------------------------------------------------------
-export const TIMES: string[] = [
-  'Past 5 Minutes','Past 15 Minutes','Past 30 Minutes',
-  'Past 1 Hour','Past 4 Hours','Past 1 Day','Past 7 Days',
-];
-
 // ---------------------------------------------------------------------------
 // NAV — design lines 710-717; icon keys from nav rail lines 64-72
 // ---------------------------------------------------------------------------
@@ -84,66 +77,6 @@ export const NAV: NavItem[] = [
   { name: 'Alerts',     icon: 'alerts',  soon: true },
 ];
 
-// ---------------------------------------------------------------------------
-// LOGS — derived from LOGSRC (design lines 726-748) via makeRows transform
-// (design lines 814-825). Base timestamp fixed; no Date.now().
-// ---------------------------------------------------------------------------
-
-const LOGSRC: [string, string, string, string][] = [
-  ['info',  'dingtalk-corp',   'corp:message:dingtalk_corp',                           'rabbitmq'],
-  ['info',  'mail-relay',      'corp:message:email',                                   'rabbitmq'],
-  ['warn',  'sso-gateway',     'token refresh deferred sub=5e3e461e',                  'auth'    ],
-  ['error', 'fx-corp',         'outgoing http request failed: 502 bad gateway',        'http'    ],
-  ['info',  'wechat-svc',      'corp:message:wechat_service',                          'rabbitmq'],
-  ['debug', 'rabbit-consumer', 'consumer ack delivery_tag=80213 queue=corp.msg',       'amqp'    ],
-  ['info',  'fx-corp',         'corp:message:system',                                  'rabbitmq'],
-  ['info',  'dingtalk-corp',   'outgoing http request status=200 dur=84ms',            'http'    ],
-  ['warn',  'rabbit-consumer', 'redelivery count=3 queue=corp.msg.retry',              'amqp'    ],
-  ['error', 'mail-relay',      'smtp 421 service not available, closing channel',      'smtp'    ],
-  ['info',  'wechat-svc',      'corp:message:wechat_service',                          'rabbitmq'],
-  ['info',  'sso-gateway',     'token refreshed sub=5e3e461e ttl=3600',                'auth'    ],
-  ['info',  'fx-corp',         'corp:message:dingtalk_corp',                           'rabbitmq'],
-  ['debug', 'fx-corp',         'payload validated bytes=1284 schema=v3',               'http'    ],
-  ['info',  'dingtalk-corp',   'corp:message:email',                                   'rabbitmq'],
-  ['warn',  'fx-corp',         'slow downstream call dur=1284ms target=notify',        'http'    ],
-  ['info',  'wechat-svc',      'corp:message:system',                                  'rabbitmq'],
-  ['error', 'rabbit-consumer', 'channel closed unexpectedly, reconnecting',            'amqp'    ],
-  ['info',  'mail-relay',      'corp:message:wechat_service',                          'rabbitmq'],
-  ['info',  'sso-gateway',     'outgoing http request status=204',                     'http'    ],
-  ['debug', 'fx-corp',         'consumer ack delivery_tag=80198',                     'amqp'    ],
-  ['info',  'dingtalk-corp',   'corp:message:dingtalk_corp',                           'rabbitmq'],
-];
-
-function buildLogs(): LogRow[] {
-  const BASE = new Date('2026-06-25T13:58:00.530+08:00').getTime();
-  let t = BASE;
-  const pad = (n: number, w = 2) => String(n).padStart(w, '0');
-  return LOGSRC.map((r, i) => {
-    t -= (i % 5 === 0 ? 41 : i % 3 === 0 ? 13 : 6) + (i * 7) % 9;
-    const d = new Date(t);
-    const time = `2026-06-25 ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
-    const [level, svc, body, ltype] = r;
-    const trace = (i * 2654435761 >>> 0).toString(16).padStart(8, '0') + 'b093900ad9162fec';
-    const tmsStr = String(t) + '000';
-    const json: LogRow['json'] = [
-      { k: '_timestamp',                    v: tmsStr,                                          kind: 'num' },
-      { k: 'body',                          v: '"' + body + '"',                                kind: 'str' },
-      { k: 'ctx_trace_id',                  v: '"' + trace + '"',                               kind: 'str' },
-      { k: 'dropped_attributes_count',      v: '0',                                             kind: 'num' },
-      { k: 'host_name',                     v: '"demo-worker-7d5b56f564-cp2jx"',            kind: 'str' },
-      { k: 'instrumentation_library_name',  v: '"@opentelemetry/winston-transport"',            kind: 'str' },
-      { k: 'logger',                        v: '"' + svc + '"',                                 kind: 'str' },
-      { k: 'metadata_log_type',             v: '"' + ltype + '"',                               kind: 'str' },
-      { k: 'service_env',                   v: '"production"',                                  kind: 'str' },
-      { k: 'service_name',                  v: '"' + svc + '"',                                 kind: 'str' },
-      { k: 'service_version',               v: '"11.3.6"',                                      kind: 'str' },
-      { k: 'severity',                      v: '"' + level + '"',                               kind: 'lvl' },
-    ];
-    return { id: String(i), time, level, service: svc, body, ltype, trace, json };
-  });
-}
-
-export const LOGS: LogRow[] = buildLogs();
 
 // ---------------------------------------------------------------------------
 // HISTORY — design lines 793-799 (state.history array)

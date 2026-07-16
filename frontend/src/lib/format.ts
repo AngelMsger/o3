@@ -11,30 +11,6 @@ export function hexA(hex: string, a: number): string {
   return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;
 }
 
-/**
- * Generate 66 deterministic histogram bars.
- * Seeding formula from design lines 904-906; clamp each value to [0, 1].
- */
-export function histogramBars(): HistoBar[] {
-  const seeds: number[] = [];
-  for (let i = 0; i < 66; i++) {
-    const v = 0.35 + 0.45 * Math.abs(Math.sin(i * 1.3) + Math.cos(i * 0.7)) / 2
-      + (i % 11 === 0 ? 0.4 : 0)
-      + (i % 7 === 0 ? 0.15 : 0);
-    seeds.push(Math.min(1, v));
-  }
-  return seeds.map(v => ({ h: v }));
-}
-
-/**
- * Format an absolute datetime string by slicing characters 5-16.
- * Design line 997: const fmt = (s) => (s || '').slice(5, 16)
- * Example: '2026-06-25 13:00:00' => '06-25 13:00'
- */
-export function fmtAbs(s: string): string {
-  return (s || '').slice(5, 16);
-}
-
 const FROM_RE = /\bfrom\s+"?([\w.-]+)"?/i;
 
 // fromStream returns the first FROM table name (unquoted), or '' when absent.

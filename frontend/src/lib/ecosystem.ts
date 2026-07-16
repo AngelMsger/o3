@@ -23,18 +23,6 @@ export interface EcoStatus {
   skill: SkillStatus;
 }
 
-// compareSemver returns -1, 0, or 1 comparing two "x.y.z" strings numerically.
-export function compareSemver(a: string, b: string): number {
-  const pa = a.split('.');
-  const pb = b.split('.');
-  for (let i = 0; i < 3; i++) {
-    const x = parseInt(pa[i] ?? '0', 10) || 0;
-    const y = parseInt(pb[i] ?? '0', 10) || 0;
-    if (x !== y) return x < y ? -1 : 1;
-  }
-  return 0;
-}
-
 export type DotState = 'ok' | 'update' | 'off';
 
 // dotState maps the CLI status to the nav-rail status dot.

@@ -4,60 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 )
 
-// RelativeRange returns [start,end] in epoch microseconds for "last amount·unit"
-// ending at now. unit is one of s, m, h, d, w.
-func RelativeRange(now time.Time, amount int, unit string) (start, end int64, err error) {
-	if amount <= 0 {
-		return 0, 0, fmt.Errorf("amount must be positive, got %d", amount)
-	}
-	var d time.Duration
-	switch unit {
-	case "s":
-		d = time.Duration(amount) * time.Second
-	case "m":
-		d = time.Duration(amount) * time.Minute
-	case "h":
-		d = time.Duration(amount) * time.Hour
-	case "d":
-		d = time.Duration(amount) * 24 * time.Hour
-	case "w":
-		d = time.Duration(amount) * 7 * 24 * time.Hour
-	default:
-		return 0, 0, fmt.Errorf("unknown time unit %q (want s, m, h, d, w)", unit)
-	}
-	end = now.UnixMicro()
-	start = now.Add(-d).UnixMicro()
-	return start, end, nil
-}
-
-// absLayout is the wall-clock format the absolute time picker emits.
-const absLayout = "2006-01-02 15:04:05"
-
-// AbsoluteRange parses "YYYY-MM-DD HH:mm:ss" from/to in loc into epoch micros.
-func AbsoluteRange(from, to string, loc *time.Location) (start, end int64, err error) {
-	if loc == nil {
-		loc = time.Local
-	}
-	f, err := time.ParseInLocation(absLayout, from, loc)
-	if err != nil {
-		return 0, 0, fmt.Errorf("bad start time %q: %w", from, err)
-	}
-	t, err := time.ParseInLocation(absLayout, to, loc)
-	if err != nil {
-		return 0, 0, fmt.Errorf("bad end time %q: %w", to, err)
-	}
-	start, end = f.UnixMicro(), t.UnixMicro()
-	if end <= start {
-		return 0, 0, fmt.Errorf("end time must be after start time")
-	}
-	return start, end, nil
-}
-
-// intervalLadder maps a bucket size in seconds to its OpenObserve word form,
-// ordered ascending. Interval snaps a target up to the smallest ladder entry.
 var intervalLadder = []struct {
 	sec  int64
 	word string

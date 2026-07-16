@@ -139,15 +139,6 @@ func LoadPrefs() (Prefs, error) {
 	return loadPrefsFrom(dir)
 }
 
-// SavePrefs persists the UI preferences.
-func SavePrefs(p Prefs) error {
-	dir, err := prefsDir()
-	if err != nil {
-		return err
-	}
-	return savePrefsTo(dir, p)
-}
-
 // mutatePrefsIn applies fn to the prefs stored in dir and writes the result back.
 func mutatePrefsIn(dir string, fn func(*Prefs)) error {
 	p, err := loadPrefsFrom(dir)
@@ -160,9 +151,9 @@ func mutatePrefsIn(dir string, fn func(*Prefs)) error {
 
 // MutatePrefs applies fn to the persisted prefs and saves the result.
 //
-// Callers that own only some of the fields must use this rather than
-// LoadPrefs/SavePrefs by hand: SavePrefs writes the whole struct, so passing a
-// partially-populated Prefs silently resets every field the caller did not set.
+// This is the only write path. Callers that own only some of the fields must use
+// it rather than a load/save pair of their own: writing the whole struct back
+// silently resets every field the caller did not populate.
 // Serialize concurrent callers yourself — this is a read-modify-write.
 func MutatePrefs(fn func(*Prefs)) error {
 	dir, err := prefsDir()

@@ -1,19 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { compareSemver, dotState, ecoTooltip, cliPill, agentLabel } from './ecosystem';
+import { dotState, ecoTooltip, cliPill, agentLabel } from './ecosystem';
 import type { CLIStatus } from './ecosystem';
 
 const base: CLIStatus = {
   installed: false, version: '', path: '', managed: '', latestVersion: '', updateAvailable: false,
 };
-
-describe('compareSemver', () => {
-  it('orders versions numerically', () => {
-    expect(compareSemver('0.6.0', '0.5.0')).toBe(1);
-    expect(compareSemver('0.5.0', '0.6.0')).toBe(-1);
-    expect(compareSemver('0.5.10', '0.5.2')).toBe(1);
-    expect(compareSemver('1.0.0', '1.0.0')).toBe(0);
-  });
-});
 
 describe('dotState', () => {
   it('off when not installed', () => {

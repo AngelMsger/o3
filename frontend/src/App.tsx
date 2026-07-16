@@ -29,7 +29,7 @@ import { UpdateSheet } from './components/UpdateSheet';
 import { checkState } from './lib/update';
 import type { UpdateResult, AppInfo as TAppInfo } from './lib/update';
 import type { config } from '../wailsjs/go/models';
-import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, LOGS, GUIDE } from './data/mock';
+import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, GUIDE } from './data/mock';
 import { fromStream, setFromStream, addCondition, aggregateBy } from './lib/format';
 import { copyText } from './lib/clipboard';
 import { dotState, ecoTooltip } from './lib/ecosystem';

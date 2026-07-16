@@ -58,9 +58,6 @@ func NewProduction(current string) *Service {
 	return New(current, fetch, runtime.GOOS, runtime.GOARCH)
 }
 
-// Current returns the running version.
-func (s *Service) Current() string { return s.current }
-
 // Check asks GitHub for the newest published stable release and reports whether
 // it is newer than the running build.
 //
