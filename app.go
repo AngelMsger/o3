@@ -71,6 +71,7 @@ func (a *App) startup(ctx context.Context) {
 		a.upd = update.NewProduction(version)
 	}
 	_ = a.rebuildClient() // best-effort; data methods re-report if it fails
+	a.installUpdateMenuItem()
 	if a.native != nil {
 		// The OS framework schedules its own background checks; hand it the
 		// persisted toggle and stay out of the way. The custom goroutine below

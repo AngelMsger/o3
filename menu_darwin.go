@@ -9,13 +9,13 @@ import (
 
 // appMenu builds the macOS menu bar.
 //
-// "Check for Updates…" cannot go where macOS convention puts it — inside the app
-// menu, under About. menu.AppMenu() is a role (AppMenuRole) that the darwin
-// backend expands natively in ObjC (WailsMenu.m, appendRole:), building
-// About/Hide/Show All/Quit itself; Wails offers no way to inject an item into it,
+// "Check for Updates…" is NOT here: it lives where macOS convention puts it,
+// inside the app menu under About. menu.AppMenu() is a role (AppMenuRole) the
+// darwin backend expands natively in ObjC and Wails cannot add items to it —
 // and hand-rolling the app menu from custom items would lose the native
-// hide:/unhideAllApplications: selectors, which only the role can wire up. So it
-// lives in a top-level submenu instead.
+// hide:/unhideAllApplications: selectors only the role can wire up. So the item
+// is injected into the live NSMenu after launch instead: see
+// installUpdateMenuItem in menu_darwin_inject.go.
 //
 // AppMenu and EditMenu must both be included: setting Menu at all replaces the
 // default macOS menu Wails would otherwise install, and dropping EditMenu takes
@@ -26,10 +26,6 @@ func appMenu(a *App) *menu.Menu {
 	m.Append(menu.EditMenu())
 
 	help := m.AddSubmenu("Help")
-	help.AddText("Check for Updates…", nil, func(*menu.CallbackData) {
-		a.RequestUpdateCheck()
-	})
-	help.AddSeparator()
 	help.AddText("Documentation", nil, func(*menu.CallbackData) {
 		a.openURL("https://angelmsger.github.io/o3")
 	})
