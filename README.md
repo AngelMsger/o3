@@ -89,6 +89,13 @@ Grab the latest installer for your OS from the
 > - **Windows** — SmartScreen shows "Windows protected your PC". Click
 >   **More info** → **Run anyway**.
 
+Once installed, o3 keeps itself up to date: macOS and Windows builds update
+in place through the platform's native mechanism
+([Sparkle](https://sparkle-project.org) / [WinSparkle](https://winsparkle.org)),
+with every update verified against the project's EdDSA signing key before it
+is installed. The Linux AppImage notifies about new releases and links to the
+download. Details in [docs/auto-update.md](docs/auto-update.md).
+
 ## Getting started
 
 ### Prerequisites
@@ -132,6 +139,8 @@ make appimage   # Linux  → build/bin/o3-<version>-x86_64.AppImage
 ```
 
 `VERSION` defaults to the current git tag; override with `make dmg VERSION=1.2.3`.
+Add `NATIVE_UPDATER=1` to reproduce the release configuration with the native
+auto-updater compiled in (see [docs/auto-update.md](docs/auto-update.md)).
 
 Releases are automated: pushing a `v*.*.*` tag runs
 [`.github/workflows/release.yml`](.github/workflows/release.yml), which builds
@@ -194,7 +203,8 @@ navigation surfaces are scaffolded and being built out.
 | **Alerts** — rule authoring and status | 🚧 Scaffolded |
 | Saved queries & shareable links | 📋 Planned |
 | Cross-platform builds (macOS · Windows · Linux) + GitHub Release automation | ✅ Shipped |
-| Code signing / notarization & auto-update | 📋 Planned |
+| Auto-update (Sparkle / WinSparkle, EdDSA-verified) | ✅ |
+| Code signing / notarization | 📋 Planned |
 
 Legend: ✅ shipped · 🚧 in progress · 📋 planned
 

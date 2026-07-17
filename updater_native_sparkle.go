@@ -33,9 +33,10 @@ func (s *sparkleUpdater) Start(_ *App, autoCheck bool) {
 		// The o3 pref is the source of truth for the toggle: pushing it on every
 		// launch keeps Settings honest without a Sparkle-side getter.
 		sparkle.SetAutomaticallyChecksForUpdates(autoCheck)
-		if feed != appcastURL { // local e2e override; persists in user defaults
-			sparkle.SetFeedURL(feed)
-		}
+		// SetFeedURL persists in user defaults, so push it unconditionally: a
+		// launch without O3_APPCAST_URL then stomps any override a previous test
+		// run left behind, instead of silently checking localhost forever.
+		sparkle.SetFeedURL(feed)
 	})
 }
 

@@ -21,3 +21,4 @@ frontend/dist
 .superpowers/
 go.work.sum
 o3
+build/darwin/tools/

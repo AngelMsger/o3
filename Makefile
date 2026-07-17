@@ -37,7 +37,11 @@ UPDATER_TAGS :=
 MAC_CGO_LDFLAGS :=
 EMBED_SPARKLE := @true
 else
-UPDATER_TAGS := -tags native_updater
+# -skipbindings: wails generates bindings by RUNNING the compiled binary, which
+# aborts outside an app bundle once it links Sparkle (the rpath resolves to
+# nothing). Bindings are tag-independent, committed, and refreshed by every
+# plain dev build, so the release build can safely skip regenerating them.
+UPDATER_TAGS := -tags native_updater -skipbindings
 MAC_CGO_LDFLAGS := CGO_LDFLAGS='-Wl,-rpath,@loader_path/../Frameworks'
 EMBED_SPARKLE := scripts/sparkle-framework.sh
 endif
