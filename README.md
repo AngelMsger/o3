@@ -83,9 +83,12 @@ Grab the latest installer for your OS from the
 > **Heads-up: the builds are currently unsigned.** Until code signing is in
 > place, your OS will warn on first launch:
 >
-> - **macOS** — Gatekeeper says the app "cannot be opened". Right-click **o3** →
->   **Open** → **Open**, or clear the quarantine flag once:
->   `xattr -dr com.apple.quarantine /Applications/o3.app`
+> - **macOS** — Gatekeeper says the app "cannot be opened". Try to open it once,
+>   then go to **System Settings → Privacy & Security** and click **Open Anyway**
+>   (macOS 15 Sequoia removed the old right-click → Open bypass for unsigned
+>   apps; on macOS 14 and earlier that shortcut still works too). Or clear the
+>   quarantine flag once: `xattr -dr com.apple.quarantine /Applications/o3.app`.
+>   The install window of the DMG carries the same hint.
 > - **Windows** — SmartScreen shows "Windows protected your PC". Click
 >   **More info** → **Run anyway**.
 

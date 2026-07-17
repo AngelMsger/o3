@@ -79,6 +79,16 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
 .chip.right {{ left:890px; width:220px; }}   /* "Applications" */
 /* arrow: shaft + head, teal with a soft glow, at the icon vertical centre. The
    shaft runs right up to the head so the two read as one mark. */
+/* Gatekeeper notice: the app is unsigned, and macOS blocks the first launch
+   BEFORE the app can explain anything — this window is the last thing the user
+   reliably sees first, so the resolution lives here. The System Settings path
+   is the only one that works on every supported macOS: Sequoia (15) removed
+   the right-click→Open bypass for unsigned apps. Sits in the empty band between
+   the chips (y=630) and the Finder clip line (y=762) — keep it above 762. */
+.notice {{ position:absolute; left:0; right:0; top:664px; text-align:center;
+  font-family:-apple-system,'Helvetica Neue',sans-serif; font-weight:500; font-size:26px;
+  line-height:46px; color:rgba(210,244,239,.52); }}
+.notice b {{ font-weight:600; color:rgba(210,244,239,.78); }}
 .arrow {{ position:absolute; top:452px; left:540px; width:240px; height:0;
   transform:translateY(-50%); filter:drop-shadow(0 0 16px rgba(45,212,191,.6)); }}
 .shaft {{ position:absolute; top:-4px; left:0; width:210px; height:8px; border-radius:4px;
@@ -94,6 +104,8 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
   <div class="chip left"></div>
   <div class="chip right"></div>
   <div class="arrow"><div class="shaft"></div><div class="head"></div></div>
+  <div class="notice">macOS will warn on first launch — this build isn't code-signed.<br>
+  Allow it via <b>System Settings → Privacy &amp; Security → "Open Anyway"</b>.</div>
 </div>
 </body></html>
 """.format(b64=b64)
