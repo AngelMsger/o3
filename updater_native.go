@@ -38,7 +38,7 @@ const (
 	//
 	// Fill in with the public half of the keypair from Sparkle's generate_keys
 	// (see docs/auto-update.md).
-	sparkleEdPublicKey = ""
+	sparkleEdPublicKey = "gw+r1q0UikoBDlmqrp0EYlrX7qHIFMF/uVMMl0RDjw4="
 )
 
 // appcastFeedURL returns the update feed, honouring the O3_APPCAST_URL override

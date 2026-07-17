@@ -33,7 +33,7 @@
         <key>SUFeedURL</key>
         <string>https://github.com/AngelMsger/o3/releases/latest/download/appcast.xml</string>
         <key>SUPublicEDKey</key>
-        <string></string>
+        <string>gw+r1q0UikoBDlmqrp0EYlrX7qHIFMF/uVMMl0RDjw4=</string>
         <key>SUEnableAutomaticChecks</key>
         <true/>
         {{if .Info.FileAssociations}}
