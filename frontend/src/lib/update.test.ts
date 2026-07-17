@@ -3,6 +3,7 @@ import {
   checkState,
   assetLabel,
   versionLine,
+  nativeUpdates,
   platformLine,
   publishedLabel,
   osLabel,
@@ -79,15 +80,17 @@ describe('versionLine', () => {
   });
 });
 
+const info = (over: Partial<AppInfo> = {}): AppInfo => ({
+  version: '1.2.0',
+  os: 'darwin',
+  arch: 'arm64',
+  wails: 'v2.12.0',
+  isDev: false,
+  updateMode: 'custom',
+  ...over,
+});
+
 describe('platformLine', () => {
-  const info = (over: Partial<AppInfo> = {}): AppInfo => ({
-    version: '1.2.0',
-    os: 'darwin',
-    arch: 'arm64',
-    wails: 'v2.12.0',
-    isDev: false,
-    ...over,
-  });
 
   it('renders the release build line', () => {
     expect(platformLine(info())).toBe('v1.2.0 · Wails v2.12.0 · macOS arm64');
@@ -107,6 +110,20 @@ describe('platformLine', () => {
 
   it('is empty before AppInfo loads', () => {
     expect(platformLine(null)).toBe('');
+  });
+});
+
+describe('nativeUpdates', () => {
+  it('reports native mode', () => {
+    expect(nativeUpdates(info({ updateMode: 'native' }))).toBe(true);
+  });
+
+  it('reports custom mode', () => {
+    expect(nativeUpdates(info())).toBe(false);
+  });
+
+  it('errs toward custom while AppInfo is still loading', () => {
+    expect(nativeUpdates(null)).toBe(false);
   });
 });
 

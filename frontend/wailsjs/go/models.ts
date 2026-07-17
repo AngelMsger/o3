@@ -110,6 +110,7 @@ export namespace main {
 	    arch: string;
 	    wails: string;
 	    isDev: boolean;
+	    updateMode: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppInfo(source);
@@ -122,6 +123,7 @@ export namespace main {
 	        this.arch = source["arch"];
 	        this.wails = source["wails"];
 	        this.isDev = source["isDev"];
+	        this.updateMode = source["updateMode"];
 	    }
 	}
 	export class ConnConfig {

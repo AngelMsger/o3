@@ -253,3 +253,79 @@ func TestBackgroundCheckRespectsAutoCheckOff(t *testing.T) {
 		t.Fatal("PendingUpdate() returned a result with the background check disabled")
 	}
 }
+
+// fakeNative records calls so the native-mode dispatch in App can be tested
+// without a real framework (which only links inside a packaged release build).
+type fakeNative struct {
+	checks int
+	auto   []bool
+}
+
+func (f *fakeNative) Start(*App, bool)     {}
+func (f *fakeNative) CheckNow()            { f.checks++ }
+func (f *fakeNative) SetAutoCheck(on bool) { f.auto = append(f.auto, on) }
+func (f *fakeNative) Shutdown()            {}
+
+// Without the native_updater tag every build is custom mode, and the About tab
+// keys its whole update UI off this field.
+func TestAppInfoUpdateModeReflectsNativeUpdater(t *testing.T) {
+	if got := (&App{}).AppInfo().UpdateMode; got != "custom" {
+		t.Errorf("UpdateMode = %q without a native updater, want custom", got)
+	}
+	a := &App{native: &fakeNative{}}
+	if got := a.AppInfo().UpdateMode; got != "native" {
+		t.Errorf("UpdateMode = %q with a native updater, want native", got)
+	}
+}
+
+// In custom mode the explicit-check gesture pokes the frontend, which owns the
+// update sheet; the menu item and the About button both route through here.
+func TestRequestUpdateCheckEmitsInCustomMode(t *testing.T) {
+	var events []string
+	a := &App{
+		ctx:  context.Background(),
+		emit: func(_ context.Context, name string, _ ...interface{}) { events = append(events, name) },
+	}
+	a.RequestUpdateCheck()
+	if len(events) != 1 || events[0] != EventUpdateCheckRequested {
+		t.Fatalf("emitted %v, want exactly [%s]", events, EventUpdateCheckRequested)
+	}
+
+	// Before startup there is no Wails context to emit into; the click is dropped.
+	early := &App{emit: func(context.Context, string, ...interface{}) { t.Error("emitted with nil ctx") }}
+	early.RequestUpdateCheck()
+}
+
+// In native mode the same gesture hands control to the framework instead.
+func TestRequestUpdateCheckDelegatesToNativeUpdater(t *testing.T) {
+	fake := &fakeNative{}
+	a := &App{native: fake, emit: func(context.Context, string, ...interface{}) {
+		t.Error("native mode must not emit the custom-flow event")
+	}}
+	a.RequestUpdateCheck()
+	if fake.checks != 1 {
+		t.Fatalf("CheckNow called %d times, want 1", fake.checks)
+	}
+}
+
+// The pref stays the source of truth; native mode additionally mirrors the
+// toggle into the framework so its self-scheduled checks obey it.
+func TestSetAutoUpdateCheckMirrorsIntoNativeUpdater(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	fake := &fakeNative{}
+	a := &App{native: fake}
+
+	if err := a.SetAutoUpdateCheck(false); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.SetAutoUpdateCheck(true); err != nil {
+		t.Fatal(err)
+	}
+	if p, _ := config.LoadPrefs(); p.UpdateCheck != "auto" {
+		t.Errorf("UpdateCheck = %q, want auto persisted", p.UpdateCheck)
+	}
+	if len(fake.auto) != 2 || fake.auto[0] != false || fake.auto[1] != true {
+		t.Errorf("SetAutoCheck saw %v, want [false true]", fake.auto)
+	}
+}

@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"testing"
 
 	"github.com/wailsapp/wails/v2/pkg/menu"
@@ -38,10 +39,10 @@ func TestAppMenuKeepsTheNativeRoles(t *testing.T) {
 	}
 }
 
-// "Check for Updates…" cannot live in the app menu: AppMenuRole is expanded
-// natively in ObjC and takes no custom items. It must therefore be reachable from
-// a top-level submenu, or macOS users lose the menu entry point entirely.
-func TestAppMenuHasCheckForUpdates(t *testing.T) {
+// "Check for Updates…" moved into the native app menu (injected after launch,
+// see menu_darwin_inject.go) — the Wails-built menus must not carry a second
+// copy, or macOS users get the same command in two places.
+func TestWailsMenusCarryNoCheckForUpdates(t *testing.T) {
 	m := appMenu(&App{})
 
 	for _, it := range m.Items {
@@ -50,14 +51,30 @@ func TestAppMenuHasCheckForUpdates(t *testing.T) {
 		}
 		for _, sub := range it.SubMenu.Items {
 			if sub.Label == "Check for Updates…" {
-				if sub.Click == nil {
-					t.Fatal(`"Check for Updates…" has no click handler`)
-				}
-				return
+				t.Fatal(`"Check for Updates…" is still in a Wails submenu; it lives in the injected app menu now`)
 			}
 		}
 	}
-	t.Fatal(`no submenu offers "Check for Updates…"`)
+}
+
+// The injected NSMenuItem's action lands here. It must route into the same
+// explicit-check path as everything else, and must tolerate firing before
+// startup has registered the App (menuApp nil) or set a context.
+func TestMenuCheckForUpdatesCallbackRoutes(t *testing.T) {
+	defer func(prev *App) { menuApp = prev }(menuApp)
+
+	menuApp = nil
+	o3MenuCheckForUpdates() // must not panic
+
+	var events []string
+	menuApp = &App{
+		ctx:  t.Context(),
+		emit: func(_ context.Context, name string, _ ...interface{}) { events = append(events, name) },
+	}
+	o3MenuCheckForUpdates()
+	if len(events) != 1 || events[0] != EventUpdateCheckRequested {
+		t.Fatalf("emitted %v, want exactly [%s]", events, EventUpdateCheckRequested)
+	}
 }
 
 // A click before startup finishes would emit against a nil context.

@@ -6,7 +6,7 @@ import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AIEcosystem } from './AIEcosystem';
 import type { EcosystemPaneProps } from './AIEcosystem';
 import { BrandMark } from './BrandMark';
-import { platformLine } from '../lib/update';
+import { nativeUpdates, platformLine } from '../lib/update';
 import type { AppInfo, CheckState, UpdateResult } from '../lib/update';
 import styles from './SettingsModal.module.css';
 
@@ -556,16 +556,21 @@ export function SettingsModal({
                       <div className={styles.brandTagline} style={{ color: accent }}>SELECT signal FROM noise</div>
                       <div className={styles.brandVersion}>{platformLine(updates.appInfo)}</div>
                     </div>
+                    {/* In native mode the click opens Sparkle/WinSparkle's own
+                        dialog, which carries the checking/available states —
+                        the label never changes here. */}
                     <button
-                      className={`${styles.updateBtn}${updates.state === 'available' ? ` ${styles.updateBtnHot}` : ''}`}
-                      disabled={updates.state === 'checking'}
+                      className={`${styles.updateBtn}${!nativeUpdates(updates.appInfo) && updates.state === 'available' ? ` ${styles.updateBtnHot}` : ''}`}
+                      disabled={!nativeUpdates(updates.appInfo) && updates.state === 'checking'}
                       onClick={updates.onCheck}
                     >
-                      {updates.state === 'checking'
-                        ? 'Checking…'
-                        : updates.state === 'available' && updates.result
-                          ? `Update To ${updates.result.latestVersion}`
-                          : 'Check For Updates'}
+                      {nativeUpdates(updates.appInfo)
+                        ? 'Check For Updates'
+                        : updates.state === 'checking'
+                          ? 'Checking…'
+                          : updates.state === 'available' && updates.result
+                            ? `Update To ${updates.result.latestVersion}`
+                            : 'Check For Updates'}
                     </button>
                   </div>
 
@@ -578,7 +583,9 @@ export function SettingsModal({
                     <div style={{ flex: 1 }}>
                       <div className={styles.histoCardLabel}>Check For Updates Automatically</div>
                       <div className={styles.histoCardSub}>
-                        Asks GitHub for a new release at most once a day. o3 never installs anything on its own.
+                        {nativeUpdates(updates.appInfo)
+                          ? 'Checks in the background and offers to install through the system update dialog. Updates are signature-verified before they run.'
+                          : 'Asks GitHub for a new release at most once a day. o3 never installs anything on its own.'}
                       </div>
                     </div>
                     <button
@@ -590,8 +597,10 @@ export function SettingsModal({
                     </button>
                   </div>
 
-                  {/* Without this, skipping a version is a one-way door. */}
-                  {updates.skipVersion && (
+                  {/* Without this, skipping a version is a one-way door. Native
+                      mode never writes this pref — the framework tracks skipped
+                      versions itself — so the row stays hidden there. */}
+                  {!nativeUpdates(updates.appInfo) && updates.skipVersion && (
                     <div className={styles.skipRow}>
                       Skipping v{updates.skipVersion}.{' '}
                       <button

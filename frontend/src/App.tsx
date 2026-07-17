@@ -26,7 +26,7 @@ import { TabContextMenu } from './components/TabContextMenu';
 import type { TabMenuAction } from './lib/tabMenu';
 import { SyntaxGuide } from './components/SyntaxGuide';
 import { UpdateSheet } from './components/UpdateSheet';
-import { checkState } from './lib/update';
+import { checkState, nativeUpdates } from './lib/update';
 import type { UpdateResult, AppInfo as TAppInfo } from './lib/update';
 import type { config } from '../wailsjs/go/models';
 import { QUICK_RANGES, HISTORY, FIELDS, STREAMS, GUIDE } from './data/mock';
@@ -46,7 +46,7 @@ import {
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
   EcosystemStatus, InstallCLI, UpgradeCLI, UninstallCLI, InstallSkill, UninstallSkill,
   BrowserSignIn as BrowserSignInCall, SessionStatus, SignOut,
-  AppInfo, CheckForUpdates, PendingUpdate, SkipUpdateVersion, SetAutoUpdateCheck,
+  AppInfo, CheckForUpdates, PendingUpdate, RequestUpdateCheck, SkipUpdateVersion, SetAutoUpdateCheck,
 } from '../wailsjs/go/main/App';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
@@ -234,6 +234,10 @@ function App() {
   const [skipVersion, setSkipVersion] = useState('');
   const updateT = useDelayedUnmount(updateOpen);
   const updateState = checkState(update, updateBusy, updateError);
+  // Release builds on macOS/Windows delegate updates to Sparkle/WinSparkle: the
+  // framework brings its own dialogs, so the custom sheet and its states stay
+  // out of the way entirely.
+  const nativeUpd = nativeUpdates(appInfo);
 
   /* Theme prefs — Phase 4: load once, persist on change, follow OS appearance. */
   useEffect(() => {
@@ -258,9 +262,11 @@ function App() {
   }, [themePref, accent, density]);
 
   /* ===== Updates =====
-     o3 checks GitHub Releases for a newer stable build. It never installs
-     anything (the builds are unsigned): the sheet's primary button opens the
-     platform artifact in the user's real browser. */
+     Two modes, reported by AppInfo.updateMode. "native" (macOS/Windows release
+     builds): Sparkle/WinSparkle owns checks, download, install and relaunch —
+     the frontend only forwards the About button to RequestUpdateCheck. "custom"
+     (Linux, dev builds): o3 checks GitHub Releases itself and the sheet's
+     primary button opens the platform artifact in the user's real browser. */
   const runUpdateCheck = () => {
     setUpdateBusy(true);
     setUpdateError('');
@@ -274,6 +280,10 @@ function App() {
   useEffect(() => {
     AppInfo().then((i) => setAppInfo(i as TAppInfo)).catch(() => {});
 
+    // The custom-flow wiring below subscribes unconditionally on purpose: in
+    // native mode the backend never emits these events and PendingUpdate always
+    // returns the zero value, so it is inert — while gating it on the async
+    // AppInfo answer would reopen the emit-before-listen race on Linux.
     // The background check emits when it finds something...
     const offAvailable = EventsOn('update:available', (r: UpdateResult) => {
       setUpdate(r);
@@ -1085,7 +1095,8 @@ function App() {
               error: updateError,
               autoCheck,
               skipVersion,
-              onCheck: runUpdateCheck,
+              // Native mode hands the gesture to the framework's own dialog.
+              onCheck: nativeUpd ? () => RequestUpdateCheck() : runUpdateCheck,
               onToggleAutoCheck: handleToggleAutoCheck,
               onClearSkip: handleClearSkip,
             }}
@@ -1116,8 +1127,10 @@ function App() {
         )}
 
         {/* UpdateSheet — a newer release was found, or an explicit check finished.
-            Sits above SettingsModal so a check launched from About lands on top. */}
-        {updateT.mounted && (
+            Sits above SettingsModal so a check launched from About lands on top.
+            Custom mode only: in native mode Sparkle/WinSparkle presents its own
+            dialog and none of the states that open this sheet can occur. */}
+        {!nativeUpd && updateT.mounted && (
           <UpdateSheet
             visible={updateT.visible}
             accent={accent}

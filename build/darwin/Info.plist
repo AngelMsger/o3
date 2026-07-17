@@ -23,6 +23,19 @@
         <string>true</string>
         <key>NSHumanReadableCopyright</key>
         <string>{{.Info.Copyright}}</string>
+        <!-- Sparkle auto-update (release builds only — dev builds don't link the
+             framework, so these keys are inert there). SUFeedURL must stay in
+             lockstep with appcastURL in updater_native.go; SUPublicEDKey with
+             sparkleEdPublicKey there. The empty key is a placeholder until the
+             one-time key generation in docs/auto-update.md — the release
+             workflow refuses to ship while it is empty, because the EdDSA
+             signature is an unsigned app's only update integrity check. -->
+        <key>SUFeedURL</key>
+        <string>https://github.com/AngelMsger/o3/releases/latest/download/appcast.xml</string>
+        <key>SUPublicEDKey</key>
+        <string></string>
+        <key>SUEnableAutomaticChecks</key>
+        <true/>
         {{if .Info.FileAssociations}}
         <key>CFBundleDocumentTypes</key>
         <array>

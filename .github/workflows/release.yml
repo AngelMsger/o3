@@ -11,6 +11,13 @@ name: Release
 # Builds are currently UNSIGNED. macOS users must bypass Gatekeeper and Windows
 # users SmartScreen on first launch (see README "Download & install"). Signing
 # and notarization can be layered on later without restructuring this file.
+#
+# AUTO-UPDATE: macOS/Windows builds embed Sparkle/WinSparkle (the native_updater
+# build tag). The appcast job EdDSA-signs the .dmg and setup.exe with the
+# SPARKLE_ED_PRIVATE_KEY secret and attaches appcast.xml to the same draft, so
+# publishing exposes the feed and the binaries it points at atomically —
+# installed apps then pick the release up from releases/latest/download/.
+# One-time key setup: docs/auto-update.md.
 
 on:
   push:
@@ -197,17 +204,24 @@ jobs:
       - name: Stamp version into wails.json
         run: node scripts/set-version.mjs "$VERSION"
 
-      # ---- macOS: universal .app -> .dmg ----
+      # ---- macOS: universal .app (+ Sparkle) -> .dmg ----
       - name: Build & package (macOS)
         if: runner.os == 'macOS'
         env:
           NUMERIC_VERSION: ${{ needs.meta.outputs.numericVersion }}
+          # The native_updater binary resolves Sparkle.framework relative to
+          # itself inside the bundle; sparkle-framework.sh puts it there.
+          CGO_LDFLAGS: "-Wl,-rpath,@loader_path/../Frameworks"
         run: |
           # CFBundleVersion / CFBundleShortVersionString must be numeric X.Y.Z;
           # re-stamp so a prerelease tag produces a valid bundle (the in-app
           # main.version ldflag and the .dmg filename keep the full tag).
           node scripts/set-version.mjs "$NUMERIC_VERSION"
-          wails build -platform darwin/universal -clean -ldflags "-X main.version=$VERSION"
+          # -skipbindings: the bindings-generation step RUNS the binary, which
+          # aborts outside an app bundle once it links Sparkle (rpath resolves
+          # to nothing). The committed bindings are tag-independent.
+          wails build -platform darwin/universal -tags native_updater -skipbindings -clean -ldflags "-X main.version=$VERSION"
+          bash scripts/sparkle-framework.sh
           VERSION="$VERSION" bash scripts/dmg.sh
 
       # ---- Windows: .exe + NSIS installer -> setup.exe + portable.zip ----
@@ -220,7 +234,10 @@ jobs:
           # resources are valid even for prerelease tags (the in-app main.version
           # ldflag keeps the full tag).
           node scripts/set-version.mjs "$NUMERIC_VERSION"
-          wails build -platform windows/amd64 -nsis -clean -ldflags "-X main.version=$VERSION"
+          # native_updater links WinSparkle; the DLL itself is go:embedded, so
+          # the installer and the portable zip need nothing extra. -skipbindings
+          # for parity with the macOS build (committed bindings are current).
+          wails build -platform windows/amd64 -nsis -tags native_updater -skipbindings -clean -ldflags "-X main.version=$VERSION"
           mv "build/bin/o3-amd64-installer.exe" "build/bin/o3-${VERSION}-windows-amd64-setup.exe"
           # Zip the portable exe with o3.exe at the archive root (run from build/bin).
           ( cd build/bin && 7z a "o3-${VERSION}-windows-amd64-portable.zip" o3.exe )
@@ -245,8 +262,90 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  release:
+  # EdDSA-sign the update archives and generate the Sparkle/WinSparkle feed.
+  # Runs on macOS because sign_update is a macOS binary (from the same pinned
+  # Sparkle release scripts/sparkle-framework.sh embeds — the pin is sourced
+  # from that script so it cannot drift). The appcast is uploaded as its own
+  # artifact and lands on the draft release with everything else.
+  appcast:
     needs: [meta, build]
+    runs-on: macos-latest
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+      NUMERIC_VERSION: ${{ needs.meta.outputs.numericVersion }}
+      TAG: ${{ needs.meta.outputs.tag }}
+    steps:
+      - name: Checkout o3
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      # An unsigned app's ONLY update integrity check is this signature, so a
+      # missing key or a still-empty public-key placeholder must fail the
+      # release loudly, not ship an updater that can never verify anything.
+      - name: Guard the signing configuration
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SPARKLE_ED_PRIVATE_KEY" ]; then
+            echo "::error::secrets.SPARKLE_ED_PRIVATE_KEY is not set — run the one-time key setup in docs/auto-update.md."
+            exit 1
+          fi
+          if grep -q 'sparkleEdPublicKey = ""' updater_native.go; then
+            echo "::error::sparkleEdPublicKey in updater_native.go is still the empty placeholder — fill in the public key from docs/auto-update.md."
+            exit 1
+          fi
+
+      - name: Sign archives and generate appcast.xml
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          # Reuse the exact Sparkle pin (version, URL, sha256) from the
+          # packaging script — one pin, two consumers.
+          eval "$(grep -E '^(SPARKLE_VERSION|SPARKLE_URL|SPARKLE_SHA)=' scripts/sparkle-framework.sh)"
+          curl -fsSL -o sparkle.tar.xz "$SPARKLE_URL"
+          echo "$SPARKLE_SHA  sparkle.tar.xz" | shasum -a 256 -c -
+          mkdir -p sparkle-dist
+          tar -xf sparkle.tar.xz -C sparkle-dist
+
+          # The key exists on disk only for the sign_update calls, 0600, on an
+          # ephemeral runner, and is removed immediately after.
+          umask 077
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" > ed25519.key
+
+          DMG="dist/o3-${VERSION}-universal.dmg"
+          SETUP="dist/o3-${VERSION}-windows-amd64-setup.exe"
+          DMG_SIG="$(./sparkle-dist/bin/sign_update --ed-key-file ed25519.key -p "$DMG")"
+          SETUP_SIG="$(./sparkle-dist/bin/sign_update --ed-key-file ed25519.key -p "$SETUP")"
+          rm -f ed25519.key
+
+          node scripts/appcast.mjs \
+            --version "$VERSION" --numeric-version "$NUMERIC_VERSION" --tag "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --dmg "$DMG" --dmg-sig "$DMG_SIG" \
+            --setup "$SETUP" --setup-sig "$SETUP_SIG" \
+            --out appcast.xml
+          cat appcast.xml
+
+      - name: Upload appcast
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: o3-appcast
+          path: appcast.xml
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [meta, build, appcast]
     runs-on: ubuntu-latest
     # Only this job needs to create the tag/release.
     permissions:

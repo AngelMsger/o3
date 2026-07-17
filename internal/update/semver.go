@@ -196,3 +196,16 @@ func IsDev(v string) bool {
 	_, ok := Parse(v)
 	return !ok
 }
+
+// Numeric strips the prerelease and build-metadata suffixes: "1.2.3-rc.1+b5"
+// → "1.2.3". It mirrors what release packaging embeds where SemVer suffixes
+// are rejected (CFBundleVersion, the .exe version resource) and is what the
+// native updater registers with WinSparkle, so all three stay aligned with the
+// appcast's numeric sparkle:version by construction.
+func Numeric(v string) string {
+	v = strings.TrimPrefix(strings.TrimSpace(v), "v")
+	if i := strings.IndexAny(v, "-+"); i >= 0 {
+		return v[:i]
+	}
+	return v
+}
