@@ -13,6 +13,8 @@ require (
 
 require (
 	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
+	github.com/abemedia/go-sparkle v0.2.0 // indirect
+	github.com/abemedia/go-winsparkle v0.9.3 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect

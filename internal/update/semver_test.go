@@ -126,3 +126,20 @@ func TestIsDev(t *testing.T) {
 		}
 	}
 }
+
+func TestNumeric(t *testing.T) {
+	cases := map[string]string{
+		"1.2.3":           "1.2.3",
+		"v1.2.3":          "1.2.3",
+		"1.2.3-rc.1":      "1.2.3",
+		"1.2.3+build.5":   "1.2.3",
+		"1.2.3-rc.1+b.5":  "1.2.3",
+		" v1.2.3-alpha.2": "1.2.3",
+		"":                "",
+	}
+	for in, want := range cases {
+		if got := Numeric(in); got != want {
+			t.Errorf("Numeric(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

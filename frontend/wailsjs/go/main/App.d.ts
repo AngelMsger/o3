@@ -31,6 +31,8 @@ export function PendingUpdate():Promise<update.Result>;
 
 export function RemoveContext(arg1:string):Promise<void>;
 
+export function RequestUpdateCheck():Promise<void>;
+
 export function RunMetricsQuery(arg1:metrics.Params):Promise<metrics.Result>;
 
 export function RunQuery(arg1:query.SearchParams):Promise<query.SearchResult>;

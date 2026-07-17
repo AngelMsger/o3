@@ -40,6 +40,9 @@ type App struct {
 	newEco  func() *ecosystem.Service
 
 	upd *update.Service
+	// native is the OS update framework (Sparkle/WinSparkle) in release builds,
+	// nil everywhere else. nil selects the custom check-only flow below.
+	native nativeUpdater
 	// updMu guards the pending result and every prefs read-modify-write. It is
 	// deliberately NOT a.mu: that one is held across query paths, and taking it
 	// around a 10-second HTTP call would stall the UI.
@@ -53,7 +56,7 @@ type App struct {
 
 // NewApp creates a new App application struct.
 func NewApp() *App {
-	return &App{upd: update.NewProduction(version)}
+	return &App{upd: update.NewProduction(version), native: newNativeUpdater()}
 }
 
 // startup records the Wails context, best-effort builds the client for the
@@ -68,7 +71,26 @@ func (a *App) startup(ctx context.Context) {
 		a.upd = update.NewProduction(version)
 	}
 	_ = a.rebuildClient() // best-effort; data methods re-report if it fails
+	if a.native != nil {
+		// The OS framework schedules its own background checks; hand it the
+		// persisted toggle and stay out of the way. The custom goroutine below
+		// must not also run, or the user would get two update prompts.
+		auto := true
+		if p, err := config.LoadPrefs(); err == nil {
+			auto = p.UpdateCheck != "off"
+		}
+		a.native.Start(a, auto)
+		return
+	}
 	go a.backgroundUpdateCheck(ctx)
+}
+
+// shutdown releases the native updater (WinSparkle requires a Cleanup call
+// before exit; Sparkle's is a no-op).
+func (a *App) shutdown(context.Context) {
+	if a.native != nil {
+		a.native.Shutdown()
+	}
 }
 
 // ConnConfig is a connection's settings exchanged with the frontend. Secret and

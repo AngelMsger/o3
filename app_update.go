@@ -41,17 +41,43 @@ type AppInfo struct {
 	Arch    string `json:"arch"`
 	Wails   string `json:"wails"`
 	IsDev   bool   `json:"isDev"`
+	// UpdateMode is "native" when an OS framework (Sparkle/WinSparkle) owns the
+	// update flow, "custom" for the check-only flow the frontend renders itself.
+	UpdateMode string `json:"updateMode"`
 }
 
 // AppInfo reports the running version and platform.
 func (a *App) AppInfo() AppInfo {
-	return AppInfo{
-		Version: version,
-		OS:      runtime.GOOS,
-		Arch:    runtime.GOARCH,
-		Wails:   wailsVersion,
-		IsDev:   update.IsDev(version),
+	mode := "custom"
+	if a.native != nil {
+		mode = "native"
 	}
+	return AppInfo{
+		Version:    version,
+		OS:         runtime.GOOS,
+		Arch:       runtime.GOARCH,
+		Wails:      wailsVersion,
+		IsDev:      update.IsDev(version),
+		UpdateMode: mode,
+	}
+}
+
+// RequestUpdateCheck runs the user-initiated "check for updates" gesture — the
+// macOS Help-menu item and the About tab's button both land here. In native
+// mode the framework takes over (its own dialog, download and install); in
+// custom mode it pokes the frontend, which runs CheckForUpdates and presents
+// the update sheet.
+func (a *App) RequestUpdateCheck() {
+	if a.native != nil {
+		a.native.CheckNow()
+		return
+	}
+	// a.ctx is nil until startup runs; a menu click cannot land before the
+	// window exists, but bound calls can arrive arbitrarily early.
+	if a.ctx == nil {
+		return
+	}
+	a.emitEvent(a.ctx, EventUpdateCheckRequested)
 }
 
 // CheckForUpdates runs the explicit check behind the About button and the macOS
@@ -99,15 +125,21 @@ func (a *App) SkipUpdateVersion(v string) error {
 	return nil
 }
 
-// SetAutoUpdateCheck enables or disables the background check on launch.
+// SetAutoUpdateCheck enables or disables the background check on launch. The
+// pref is the source of truth in both modes; in native mode it is additionally
+// mirrored into the framework, which applies it to its own schedule.
 func (a *App) SetAutoUpdateCheck(on bool) error {
 	mode := "off"
 	if on {
 		mode = "auto"
 	}
 	a.updMu.Lock()
-	defer a.updMu.Unlock()
-	return apperr.Wrap(config.MutatePrefs(func(p *config.Prefs) { p.UpdateCheck = mode }))
+	err := config.MutatePrefs(func(p *config.Prefs) { p.UpdateCheck = mode })
+	a.updMu.Unlock()
+	if err == nil && a.native != nil {
+		a.native.SetAutoCheck(on)
+	}
+	return apperr.Wrap(err)
 }
 
 // backgroundUpdateCheck waits out the startup delay, then runs the check.

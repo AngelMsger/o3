@@ -50,6 +50,10 @@ export function RemoveContext(arg1) {
   return window['go']['main']['App']['RemoveContext'](arg1);
 }
 
+export function RequestUpdateCheck() {
+  return window['go']['main']['App']['RequestUpdateCheck']();
+}
+
 export function RunMetricsQuery(arg1) {
   return window['go']['main']['App']['RunMetricsQuery'](arg1);
 }

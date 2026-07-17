@@ -24,6 +24,18 @@ export interface AppInfo {
   arch: string;
   wails: string;
   isDev: boolean;
+  // "native" when an OS framework (Sparkle/WinSparkle) owns the update flow —
+  // its own dialogs, download, install, relaunch. "custom" everywhere else
+  // (Linux, dev builds): the check-only flow rendered by UpdateSheet.
+  updateMode: string;
+}
+
+// nativeUpdates reports whether the running build delegates updates to an OS
+// framework. While AppInfo is still loading (null) it answers false, which errs
+// toward mounting the custom UI — harmless, since a native-mode backend never
+// emits the events that would open it.
+export function nativeUpdates(info: AppInfo | null): boolean {
+  return info?.updateMode === 'native';
 }
 
 // CheckState drives both the About button and the update sheet, so the two can

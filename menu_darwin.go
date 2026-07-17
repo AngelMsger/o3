@@ -27,12 +27,7 @@ func appMenu(a *App) *menu.Menu {
 
 	help := m.AddSubmenu("Help")
 	help.AddText("Check for Updates…", nil, func(*menu.CallbackData) {
-		// a.ctx is nil until startup runs; the menu is built before that, but a
-		// click cannot land before the window exists.
-		if a.ctx == nil {
-			return
-		}
-		wruntime.EventsEmit(a.ctx, EventUpdateCheckRequested)
+		a.RequestUpdateCheck()
 	})
 	help.AddSeparator()
 	help.AddText("Documentation", nil, func(*menu.CallbackData) {
