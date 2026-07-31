@@ -194,20 +194,30 @@
   margin-top: 4px;
 }
 
+/* The primary fills the row; scoped here so the button never inherits a
+   flex-basis of 0 when it sits in a column container (which collapses its
+   height instead of stretching its width). */
+.actions .btnPrimary { flex: 1; }
+
 .btnPrimary {
-  flex: 1;
+  flex: none;
   height: 42px;
+  padding: 0 22px;
   border: none;
   border-radius: 10px;
   color: #06181a;
   font-size: 13.5px;
   font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
+  transition: opacity var(--motion-fast) var(--motion-ease);
 }
 
+.btnPrimary:hover:not(:disabled) { opacity: 0.88; }
 .btnPrimary:disabled { opacity: 0.6; cursor: default; }
 
 .btnSecondary {
+  flex: none;
   height: 42px;
   padding: 0 18px;
   border-radius: 10px;
@@ -215,7 +225,14 @@
   background: transparent;
   color: var(--tx-06, #99a2b2);
   font-size: 13px;
+  font-family: inherit;
   cursor: pointer;
+  transition: border-color var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
+}
+
+.btnSecondary:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.24);
+  color: var(--tx-hi, #e6eaf2);
 }
 
 .linkBtn {
