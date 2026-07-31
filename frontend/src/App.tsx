@@ -41,6 +41,7 @@ import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import { relativeRange, rangeToMicros, rangeLabel, parseAbsolute, type TimeRange } from './lib/timeRange';
 import { createLatest } from './lib/latest';
 import { draftName, preserveDrafts, seedIfEmpty } from './lib/contexts';
+import { IDLE, type ConnTest } from './lib/connTest';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
@@ -117,7 +118,8 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
   const [setupOpen, setSetupOpen] = useState(false);
-  const [tested, setTested] = useState(false);
+  // Result of the last "Test Connection", shown by BOTH the wizard and Settings.
+  const [connTest, setConnTest] = useState<ConnTest>(IDLE);
   const [selfSigned, setSelfSigned] = useState(false);
   const [accent, setAccent] = useState<string>('#2dd4bf');
   const [themePref, setThemePref] = useState<ThemePref>('dark');
@@ -673,7 +675,7 @@ function App() {
 
   // handleSelectContext picks which context the Settings form edits, without
   // switching the active connection.
-  const handleSelectContext = (name: string) => setEditingName(name);
+  const handleSelectContext = (name: string) => { setEditingName(name); setConnTest(IDLE); };
 
   // handleSaveContext persists the named context (upsert + secret) then refreshes.
   const handleSaveContext = async (ctx: UICtx): Promise<void> => {
@@ -743,13 +745,18 @@ function App() {
   // handleTestContext tests the connection for the given context draft.
   const handleTestContext = async (ctx: UICtx): Promise<void> => {
     setWizardError(null);
+    // 'testing' first: the round trip can take seconds, and with no in-flight
+    // state the button looked inert until it finished.
+    setConnTest({ state: 'testing' });
     try {
       const secret = ctx.scheme === 'token' ? ctx.token : ctx.password;
-      await TestConnection({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret } as any);
-      setTested(true);
+      // An empty secret is normal for a saved context — the credential lives in
+      // the keychain and is never read back into the UI. TestConnection falls
+      // back to the stored one, so the test still exercises the real credential.
+      const info = await TestConnection({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret } as any);
+      setConnTest({ state: 'ok', orgCount: info.orgCount ?? 0, streamCount: info.streamCount ?? 0 });
     } catch (e: any) {
-      setTested(false);
-      setWizardError(parseAppError(e).message);
+      setConnTest({ state: 'error', message: parseAppError(e).message });
     }
   };
 
@@ -1125,9 +1132,10 @@ function App() {
             canRemove={contexts.length > 1}
             onAddContext={() => handleAddContext(false)}
             onSelect={handleSelectContext}
+            test={connTest}
             onUse={(name) => handleSwitchContext(name)}
             onRemove={(name) => handleRemoveContext(name)}
-            onField={(key, value) => { setContexts((cs) => cs.map((c) => (c.name === editSel ? { ...c, [key]: value } : c))); if (key === 'name') setEditingName(value); }}
+            onField={(key, value) => { setContexts((cs) => cs.map((c) => (c.name === editSel ? { ...c, [key]: value } : c))); if (key === 'name') setEditingName(value); setConnTest(IDLE); }}
             onTest={() => { const a = contexts.find((c) => c.name === editSel); if (a) handleTestContext(a); }}
             onSave={() => { const a = contexts.find((c) => c.name === editSel); if (a) handleSaveContext(a); }}
             onBrowserSignIn={() => { const a = contexts.find((c) => c.name === editSel); if (a) startBrowserSignIn(a); }}
@@ -1160,7 +1168,7 @@ function App() {
             isDark={effectiveTheme(themePref, systemDark) === 'dark'}
             contexts={contexts}
             currentName={currentName}
-            tested={tested}
+            test={connTest}
             selfSigned={selfSigned}
             error={wizardError}
             onUpdateCtx={(name, key, value) => {
@@ -1173,7 +1181,7 @@ function App() {
                 setCurrentName(value);
               }
             }}
-            onSelectCtx={(name) => { setCurrentName(name); setWizardError(null); }}
+            onSelectCtx={(name) => { setCurrentName(name); setWizardError(null); setConnTest(IDLE); }}
             onToggleSelfSigned={() => setSelfSigned((v) => !v)}
             onTest={(ctx) => handleTestContext(ctx)}
             onClose={() => { setSetupOpen(false); setWizardError(null); }}

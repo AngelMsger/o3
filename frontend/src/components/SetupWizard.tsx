@@ -3,6 +3,7 @@
    selected context (name, URL, org, auth, test, save). */
 import type { ReactElement } from 'react';
 import { authTabToScheme, schemeToAuthTab } from '../lib/signin';
+import { connTestLabel, type ConnTest } from '../lib/connTest';
 import { BrandMark } from './BrandMark';
 import styles from './SetupWizard.module.css';
 
@@ -24,7 +25,7 @@ interface SetupWizardProps {
   contexts: UICtx[];
   currentName: string;
   // authTab and onAuthTab removed — Fix 3: scheme is now the source of truth
-  tested: boolean;
+  test: ConnTest;
   selfSigned: boolean;
   error?: string | null;
   // mutate a single field on the named context
@@ -50,7 +51,7 @@ export function SetupWizard({
   isDark,
   contexts,
   currentName,
-  tested,
+  test,
   selfSigned,
   error,
   onUpdateCtx,
@@ -311,12 +312,14 @@ export function SetupWizard({
                 <button
                   className={styles.testBtn}
                   onClick={() => selected && onTest(selected)}
-                  disabled={!selected}
+                  disabled={!selected || test.state === 'testing'}
                 >
                   Test Connection
                 </button>
-                {tested && (
-                  <span className={styles.testedLabel}>✓ reachable</span>
+                {test.state !== 'idle' && (
+                  <span className={test.state === 'error' ? styles.testError : styles.testedLabel}>
+                    {connTestLabel(test)}
+                  </span>
                 )}
               </div>
               {error && <div className={styles.testError}>{error}</div>}
