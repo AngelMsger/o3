@@ -28,6 +28,10 @@ export interface TabResult {
   error: { message: string; hint: string } | null;
   page: number;
   histoSel: HistoSelection | null;
+  // Row ids are POSITIONAL ("0", "1", ...), so they collide across tabs: a
+  // selection left over from another tab would silently open an unrelated row in
+  // the inspector. It belongs to the tab that made it.
+  selectedRow: string | null;
 }
 
 // EMPTY_RESULT is what a tab that has never run a query shows.
@@ -38,6 +42,7 @@ export const EMPTY_RESULT: TabResult = {
   error: null,
   page: 1,
   histoSel: null,
+  selectedRow: null,
 };
 
 export type TabResults = Record<string, TabResult>;
