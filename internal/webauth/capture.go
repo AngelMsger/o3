@@ -2,6 +2,7 @@ package webauth
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
@@ -55,6 +56,18 @@ func parseProbe(data []byte) (cookies []Cookie, currentURL, authorization, email
 		})
 	}
 	return cookies, p.URL, p.Authorization, p.Email, nil
+}
+
+// Replayable reports whether a captured state carries anything o3 could replay,
+// and so is worth handing to the verifier.
+//
+// Cookies are the usual authenticator, but they are NOT universal: an instance
+// using native (email + password) login authenticates its own SPA with an
+// Authorization header the browser builds locally and sets no cookies at all.
+// Gating capture on cookies alone therefore never verified such a login — the
+// window stayed open on the instance's home page after the user had signed in.
+func Replayable(s pkgauth.Session) bool {
+	return strings.TrimSpace(s.Cookies) != "" || strings.TrimSpace(s.Authorization) != ""
 }
 
 // AssembleSession builds the storable/replayable session from captured cookies.

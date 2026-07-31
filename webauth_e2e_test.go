@@ -38,6 +38,69 @@ func mockInstance(t *testing.T) *httptest.Server {
 	return httptest.NewServer(mux)
 }
 
+// headerOnlyInstance stands in for an OpenObserve instance using native
+// (email + password) login: its own web SPA authenticates every API call with an
+// Authorization header built in the browser, and the server sets NO cookies at
+// all. Capturing such a login yields a session with an Authorization and an
+// empty cookie jar — the case that must still authenticate.
+func headerOnlyInstance(t *testing.T) (*httptest.Server, string) {
+	t.Helper()
+	const header = "Basic b3BzQGV4YW1wbGUuY29tOnB3"
+	mux := http.NewServeMux()
+	mux.HandleFunc("/web/login", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK) // no Set-Cookie: credentials live in localStorage
+	})
+	mux.HandleFunc("/api/organizations", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != header {
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte(`{"message":"unauthorized"}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"data":[{"identifier":"default","name":"Default"}]}`))
+	})
+	return httptest.NewServer(mux), header
+}
+
+// TestSessionVerifierHeaderOnly proves browser sign-in completes against an
+// instance that sets no cookies. Gating capture on cookies (or rejecting a
+// cookieless session envelope) left the login window open on the instance's home
+// page after a successful login, with no way to finish authorizing.
+func TestSessionVerifierHeaderOnly(t *testing.T) {
+	srv, header := headerOnlyInstance(t)
+	defer srv.Close()
+	host, _ := hostPort(t, srv.URL)
+
+	sess := webauth.AssembleSession(nil, host, header, "ops@example.com")
+	if !webauth.Replayable(sess) {
+		t.Fatal("a header-only capture was not considered worth verifying")
+	}
+
+	verify := sessionVerifier(t.Context(), srv.URL, "default", cfgshared.Defaults{})
+	if !verify(sess) {
+		t.Fatal("verifier rejected a header-only session that authenticates")
+	}
+
+	// A wrong header must still be rejected, so the header is what authenticated.
+	if verify(webauth.AssembleSession(nil, host, "Basic WRONG", "")) {
+		t.Fatal("verifier accepted a header-only session that does not authenticate")
+	}
+
+	// And the same envelope must survive encode -> buildClient -> replay, the path
+	// SaveContext + rebuildClient take once the user authorizes.
+	blob, err := pkgauth.EncodeSession(sess)
+	if err != nil {
+		t.Fatalf("EncodeSession: %v", err)
+	}
+	client, err := buildClient(srv.URL, "default", pkgauth.SchemeSession, sess.Email, blob, cfgshared.Defaults{})
+	if err != nil {
+		t.Fatalf("buildClient with a cookieless session: %v", err)
+	}
+	if _, err := client.Ping(t.Context()); err != nil {
+		t.Fatalf("Ping with a replayed header-only session failed: %v", err)
+	}
+}
+
 // hostPort returns the host (with port) for scoping, and the bare hostname a
 // real cookie's Domain carries (never a port), mirroring WKHTTPCookieStore.
 func hostPort(t *testing.T, raw string) (host, cookieDomain string) {
