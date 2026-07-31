@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	cfgshared "github.com/angelmsger/openobserve-cli/pkg/config"
@@ -80,18 +82,54 @@ func TestSaveContextNormalizesURL(t *testing.T) {
 	}
 }
 
-// TestSaveContextTransactional proves a keychain failure aborts before config.yaml
-// is written, so the app never persists a context that points at a missing
-// credential. (#8)
+// A keychain that refuses the secret is no longer fatal: the shared credential
+// store falls back to a protected file, so the context saves and the credential
+// is still retrievable. Before the fallback existed this failed outright — and
+// on macOS it failed by raising a system dialog offering to reset the user's
+// default keychain.
+func TestSaveContextFallsBackWhenTheKeychainRefuses(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	keyring.MockInitWithError(keyring.ErrNotFound) // every keychain op fails
+	a := &App{}
+	if err := a.SaveContext(ConnConfig{
+		Name: "prod", URL: "https://observe.example.com", Scheme: "basic", Username: "u", Secret: "pw",
+	}); err != nil {
+		t.Fatalf("SaveContext with an unusable keychain: %v", err)
+	}
+	if _, ok := readConfig(t).Context("prod"); !ok {
+		t.Fatal("context was not persisted despite the secret being stored in the fallback")
+	}
+	got, has, err := config.LoadSecret("https://observe.example.com", "basic")
+	if err != nil || !has || got != "pw" {
+		t.Fatalf("LoadSecret = (%q,%v,%v), want the fallback-stored secret", got, has, err)
+	}
+}
+
+// TestSaveContextTransactional proves that when the secret cannot be stored AT
+// ALL, config.yaml is not written, so the app never persists a context pointing
+// at a missing credential. (#8)
+//
+// Both backends must fail to reach that state now that a file fallback exists:
+// the keychain is mocked to refuse, and the credentials path is occupied by a
+// directory so the fallback write fails too — while the config directory itself
+// stays writable, so a config.yaml entry WOULD have been written had the code
+// not aborted first.
 func TestSaveContextTransactional(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
-	keyring.MockInitWithError(keyring.ErrNotFound) // any Set failure
+	keyring.MockInitWithError(keyring.ErrNotFound)
+	dir, err := configDir()
+	if err != nil {
+		t.Fatalf("configDir: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "credentials"), 0o700); err != nil {
+		t.Fatalf("blocking the fallback path: %v", err)
+	}
+
 	a := &App{}
-	err := a.SaveContext(ConnConfig{
+	if err := a.SaveContext(ConnConfig{
 		Name: "prod", URL: "https://observe.example.com", Scheme: "basic", Username: "u", Secret: "pw",
-	})
-	if err == nil {
-		t.Fatal("expected SaveContext to fail when the keychain rejects the secret")
+	}); err == nil {
+		t.Fatal("expected SaveContext to fail when the secret cannot be stored anywhere")
 	}
 	// config.yaml must NOT contain the half-saved context.
 	if _, ok := readConfig(t).Context("prod"); ok {
