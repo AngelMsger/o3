@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import type { SettingsTab, Density, ThemePref } from '../types';
 import { hexA } from '../lib/format';
 import { authTabToScheme, expiryLabel, schemeToAuthTab } from '../lib/signin';
+import { connTestLabel, type ConnTest } from '../lib/connTest';
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AIEcosystem } from './AIEcosystem';
 import type { EcosystemPaneProps } from './AIEcosystem';
@@ -29,6 +30,7 @@ interface SettingsContextsProps {
   onRemove: (name: string) => void;
   onField: (key: string, value: string) => void;
   onTest: () => void;
+  test: ConnTest;
   onSave: () => void;
 }
 
@@ -124,6 +126,7 @@ export function SettingsModal({
   onRemove,
   onField,
   onTest,
+  test,
   onSave,
   onBrowserSignIn,
   onSignOut,
@@ -257,8 +260,24 @@ export function SettingsModal({
                           <div className={styles.statusMeta}>
                             org <b style={{ color: 'var(--tx-06)' }}>{active.org}</b>
                           </div>
+                          {/* Test outcome. Without this the button called the
+                              backend and displayed nothing, so it read as dead. */}
+                          {test.state !== 'idle' && (
+                            <div
+                              className={styles.statusMeta}
+                              style={{ marginTop: 4, color: test.state === 'error' ? '#f4685f' : accent }}
+                            >
+                              {connTestLabel(test)}
+                            </div>
+                          )}
                         </div>
-                        <button className={styles.testBtn} onClick={onTest}>Test Connection</button>
+                        <button
+                          className={styles.testBtn}
+                          onClick={onTest}
+                          disabled={test.state === 'testing'}
+                        >
+                          Test Connection
+                        </button>
                       </div>
 
                       {/* Edit form card — design lines 475-513 */}
