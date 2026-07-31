@@ -121,7 +121,6 @@ function App() {
   const [setupOpen, setSetupOpen] = useState(false);
   // Result of the last "Test Connection", shown by BOTH the wizard and Settings.
   const [connTest, setConnTest] = useState<ConnTest>(IDLE);
-  const [selfSigned, setSelfSigned] = useState(false);
   const [accent, setAccent] = useState<string>('#2dd4bf');
   const [themePref, setThemePref] = useState<ThemePref>('dark');
   const [systemDark, setSystemDark] = useState<boolean>(
@@ -777,7 +776,10 @@ function App() {
       setConnTest({ state: 'ok', orgCount: info.orgCount ?? 0, streamCount: info.streamCount ?? 0 });
     } catch (e: any) {
       if (!testLatest.isCurrent(token)) return;
-      setConnTest({ state: 'error', message: parseAppError(e).message });
+      // Keep the hint: for a rejected TLS certificate it is the only actionable
+      // part, and the message alone reads as an unexplained network failure.
+      const failure = parseAppError(e);
+      setConnTest({ state: 'error', message: failure.message, hint: failure.hint });
     }
   };
 
@@ -1218,7 +1220,6 @@ function App() {
             contexts={contexts}
             currentName={currentName}
             test={connTest}
-            selfSigned={selfSigned}
             error={wizardError}
             onUpdateCtx={(name, key, value) => {
               setContexts((cs) =>
@@ -1232,7 +1233,6 @@ function App() {
               }
             }}
             onSelectCtx={(name) => { setCurrentName(name); setWizardError(null); resetConnTest(); }}
-            onToggleSelfSigned={() => setSelfSigned((v) => !v)}
             onTest={(ctx) => handleTestContext(ctx)}
             onClose={() => { setSetupOpen(false); setWizardError(null); }}
             onSave={async (ctx) => {

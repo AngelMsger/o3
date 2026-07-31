@@ -32,4 +32,15 @@ describe('connTestLabel', () => {
     const t: ConnTest = { state: 'error', message: 'no stored credential' };
     expect(connTestLabel(t)).toBe('no stored credential');
   });
+
+  // The hint is longer guidance, rendered on its own line beneath the label
+  // rather than crammed into the one-liner beside the button.
+  it('keeps the hint out of the one-line label', () => {
+    const t: ConnTest = {
+      state: 'error',
+      message: "the server's TLS certificate is not trusted",
+      hint: 'o3 does not support self-signed certificates.',
+    };
+    expect(connTestLabel(t)).toBe("the server's TLS certificate is not trusted");
+  });
 });

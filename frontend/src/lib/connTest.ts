@@ -6,11 +6,15 @@
 // loose `tested: boolean` next to an unrelated error string) gives both the same
 // four states, including the in-flight one that acknowledges the click.
 
+// A failure carries the backend's hint alongside its message. The message says
+// what went wrong; the hint says what to do about it — for a rejected TLS
+// certificate, that hint is the whole point, since nothing in the app can make
+// an untrusted certificate work.
 export type ConnTest =
   | { state: 'idle' }
   | { state: 'testing' }
   | { state: 'ok'; orgCount: number; streamCount: number }
-  | { state: 'error'; message: string };
+  | { state: 'error'; message: string; hint?: string };
 
 export const IDLE: ConnTest = { state: 'idle' };
 

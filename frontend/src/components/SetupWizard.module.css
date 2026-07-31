@@ -342,46 +342,20 @@
   line-height: 1.55;
 }
 
-/* Self-signed toggle row */
-.toggleRow {
+/* Certificate note — replaced the self-signed toggle, which was never wired */
+.certNote {
   display: flex;
-  align-items: center;
-  gap: 11px;
+  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 22px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--tx-12);
 }
 
-.toggleLabel {
-  font-size: 12.5px;
-  color: var(--tx-05);
-}
-
-.toggle {
-  width: 36px;
-  height: 20px;
-  border-radius: 10px;
-  background: var(--sf-track);
-  border: 1px solid rgba(var(--ink),0.12);
-  cursor: pointer;
-  position: relative;
+.certIcon {
   flex: none;
-  padding: 0;
-  transition: background var(--motion-fast) var(--motion-ease);
-}
-
-.toggleOn {
-  background: var(--accent, #2dd4bf);
-  border-color: transparent;
-}
-
-.knob {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--tx-10);
-  transition: transform var(--motion-fast) var(--motion-ease);
+  line-height: 1.45;
 }
 
 /* Test connection row */
@@ -419,6 +393,14 @@
 .testError {
   font-size: 12px;
   color: var(--sy-null);
+  margin-bottom: 10px;
+}
+
+/* What to do about the failure — the backend's hint, on its own line */
+.testHint {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--tx-12);
   margin-bottom: 10px;
 }
 
