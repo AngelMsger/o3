@@ -63,7 +63,8 @@ func (a *App) AppInfo() AppInfo {
 }
 
 // RequestUpdateCheck runs the user-initiated "check for updates" gesture — the
-// macOS Help-menu item and the About tab's button both land here. In native
+// macOS app-menu item (o3 ▸ Check for Updates…, injected by
+// installUpdateMenuItem) and the About tab's button both land here. In native
 // mode the framework takes over (its own dialog, download and install); in
 // custom mode it pokes the frontend, which runs CheckForUpdates and presents
 // the update sheet.

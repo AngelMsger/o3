@@ -55,7 +55,8 @@ func main() {
 			WindowIsTranslucent:  false,
 		},
 		// macOS only (nil elsewhere): the standard app + edit menus, plus a Help
-		// menu carrying "Check for Updates…". See menu_darwin.go.
+		// menu of documentation links. "Check for Updates…" is not here — it is
+		// injected into the app menu after launch. See menu_darwin.go.
 		Menu:             appMenu(app),
 		BackgroundColour: &options.RGBA{R: 5, G: 6, B: 8, A: 1}, // #050608 opaque
 		AssetServer: &assetserver.Options{
