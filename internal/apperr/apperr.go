@@ -37,7 +37,9 @@ func (e AppError) Error() string {
 }
 
 // Wrap converts any error into an AppError. CLIErrors keep their category and
-// hint; plain errors become an "internal" AppError with the error text.
+// hint; plain errors become an "internal" AppError with the error text. A TLS
+// trust failure keeps its category but trades the transport's opaque message for
+// the certificate explanation, which is the only detail the user can act on.
 func Wrap(err error) error {
 	if err == nil {
 		return nil
@@ -47,10 +49,14 @@ func Wrap(err error) error {
 		return ae
 	}
 	ce := cerr.AsCLIError(err)
+	message, hint := ce.Message, ce.Hint
+	if certMsg, certHint, isCert := certFailure(err); isCert {
+		message, hint = certMsg, certHint
+	}
 	return AppError{
 		Category: string(ce.Category),
-		Message:  ce.Message,
-		Hint:     ce.Hint,
+		Message:  message,
+		Hint:     hint,
 	}
 }
 

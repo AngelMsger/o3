@@ -270,6 +270,14 @@ export function SettingsModal({
                               {connTestLabel(test)}
                             </div>
                           )}
+                          {/* Same hint the wizard shows — a rejected certificate
+                              must not read as an unexplained network failure on
+                              one surface and an explained one on the other. */}
+                          {test.state === 'error' && test.hint && (
+                            <div className={styles.statusMeta} style={{ marginTop: 4 }}>
+                              {test.hint}
+                            </div>
+                          )}
                         </div>
                         <button
                           className={styles.testBtn}

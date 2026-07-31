@@ -4,6 +4,7 @@
 import type { ReactElement } from 'react';
 import { authTabToScheme, schemeToAuthTab } from '../lib/signin';
 import { connTestLabel, type ConnTest } from '../lib/connTest';
+import { usesTLS } from '../lib/tls';
 import { BrandMark } from './BrandMark';
 import styles from './SetupWizard.module.css';
 
@@ -26,12 +27,10 @@ interface SetupWizardProps {
   currentName: string;
   // authTab and onAuthTab removed — Fix 3: scheme is now the source of truth
   test: ConnTest;
-  selfSigned: boolean;
   error?: string | null;
   // mutate a single field on the named context
   onUpdateCtx: (name: string, key: string, value: string) => void;
   onSelectCtx: (name: string) => void;
-  onToggleSelfSigned: () => void;
   onTest: (ctx: UICtx) => void;
   onClose: () => void;
   onSave: (ctx: UICtx) => Promise<void>;
@@ -52,11 +51,9 @@ export function SetupWizard({
   contexts,
   currentName,
   test,
-  selfSigned,
   error,
   onUpdateCtx,
   onSelectCtx,
-  onToggleSelfSigned,
   onTest,
   onClose,
   onSave,
@@ -291,23 +288,27 @@ export function SetupWizard({
             </div>
           )}
 
-          {/* Self-signed toggle + Test (not shown for browser sign-in, which
-              connects through the captured session, not typed credentials) */}
+          {/* Certificate note. This replaced a "Trust Self-Signed Certificate"
+              toggle that was wired to nothing: it set React state no backend
+              call ever read, so it promised an exception o3 has never made. The
+              note is outside the !isSession gate on purpose — browser sign-in is
+              if anything stricter, since WKWebView rejects an untrusted
+              certificate on its own. */}
+          {usesTLS(selected?.url ?? '') && (
+            <div className={styles.certNote}>
+              <span className={styles.certIcon}>🔒</span>
+              <span>
+                This server's certificate must be trusted by your system.
+                Self-signed certificates are not supported — add the issuing CA to
+                your system trust store, or serve a publicly trusted certificate.
+              </span>
+            </div>
+          )}
+
+          {/* Test (not shown for browser sign-in, which connects through the
+              captured session, not typed credentials) */}
           {!isSession && (
             <>
-              <div className={styles.toggleRow}>
-                <button
-                  className={`${styles.toggle}${selfSigned ? ` ${styles.toggleOn}` : ''}`}
-                  onClick={onToggleSelfSigned}
-                >
-                  <span
-                    className={styles.knob}
-                    style={selfSigned ? { transform: 'translateX(16px)' } : undefined}
-                  />
-                </button>
-                <span className={styles.toggleLabel}>Trust Self-Signed Certificate</span>
-              </div>
-
               <div className={styles.testRow}>
                 <button
                   className={styles.testBtn}
@@ -322,6 +323,9 @@ export function SetupWizard({
                   </span>
                 )}
               </div>
+              {test.state === 'error' && test.hint && (
+                <div className={styles.testHint}>{test.hint}</div>
+              )}
               {error && <div className={styles.testError}>{error}</div>}
             </>
           )}
