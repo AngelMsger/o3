@@ -187,7 +187,9 @@ export function BrowserSignIn({
               <div className={styles.cliCallout} style={{ borderColor: hexA(accent, 0.2), background: hexA(accent, 0.05) }}>
                 Works from the terminal too — <span className="mono" style={{ color: accent }}>openobserve-cli</span> reuses this same session. Nothing else to set up.
               </div>
-              <button className={styles.btnPrimary} style={{ background: accent }} onClick={onDone}>Start querying</button>
+              <div className={styles.actions}>
+                <button className={styles.btnPrimary} style={{ background: accent }} onClick={onDone}>Start querying</button>
+              </div>
             </div>
           )}
 
