@@ -11,6 +11,15 @@ const result = (rows: LogRow[], total: number): TabResult => ({
 });
 
 describe('tab result retention', () => {
+  // Row ids are positional, so a selection carried across a tab switch opens a
+  // DIFFERENT row of the same index. Selection travels with its tab.
+  it('carries the row selection with its own tab', () => {
+    const withSel: TabResult = { ...EMPTY_RESULT, rows: [row('0')], selectedRow: '0' };
+    const store = rememberResult({}, 't1', withSel);
+    expect(recallResult(store, 't1').selectedRow).toBe('0');
+    expect(recallResult(store, 't2').selectedRow).toBeNull();
+  });
+
   // Switching tabs used to wipe the global result state, because results were
   // not per-tab: leaving a tab and coming back showed an empty table and the
   // query had to be re-run. Results now belong to the tab that produced them.

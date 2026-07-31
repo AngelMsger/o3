@@ -428,6 +428,11 @@ function App() {
   // context the user has since left) can never overwrite fresher results.
   const queryLatest = useRef(createLatest()).current;
 
+  // Test Connection is async and its result is global, so a response for the
+  // context the user has since left could land on the one now selected and
+  // vouch for it. Same guard as the query runner: only the newest test applies.
+  const testLatest = useRef(createLatest()).current;
+
   /* Live-data state — M2 */
   const [liveRows, setLiveRows] = useState<TLogRow[]>([]);
   const [liveFields, setLiveFields] = useState<TField[]>([]);
@@ -631,6 +636,12 @@ function App() {
       setConfigured(true);
       setQueryError(null);
       setLiveRows([]); setLiveBars([]);
+      // Results are only meaningful for the context that produced them. The
+      // active tab's view is cleared just above; drop every OTHER tab's banked
+      // results too, or switching to one would show rows from the old context
+      // under the new context's name.
+      setTabResults({});
+      setSelectedRow(null);
       const s = await ListStreams().catch((e) => {
         if (parseAppError(e).category === 'not_configured') { setConfigured(false); setSetupOpen(true); }
         return [];
@@ -678,7 +689,11 @@ function App() {
 
   // handleSelectContext picks which context the Settings form edits, without
   // switching the active connection.
-  const handleSelectContext = (name: string) => { setEditingName(name); setConnTest(IDLE); };
+  // resetConnTest clears the displayed result AND invalidates any test still in
+  // flight, so a late response cannot repaint what the reset just cleared.
+  const resetConnTest = () => { testLatest.invalidate(); setConnTest(IDLE); };
+
+  const handleSelectContext = (name: string) => { setEditingName(name); resetConnTest(); };
 
   // handleSaveContext persists the named context (upsert + secret) then refreshes.
   const handleSaveContext = async (ctx: UICtx): Promise<void> => {
@@ -748,6 +763,7 @@ function App() {
   // handleTestContext tests the connection for the given context draft.
   const handleTestContext = async (ctx: UICtx): Promise<void> => {
     setWizardError(null);
+    const token = testLatest.begin();
     // 'testing' first: the round trip can take seconds, and with no in-flight
     // state the button looked inert until it finished.
     setConnTest({ state: 'testing' });
@@ -757,8 +773,10 @@ function App() {
       // the keychain and is never read back into the UI. TestConnection falls
       // back to the stored one, so the test still exercises the real credential.
       const info = await TestConnection({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret } as any);
+      if (!testLatest.isCurrent(token)) return; // the user moved on; do not vouch for another config
       setConnTest({ state: 'ok', orgCount: info.orgCount ?? 0, streamCount: info.streamCount ?? 0 });
     } catch (e: any) {
+      if (!testLatest.isCurrent(token)) return;
       setConnTest({ state: 'error', message: parseAppError(e).message });
     }
   };
@@ -801,7 +819,7 @@ function App() {
     // force a re-run.
     const outgoing: TabResult = {
       rows: liveRows, bars: liveBars, meta: liveMeta,
-      error: queryError, page, histoSel,
+      error: queryError, page, histoSel, selectedRow,
     };
     setTabResults((prev) => rememberResult(prev, activeTab, outgoing));
     const incoming = recallResult(tabResults, id);
@@ -812,6 +830,9 @@ function App() {
     setLiveBars(incoming.bars);
     setLiveMeta(incoming.meta);
     setQueryError(incoming.error);
+    // Row ids are positional, so keeping the old selection would open a
+    // DIFFERENT row of the same index in the tab being entered.
+    setSelectedRow(incoming.selectedRow);
     // The invalidated query no longer clears the busy state, so reset it here to
     // avoid a spinner sticking on the freshly selected tab.
     setRunning(false); setLoading(false);
@@ -875,8 +896,11 @@ function App() {
   const closeAllTabs = () => {
     tabSeq.current += 1;
     const id = `t-new-${tabSeq.current}`;
+    const closed = tabs.map((t) => t.id);
     setTabs([{ id, name: 'untitled', mode: 'sql', sql: '', search: '', stream: '' }]);
     selectTab(id);
+    // After selectTab, which banks the outgoing tab — one of the closed ones.
+    forgetTabs(closed);
   };
   const onTabMenuPick = (action: TabMenuAction) => {
     if (!tabMenu) return;
@@ -1160,7 +1184,7 @@ function App() {
             test={connTest}
             onUse={(name) => handleSwitchContext(name)}
             onRemove={(name) => handleRemoveContext(name)}
-            onField={(key, value) => { setContexts((cs) => cs.map((c) => (c.name === editSel ? { ...c, [key]: value } : c))); if (key === 'name') setEditingName(value); setConnTest(IDLE); }}
+            onField={(key, value) => { setContexts((cs) => cs.map((c) => (c.name === editSel ? { ...c, [key]: value } : c))); if (key === 'name') setEditingName(value); resetConnTest(); }}
             onTest={() => { const a = contexts.find((c) => c.name === editSel); if (a) handleTestContext(a); }}
             onSave={() => { const a = contexts.find((c) => c.name === editSel); if (a) handleSaveContext(a); }}
             onBrowserSignIn={() => { const a = contexts.find((c) => c.name === editSel); if (a) startBrowserSignIn(a); }}
@@ -1200,13 +1224,14 @@ function App() {
               setContexts((cs) =>
                 cs.map((c) => (c.name === name ? { ...c, [key]: value } : c))
               );
+              resetConnTest(); // a result must not vouch for an edited config
               // Fix 2: when renaming the currently-selected context, keep
               // currentName in sync so `selected` keeps tracking the right entry.
               if (key === 'name' && name === currentName) {
                 setCurrentName(value);
               }
             }}
-            onSelectCtx={(name) => { setCurrentName(name); setWizardError(null); setConnTest(IDLE); }}
+            onSelectCtx={(name) => { setCurrentName(name); setWizardError(null); resetConnTest(); }}
             onToggleSelfSigned={() => setSelfSigned((v) => !v)}
             onTest={(ctx) => handleTestContext(ctx)}
             onClose={() => { setSetupOpen(false); setWizardError(null); }}
