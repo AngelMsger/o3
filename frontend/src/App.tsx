@@ -42,6 +42,7 @@ import { relativeRange, rangeToMicros, rangeLabel, parseAbsolute, type TimeRange
 import { createLatest } from './lib/latest';
 import { draftName, preserveDrafts, seedIfEmpty } from './lib/contexts';
 import { IDLE, type ConnTest } from './lib/connTest';
+import { forgetResult, recallResult, rememberResult, type TabResult, type TabResults } from './lib/tabResults';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
@@ -139,6 +140,8 @@ function App() {
     { id: 't1', name: 'untitled', mode: 'sql', sql: '', search: '', stream: '' },
   ]);
   const [activeTab, setActiveTab] = useState<string>('t1');
+  // Query results banked per tab, so switching away and back does not lose them.
+  const [tabResults, setTabResults] = useState<TabResults>({});
   const tabSeq = useRef(0);
   const [tabMenu, setTabMenu] = useState<{ id: string; x: number; y: number; open: boolean } | null>(null);
   const tabMenuT = useDelayedUnmount(!!tabMenu?.open, 140);
@@ -790,17 +793,34 @@ function App() {
   const handlePickAccent = (c: string) => setAccent(c);
 
   const selectTab = (id: string) => {
+    if (id === activeTab) return;
     queryLatest.invalidate(); // drop any in-flight query for the tab we are leaving
+    // Results belong to the tab that produced them: bank the outgoing tab's view
+    // and restore the incoming tab's, instead of throwing both away. Clearing
+    // unconditionally is what made a tab switch silently discard results and
+    // force a re-run.
+    const outgoing: TabResult = {
+      rows: liveRows, bars: liveBars, meta: liveMeta,
+      error: queryError, page, histoSel,
+    };
+    setTabResults((prev) => rememberResult(prev, activeTab, outgoing));
+    const incoming = recallResult(tabResults, id);
     setActiveTab(id);
-    setPage(1);
-    setHistoSel(null);
-    setLiveRows([]);
-    setLiveBars([]);
-    setLiveMeta({ total: 0, tookMs: 0, shown: 0 });
-    setQueryError(null);
+    setPage(incoming.page);
+    setHistoSel(incoming.histoSel);
+    setLiveRows(incoming.rows);
+    setLiveBars(incoming.bars);
+    setLiveMeta(incoming.meta);
+    setQueryError(incoming.error);
     // The invalidated query no longer clears the busy state, so reset it here to
-    // avoid a spinner sticking on the freshly selected (empty) tab.
+    // avoid a spinner sticking on the freshly selected tab.
     setRunning(false); setLoading(false);
+  };
+
+  // forgetTabs drops the banked results of closed tabs so a recycled id cannot
+  // inherit them and the store cannot grow without bound.
+  const forgetTabs = (ids: string[]) => {
+    setTabResults((prev) => ids.reduce(forgetResult, prev));
   };
 
   const handleNewTab = () => {
@@ -823,6 +843,8 @@ function App() {
       const neighbor = next[Math.min(idx, next.length - 1)];
       selectTab(neighbor.id);
     }
+    // After selectTab: it banks the OUTGOING tab, which is the one being closed.
+    forgetTabs([id]);
   };
 
   // Bulk tab close actions for the right-click menu. Each keeps >=1 tab and
@@ -833,6 +855,7 @@ function App() {
     const next = tabs.slice(idx);
     setTabs(next);
     if (!next.some((t) => t.id === activeTab)) selectTab(id);
+    forgetTabs(tabs.slice(0, idx).map((t) => t.id));
   };
   const closeTabsRight = (id: string) => {
     const idx = tabs.findIndex((t) => t.id === id);
@@ -840,12 +863,14 @@ function App() {
     const next = tabs.slice(0, idx + 1);
     setTabs(next);
     if (!next.some((t) => t.id === activeTab)) selectTab(id);
+    forgetTabs(tabs.slice(idx + 1).map((t) => t.id));
   };
   const closeOtherTabs = (id: string) => {
     const keep = tabs.find((t) => t.id === id);
     if (!keep || tabs.length <= 1) return;
     setTabs([keep]);
     if (activeTab !== id) selectTab(id);
+    forgetTabs(tabs.filter((t) => t.id !== id).map((t) => t.id));
   };
   const closeAllTabs = () => {
     tabSeq.current += 1;
