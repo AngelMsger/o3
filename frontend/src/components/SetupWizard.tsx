@@ -154,6 +154,20 @@ export function SetupWizard({
             Name this context and point it at your instance. Switch between contexts any time from the title bar. Self-hosted OSS uses basic auth — no hosted OAuth.
           </div>
 
+          {/* Every field below is bound to `selected` and guarded on it, so with
+              no context the form would render but silently swallow typing. App
+              seeds a draft so this cannot happen; show a way out if it ever does
+              rather than a dead form. */}
+          {!selected && (
+            <div className={styles.browserPane}>
+              <div className={styles.browserDesc}>No context to edit yet.</div>
+              <button className={styles.browserBtn} onClick={onAddContext}>
+                + New context
+              </button>
+            </div>
+          )}
+
+          {selected && (<>
           {/* Context name — design line 667 */}
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Context name</div>
@@ -308,6 +322,7 @@ export function SetupWizard({
               {error && <div className={styles.testError}>{error}</div>}
             </>
           )}
+          </>)}
 
           {/* Action buttons — browser sign-in connects via the sign-in window,
               so it only offers Skip; typed methods keep Connect & Continue. */}
