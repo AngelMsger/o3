@@ -40,7 +40,7 @@ import type { LogRow as TLogRow, Field as TField, HistoBucket } from './types';
 import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import { relativeRange, rangeToMicros, rangeLabel, parseAbsolute, type TimeRange } from './lib/timeRange';
 import { createLatest } from './lib/latest';
-import { preserveDrafts } from './lib/contexts';
+import { draftName, preserveDrafts, seedIfEmpty } from './lib/contexts';
 import {
   ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
@@ -100,6 +100,16 @@ const toUICtx = (infos: { name: string; url: string; org: string; scheme: string
     password: '', token: '', draft: false,
     origName: c.name, // I1: track the persisted name so backend can detect renames
   }));
+
+// makeDraft builds a frontend-only context, held in state until SaveContext
+// persists it. index only picks its palette colour.
+const makeDraft = (name: string, index: number): UICtx => ({
+  name, url: '', org: 'default', scheme: 'session', username: '',
+  hasSecret: false, isCurrent: false,
+  color: CTX_PALETTE[index % CTX_PALETTE.length],
+  password: '', token: '', draft: true,
+  origName: '', // I1: never persisted yet, so no old entry to remove
+});
 
 function App() {
   const editorRef = useRef<SqlEditorHandle>(null);
@@ -440,10 +450,20 @@ function App() {
   /* Startup: load contexts; open wizard only when none usable (no current with secret) */
   useEffect(() => {
     const seedTabId = activeTab; // capture the tab active when the load begins (always 't1' here)
+    // A first launch has no config file, so ListContexts returns NOTHING. The
+    // wizard edits the selected context and guards every onChange on it, so with
+    // an empty list its fields silently swallowed each keystroke and its buttons
+    // were all disabled — the app could not be set up at all. Seed one editable
+    // draft before opening it. Idempotent, so a repeated effect adds no second.
+    const seedFirstRun = () => {
+      setContexts((cs) => seedIfEmpty(cs, (n) => makeDraft(n, 0)));
+      setCurrentName((n) => n || 'default');
+    };
     refreshContexts()
       .then((ui) => {
         const cur = ui.find((c) => c.isCurrent) ?? ui[0];
         if (!cur || !cur.hasSecret) {
+          if (ui.length === 0) seedFirstRun();
           setConfigured(false);
           setSetupOpen(true);
           return;
@@ -468,7 +488,7 @@ function App() {
             if (parseAppError(e).category === 'not_configured') { setConfigured(false); setSetupOpen(true); }
           });
       })
-      .catch(() => { setConfigured(false); setSetupOpen(true); });
+      .catch(() => { seedFirstRun(); setConfigured(false); setSetupOpen(true); });
   }, []);
 
   /* Keep the browser-session status (email/expiry) synced with the context the
@@ -644,21 +664,11 @@ function App() {
   // SELECTS the draft for editing and must NOT switch the live connection onto an
   // unconfigured context. Dedupe the draft name so repeat clicks never collide.
   const handleAddContext = (activate: boolean = true) => {
-    const color = CTX_PALETTE[contexts.length % CTX_PALETTE.length];
-    let draftName = 'new-context';
-    let seq = 2;
-    while (contexts.some((c) => c.name === draftName)) {
-      draftName = `new-context-${seq}`;
-      seq += 1;
-    }
-    const draft: UICtx = {
-      name: draftName, url: '', org: 'default', scheme: 'session', username: '',
-      hasSecret: false, isCurrent: false, color, password: '', token: '', draft: true,
-      origName: '', // I1: never persisted yet, so no old entry to remove
-    };
+    const name = draftName(contexts, 'new-context');
+    const draft = makeDraft(name, contexts.length);
     setContexts((cs) => [...cs, draft]);
-    if (activate) setCurrentName(draftName);
-    else setEditingName(draftName);
+    if (activate) setCurrentName(name);
+    else setEditingName(name);
   };
 
   // handleSelectContext picks which context the Settings form edits, without

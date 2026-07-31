@@ -119,17 +119,18 @@ func webauthProbe(cjson *C.char) C.int {
 	}
 
 	// The authenticated API probe is the sole success signal: it confirms the
-	// captured cookies actually authenticate, so a benign cookie on the login
-	// page or an in-progress external SSO redirect can never be mistaken for a
-	// completed login. Only probe when there are host-scoped cookies to replay,
-	// and skip while a probe is in flight or the captured state is unchanged
-	// (so a static page is not re-probed every timer tick). The probe runs off
-	// the main thread; on success the goroutine closes the window itself.
-	scoped := FilterForHost(cookies, host)
-	if len(scoped) == 0 {
+	// capture actually authenticates, so a benign cookie on the login page or an
+	// in-progress external SSO redirect can never be mistaken for a completed
+	// login. Only probe once there is something to replay — host-scoped cookies
+	// OR the Authorization header the SPA sends, since a native-login instance
+	// sets no cookies at all — and skip while a probe is in flight or the
+	// captured state is unchanged (so a static page is not re-probed every timer
+	// tick). The probe runs off the main thread; on success the goroutine closes
+	// the window itself.
+	if !Replayable(sess) {
 		return 0
 	}
-	sig := SerializeCookies(scoped) + "\n" + authz
+	sig := sess.Cookies + "\n" + sess.Authorization
 	if busy || sig == verifySig {
 		return 0
 	}

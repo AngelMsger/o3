@@ -37,7 +37,7 @@ env:
   # Pin the shared client to an immutable tag so a given o3 release is
   # reproducible — 'main' would let a later rebuild compile different dependency
   # code. Bump this in lockstep when a release needs a newer openobserve-cli.
-  OACLI_REF: v0.6.0
+  OACLI_REF: v0.8.1
   WAILS_VERSION: v2.12.0
   GO_VERSION: "1.24"
   NODE_VERSION: "20"
