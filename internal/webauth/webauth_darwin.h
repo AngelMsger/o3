@@ -2,10 +2,13 @@
 #define O3_WEBAUTH_DARWIN_H
 
 // o3StartWebAuth builds the native login window on the main thread and loads
-// loginURL. Implemented in webauth_darwin.m; declared here so the cgo Go file
-// can call it without pulling the Objective-C implementation into the preamble
+// loginURL, injecting probeJS into every page as a document-end user script.
+// probeJS is owned by Go (it comes from the shared capture core in
+// openobserve-cli/pkg/webauth) so o3 and the CLI inject exactly the same
+// script. Implemented in webauth_darwin.m; declared here so the cgo Go file can
+// call it without pulling the Objective-C implementation into the preamble
 // (which would compile it twice and duplicate its symbols).
-void o3StartWebAuth(const char *loginURL);
+void o3StartWebAuth(const char *loginURL, const char *probeJS);
 
 // o3FinishWebAuth closes the active login window from Go once an asynchronous
 // authenticated probe has confirmed the captured session. Safe to call from any

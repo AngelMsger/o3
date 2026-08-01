@@ -2,6 +2,8 @@ package webauth
 
 import (
 	"testing"
+
+	shared "github.com/angelmsger/openobserve-cli/pkg/webauth"
 )
 
 func TestParseProbe(t *testing.T) {
@@ -32,21 +34,6 @@ func TestParseProbe(t *testing.T) {
 	}
 }
 
-func TestAssembleSession(t *testing.T) {
-	cookies := []Cookie{
-		{Name: "b", Value: "2", Domain: "observe.example.com"},
-		{Name: "a", Value: "1", Domain: "observe.example.com"},
-		{Name: "drop", Value: "z", Domain: "evil.com"},
-	}
-	sess := AssembleSession(cookies, "observe.example.com", "Bearer tok", "ops@example.com")
-	if sess.Cookies != "a=1; b=2" {
-		t.Fatalf("Cookies = %q, want %q (host-scoped, stable order)", sess.Cookies, "a=1; b=2")
-	}
-	if sess.Authorization != "Bearer tok" || sess.Email != "ops@example.com" {
-		t.Fatalf("metadata wrong: %+v", sess)
-	}
-}
-
 // TestProbeFromNativeLoginInstance walks the exact payload the native window
 // hands over after a successful login on an instance that authenticates its own
 // SPA with an Authorization header and sets no cookies — the shape that used to
@@ -62,37 +49,11 @@ func TestProbeFromNativeLoginInstance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parseProbe: %v", err)
 	}
-	sess := AssembleSession(cookies, "observe.example.com", authz, email)
+	sess := shared.AssembleSession(cookies, "observe.example.com", authz, email)
 	if sess.Cookies != "" {
 		t.Fatalf("Cookies = %q, want empty", sess.Cookies)
 	}
-	if !Replayable(sess) {
+	if !shared.Replayable(sess) {
 		t.Fatal("a completed header-only login was not considered replayable, so capture never verified it")
-	}
-}
-
-// TestReplayable pins the gate that decides when a probed state is worth
-// verifying. The header-only case is the one that matters: an OpenObserve
-// instance using native (email + password) login authenticates its own SPA with
-// an Authorization header and sets NO cookies at all, so gating on cookies alone
-// meant capture never verified — the login window sat on the web UI forever.
-func TestReplayable(t *testing.T) {
-	cases := []struct {
-		name    string
-		cookies []Cookie
-		authz   string
-		want    bool
-	}{
-		{"nothing captured yet", nil, "", false},
-		{"cookies only (SSO / Dex instances)", []Cookie{{Name: "auth_ext", Value: "abc"}}, "", true},
-		{"authorization only (native-login instances)", nil, "Basic dXNlcjpwYXNz", true},
-		{"both", []Cookie{{Name: "auth_ext", Value: "abc"}}, "Basic dXNlcjpwYXNz", true},
-		{"blank authorization is not a capture", nil, "   ", false},
-	}
-	for _, c := range cases {
-		sess := AssembleSession(c.cookies, "observe.example.com", c.authz, "")
-		if got := Replayable(sess); got != c.want {
-			t.Errorf("%s: Replayable = %v, want %v", c.name, got, c.want)
-		}
 	}
 }

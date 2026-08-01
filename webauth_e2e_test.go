@@ -8,9 +8,9 @@ import (
 
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
 	cfgshared "github.com/angelmsger/openobserve-cli/pkg/config"
+	webauth "github.com/angelmsger/openobserve-cli/pkg/webauth"
 
 	"github.com/angelmsger/o3/internal/config"
-	"github.com/angelmsger/o3/internal/webauth"
 )
 
 // mockInstance is an httptest server standing in for OpenObserve: the login page
@@ -76,7 +76,8 @@ func TestSessionVerifierHeaderOnly(t *testing.T) {
 		t.Fatal("a header-only capture was not considered worth verifying")
 	}
 
-	verify := sessionVerifier(t.Context(), srv.URL, "default", cfgshared.Defaults{})
+	def := cfgshared.Defaults{}
+	verify := webauth.PingVerifier(srv.URL, "default", def.Timeout, def.MaxRetries)
 	if !verify(sess) {
 		t.Fatal("verifier rejected a header-only session that authenticates")
 	}
@@ -165,7 +166,8 @@ func TestSessionVerifier(t *testing.T) {
 	defer srv.Close()
 	host, cookieDomain := hostPort(t, srv.URL)
 
-	verify := sessionVerifier(t.Context(), srv.URL, "default", cfgshared.Defaults{})
+	def := cfgshared.Defaults{}
+	verify := webauth.PingVerifier(srv.URL, "default", def.Timeout, def.MaxRetries)
 
 	good := webauth.AssembleSession(
 		[]webauth.Cookie{{Name: "auth_ext", Value: "SESSION123", Domain: cookieDomain, Path: "/"}}, host, "", "ops@x")
