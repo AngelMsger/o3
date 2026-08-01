@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -11,6 +13,7 @@ import (
 	api "github.com/angelmsger/openobserve-cli/pkg/apiclient"
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
 	cfgshared "github.com/angelmsger/openobserve-cli/pkg/config"
+	shared "github.com/angelmsger/openobserve-cli/pkg/webauth"
 
 	"github.com/angelmsger/o3/internal/apperr"
 	"github.com/angelmsger/o3/internal/branding"
@@ -569,43 +572,36 @@ func rfc3339OrEmpty(t time.Time) string {
 	return t.UTC().Format(time.RFC3339)
 }
 
-// sessionVerifier returns a webauth.VerifyFunc that confirms a captured session
-// by making a real authenticated request (Ping) to the instance. Only a session
-// whose cookies (or Authorization fallback) actually authenticate counts as a
-// completed login, so an in-progress SSO redirect or a benign login-page cookie
-// can never be mistaken for success. This is the signal that stops capture.
-func sessionVerifier(ctx context.Context, base, org string, def cfgshared.Defaults) webauth.VerifyFunc {
-	return func(sess pkgauth.Session) bool {
-		blob, err := pkgauth.EncodeSession(sess)
-		if err != nil {
-			return false
-		}
-		client, err := buildClient(base, org, pkgauth.SchemeSession, sess.Email, blob, def)
-		if err != nil {
-			return false
-		}
-		reqCtx := ctx
-		if reqCtx == nil {
-			reqCtx = context.Background()
-		}
-		cctx, cancel := context.WithTimeout(reqCtx, 20*time.Second)
-		defer cancel()
-		_, err = client.Ping(cctx)
-		return err == nil
+// browserProfileDir is o3's own persistent browser sign-in profile, used by the
+// DevTools-Protocol driver off macOS. It must NOT be the CLI's: two browser
+// processes pointed at one --user-data-dir refuse to start, so sharing it would
+// make a CLI login and an o3 login collide. Ignored on darwin, where the native
+// WebView keeps its own (deliberately non-persistent) data store.
+func browserProfileDir() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
 	}
+	return filepath.Join(home, ".angelmsger", "o3", "browser-profile")
 }
 
-// BrowserSignIn opens the native login window for the instance URL, captures the
+// BrowserSignIn opens the platform's sign-in browser for the instance URL — the
+// native window on macOS, a Chromium-family browser elsewhere — captures the
 // authenticated session, and returns it for the frontend consent step. It does
 // NOT persist anything; the frontend calls SaveContext once the user authorizes.
+//
+// The verifier is the shared one: a capture counts as a completed login only
+// once a real authenticated request (Ping) succeeds with it, so an in-progress
+// SSO redirect or a benign login-page cookie can never be mistaken for success.
 func (a *App) BrowserSignIn(rawURL, org string) (SessionResult, error) {
 	base, err := normalizeURL(rawURL)
 	if err != nil {
 		return SessionResult{}, apperr.Wrap(err)
 	}
 	host := hostOf(base)
-	verify := sessionVerifier(a.ctx, base, orgOrDefault(org), a.fileDefaults())
-	sess, err := webauth.Capture(base+"/web/login", host, verify)
+	d := a.fileDefaults()
+	verify := shared.PingVerifier(base, orgOrDefault(org), d.Timeout, d.MaxRetries)
+	sess, err := webauth.Driver(browserProfileDir()).Capture(base+"/web/login", host, verify)
 	if err != nil {
 		return SessionResult{}, apperr.Wrap(err)
 	}

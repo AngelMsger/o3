@@ -1,20 +1,19 @@
+// Package webauth is o3's browser sign-in transport layer. The decision logic
+// — cookie shaping, the login-success heuristic, the injected capture script
+// and the policy deciding when a captured state counts as a completed login —
+// lives in openobserve-cli's pkg/webauth, shared with the CLI so the two cannot
+// drift. What remains here is transport: the native WKWebView window on macOS
+// (webauth_darwin.go/.m) plus the decoder for the JSON payload that window
+// hands to Go. Off macOS the shared DevTools-Protocol driver takes over, so
+// browser sign-in is no longer macOS-only.
 package webauth
 
 import (
 	"encoding/json"
-	"strings"
 	"time"
 
-	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
+	shared "github.com/angelmsger/openobserve-cli/pkg/webauth"
 )
-
-// VerifyFunc confirms that a captured session actually authenticates against the
-// instance's API. When a verifier is supplied, Capture reports success only once
-// it returns true, so a login that merely set a benign preference/language cookie
-// — or an in-progress SSO redirect that briefly leaves the login path — is never
-// mistaken for a completed sign-in. A nil verifier disables the probe and falls
-// back to the pure cookie/URL heuristic (used off-darwin and in unit tests).
-type VerifyFunc func(pkgauth.Session) bool
 
 // nativeProbe is the JSON payload the native window hands to Go on each capture
 // probe: the current WebView URL plus the cookies and any Authorization/email
@@ -39,47 +38,21 @@ type nativeCookie struct {
 
 // parseProbe decodes a native probe payload into cookies plus the observed URL,
 // Authorization header, and email.
-func parseProbe(data []byte) (cookies []Cookie, currentURL, authorization, email string, err error) {
+func parseProbe(data []byte) (cookies []shared.Cookie, currentURL, authorization, email string, err error) {
 	var p nativeProbe
 	if err = json.Unmarshal(data, &p); err != nil {
 		return nil, "", "", "", err
 	}
-	cookies = make([]Cookie, 0, len(p.Cookies))
+	cookies = make([]shared.Cookie, 0, len(p.Cookies))
 	for _, c := range p.Cookies {
 		var exp time.Time
 		if c.Expires > 0 {
 			exp = time.Unix(int64(c.Expires), 0).UTC()
 		}
-		cookies = append(cookies, Cookie{
+		cookies = append(cookies, shared.Cookie{
 			Name: c.Name, Value: c.Value, Domain: c.Domain, Path: c.Path,
 			Expires: exp, Secure: c.Secure, HTTPOnly: c.HTTPOnly,
 		})
 	}
 	return cookies, p.URL, p.Authorization, p.Email, nil
-}
-
-// Replayable reports whether a captured state carries anything o3 could replay,
-// and so is worth handing to the verifier.
-//
-// Cookies are the usual authenticator, but they are NOT universal: an instance
-// using native (email + password) login authenticates its own SPA with an
-// Authorization header the browser builds locally and sets no cookies at all.
-// Gating capture on cookies alone therefore never verified such a login — the
-// window stayed open on the instance's home page after the user had signed in.
-func Replayable(s pkgauth.Session) bool {
-	return strings.TrimSpace(s.Cookies) != "" || strings.TrimSpace(s.Authorization) != ""
-}
-
-// AssembleSession builds the storable/replayable session from captured cookies.
-// Only cookies scoped to host are kept; the Cookie header is serialized stably,
-// and the soonest cookie expiry (if any) drives the connection UI. Authorization
-// and email ride along as the header fallback and display metadata.
-func AssembleSession(cookies []Cookie, host, authorization, email string) pkgauth.Session {
-	scoped := FilterForHost(cookies, host)
-	return pkgauth.Session{
-		Cookies:       SerializeCookies(scoped),
-		Authorization: authorization,
-		Email:         email,
-		ExpiresAt:     EarliestExpiry(scoped),
-	}
 }

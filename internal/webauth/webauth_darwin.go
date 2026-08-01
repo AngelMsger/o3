@@ -18,7 +18,24 @@ import (
 	"unsafe"
 
 	pkgauth "github.com/angelmsger/openobserve-cli/pkg/auth"
+	shared "github.com/angelmsger/openobserve-cli/pkg/webauth"
 )
+
+// bindingName is the global function the injected script calls with its JSON
+// payload. It is scoped with an unlikely prefix so it cannot collide with
+// anything in the sign-in page.
+const bindingName = "__o3Probe"
+
+// probeScript is what gets injected into the sign-in page: the shared capture
+// script, prefixed with a shim binding its delivery function to o3's WebKit
+// message handler. The shared script hands the delivery function a JSON STRING
+// (the DevTools binding the CLI uses accepts only one string argument), while
+// the Objective-C handler expects an object, so the shim parses it.
+func probeScript() string {
+	shim := "window." + bindingName +
+		"=function(s){try{window.webkit.messageHandlers.o3.postMessage(JSON.parse(s));}catch(e){}};"
+	return shim + shared.ProbeJS(bindingName)
+}
 
 type captureResult struct {
 	session pkgauth.Session
@@ -27,14 +44,12 @@ type captureResult struct {
 
 // Capture state. captureCh is the channel the CURRENT capture is waiting on;
 // each new Capture supersedes any previous one (unblocking it) so a missed
-// window-close can never permanently wedge the flow.
+// window-close can never permanently wedge the flow. captureTracker owns the
+// success policy (assemble -> replayable -> verify-once) shared with the CLI.
 var (
-	captureMu     sync.Mutex
-	captureHost   string
-	captureCh     chan captureResult
-	captureVerify VerifyFunc
-	verifyBusy    bool   // an API probe is in flight
-	verifySig     string // cookie+authz signature of the last probed state
+	captureMu      sync.Mutex
+	captureCh      chan captureResult
+	captureTracker *shared.Tracker
 )
 
 // deliver sends a result to ch only if it is still the active channel, exactly
@@ -57,7 +72,7 @@ func deliver(ch chan captureResult, res captureResult) {
 // host scopes which cookies are kept. Safe to call from any goroutine; the
 // AppKit work is marshalled onto the main thread. Reopening supersedes any
 // prior window rather than failing.
-func Capture(loginURL, host string, verify VerifyFunc) (pkgauth.Session, error) {
+func Capture(loginURL, host string, verify shared.VerifyFunc) (pkgauth.Session, error) {
 	ch := make(chan captureResult, 1)
 	captureMu.Lock()
 	if prev := captureCh; prev != nil {
@@ -69,16 +84,15 @@ func Capture(loginURL, host string, verify VerifyFunc) (pkgauth.Session, error) 
 		}
 	}
 	captureCh = ch
-	captureHost = host
-	captureVerify = verify
-	verifyBusy = false
-	verifySig = ""
+	captureTracker = shared.NewTracker(host, verify)
 	captureMu.Unlock()
 
 	log.Printf("[webauth] Capture start host=%s url=%s", host, loginURL)
 	cURL := C.CString(loginURL)
-	C.o3StartWebAuth(cURL)
+	cJS := C.CString(probeScript())
+	C.o3StartWebAuth(cURL, cJS)
 	C.free(unsafe.Pointer(cURL))
+	C.free(unsafe.Pointer(cJS))
 
 	var res captureResult
 	select {
@@ -95,57 +109,30 @@ func Capture(loginURL, host string, verify VerifyFunc) (pkgauth.Session, error) 
 func webauthProbe(cjson *C.char) C.int {
 	data := []byte(C.GoString(cjson))
 	captureMu.Lock()
-	host, ch, verify, busy := captureHost, captureCh, captureVerify, verifyBusy
+	ch, tracker := captureCh, captureTracker
 	captureMu.Unlock()
-	if ch == nil {
+	if ch == nil || tracker == nil {
 		return 0
 	}
 	cookies, currentURL, authz, email, err := parseProbe(data)
 	if err != nil {
 		return 0
 	}
-	sess := AssembleSession(cookies, host, authz, email)
-
-	// No verifier (should not happen in the app, but keeps tests and any future
-	// caller working): fall back to the pure cookie/URL heuristic and close the
-	// window synchronously by returning 1.
-	if verify == nil {
-		if !LoginSucceeded(currentURL, host, cookies) {
-			return 0
-		}
-		log.Printf("[webauth] probe success (heuristic) email=%q url=%s", email, currentURL)
-		deliver(ch, captureResult{session: sess})
-		return 1
-	}
-
-	// The authenticated API probe is the sole success signal: it confirms the
-	// capture actually authenticates, so a benign cookie on the login page or an
-	// in-progress external SSO redirect can never be mistaken for a completed
-	// login. Only probe once there is something to replay — host-scoped cookies
-	// OR the Authorization header the SPA sends, since a native-login instance
-	// sets no cookies at all — and skip while a probe is in flight or the
-	// captured state is unchanged (so a static page is not re-probed every timer
-	// tick). The probe runs off the main thread; on success the goroutine closes
-	// the window itself.
-	if !Replayable(sess) {
-		return 0
-	}
-	sig := sess.Cookies + "\n" + sess.Authorization
-	if busy || sig == verifySig {
-		return 0
-	}
-	captureMu.Lock()
-	verifyBusy = true
-	verifySig = sig
-	captureMu.Unlock()
+	// The shared Tracker owns the success policy: assemble, require something
+	// replayable, and confirm with an authenticated API probe at most once per
+	// distinct state. That probe makes a network request and this callback runs
+	// on the AppKit main thread, so it MUST stay on a goroutine; on success the
+	// goroutine closes the window itself rather than returning 1.
 	go func() {
-		ok := verify(sess)
+		sess, ok := tracker.Observe(cookies, currentURL, authz, email)
+		if !ok {
+			return
+		}
 		captureMu.Lock()
-		verifyBusy = false
 		active := captureCh == ch
 		captureMu.Unlock()
-		if ok && active {
-			log.Printf("[webauth] probe success (verified) email=%q url=%s", email, currentURL)
+		if active {
+			log.Printf("[webauth] probe success email=%q url=%s", email, currentURL)
 			deliver(ch, captureResult{session: sess})
 			C.o3FinishWebAuth()
 		}
