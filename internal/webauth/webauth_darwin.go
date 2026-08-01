@@ -31,10 +31,15 @@ const bindingName = "__o3Probe"
 // message handler. The shared script hands the delivery function a JSON STRING
 // (the DevTools binding the CLI uses accepts only one string argument), while
 // the Objective-C handler expects an object, so the shim parses it.
-func probeScript() string {
+//
+// host scopes the capture to the OpenObserve instance. WKUserScript runs in
+// every frame and every document, so without it a full-page or iframed identity
+// provider that sends its own Authorization header would have that header
+// captured and stored as the user's OpenObserve credential.
+func probeScript(host string) string {
 	shim := "window." + bindingName +
 		"=function(s){try{window.webkit.messageHandlers.o3.postMessage(JSON.parse(s));}catch(e){}};"
-	return shim + shared.ProbeJS(bindingName)
+	return shim + shared.ProbeJS(bindingName, host)
 }
 
 type captureResult struct {
@@ -89,7 +94,7 @@ func Capture(loginURL, host string, verify shared.VerifyFunc) (pkgauth.Session, 
 
 	log.Printf("[webauth] Capture start host=%s url=%s", host, loginURL)
 	cURL := C.CString(loginURL)
-	cJS := C.CString(probeScript())
+	cJS := C.CString(probeScript(host))
 	C.o3StartWebAuth(cURL, cJS)
 	C.free(unsafe.Pointer(cURL))
 	C.free(unsafe.Pointer(cJS))
