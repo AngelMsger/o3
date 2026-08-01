@@ -86,6 +86,10 @@ export function SetDockTheme(arg1) {
   return window['go']['main']['App']['SetDockTheme'](arg1);
 }
 
+export function SetLastStream(arg1, arg2) {
+  return window['go']['main']['App']['SetLastStream'](arg1, arg2);
+}
+
 export function SignOut(arg1) {
   return window['go']['main']['App']['SignOut'](arg1);
 }

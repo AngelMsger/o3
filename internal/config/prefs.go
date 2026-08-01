@@ -28,6 +28,14 @@ type Prefs struct {
 	// LastUpdateCheck is when the background check last succeeded (RFC3339); ""
 	// means never. Empty is meaningful, so applyDefaults must not touch it.
 	LastUpdateCheck string `json:"lastUpdateCheck"`
+
+	// LastStreams remembers the stream the user last selected, keyed by context
+	// name, so a restart reopens where they left off. It is keyed per context
+	// because each connection has its own stream list: one global name would be
+	// restored into a context that has no such stream. A missing key means
+	// "nothing remembered" and the caller falls back to the first stream, so
+	// applyDefaults has nothing to backfill.
+	LastStreams map[string]string `json:"lastStreams,omitempty"`
 }
 
 // prefsFileName is the file name for the persisted prefs, relative to o3's

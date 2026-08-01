@@ -49,7 +49,9 @@ import {
   EcosystemStatus, InstallCLI, UpgradeCLI, UninstallCLI, InstallSkill, UninstallSkill,
   BrowserSignIn as BrowserSignInCall, SessionStatus, SignOut,
   AppInfo, CheckForUpdates, PendingUpdate, RequestUpdateCheck, SkipUpdateVersion, SetAutoUpdateCheck,
+  SetLastStream,
 } from '../wailsjs/go/main/App';
+import { pickStream } from './lib/streams';
 
 // parseAppError unpacks the structured error string Wails delivers (apperr emits
 // JSON), falling back to a plain message for non-structured rejections.
@@ -253,9 +255,41 @@ function App() {
   // out of the way entirely.
   const nativeUpd = nativeUpdates(appInfo);
 
+  /* Remembered stream selection, context name -> stream. Mirrors prefs.lastStreams
+     so a pick made this session is visible to the next seed without re-reading the
+     file, and so the write and the read cannot disagree. */
+  const lastStreams = useRef<Record<string, string>>({});
+
+  // loadPrefs memoizes the one GetPrefs call. The theme effect and every
+  // stream-seeding path need the answer and all race on mount, so they share a
+  // single promise rather than each firing their own read.
+  const prefsOnce = useRef<Promise<config.Prefs> | null>(null);
+  const loadPrefs = () => (prefsOnce.current ??= GetPrefs().then((p) => {
+    lastStreams.current = p.lastStreams ?? {};
+    return p;
+  }));
+
+  // rememberedStream is the stream to reopen for a context, or undefined when
+  // none is remembered. It awaits the initial prefs read so a seed racing mount
+  // still sees the persisted choice instead of falling back to the first stream.
+  const rememberedStream = async (ctxName: string): Promise<string | undefined> => {
+    await loadPrefs().catch(() => {});
+    return lastStreams.current[ctxName];
+  };
+
+  // rememberStream records the user's pick for the active context. Best-effort:
+  // failing to persist must never break the selection the user just made.
+  // Unconfigured, the picker lists mock streams — those are not a real choice and
+  // must not be written against a context whose streams have never been loaded.
+  const rememberStream = (name: string) => {
+    if (!configured || !currentName || !name) return;
+    lastStreams.current = { ...lastStreams.current, [currentName]: name };
+    SetLastStream(currentName, name).catch(() => {});
+  };
+
   /* Theme prefs — Phase 4: load once, persist on change, follow OS appearance. */
   useEffect(() => {
-    GetPrefs().then((p) => {
+    loadPrefs().then((p) => {
       prefs.current = p;
       if (p.theme) setThemePref(p.theme as ThemePref);
       if (p.accent) setAccent(p.accent);
@@ -479,17 +513,19 @@ function App() {
         }
         setConfigured(true);
         return ListStreams()
-          .then((s) => {
+          .then(async (s) => {
             const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
             setLiveStreams(mapped);
-            if (mapped.length > 0) {
-              const first = mapped[0].name;
+            // Reopen the stream this context was left on; pickStream falls back to
+            // the first when there is no memory or it no longer exists.
+            const pick = pickStream(mapped, await rememberedStream(cur.name));
+            if (pick) {
               // Seed the tab that was active when the load began (not the current activeTab).
               setTabs((ts) => ts.map((t) => {
                 if (t.id !== seedTabId) return t;
                 return t.sql.trim()
-                  ? { ...t, stream: first }
-                  : { ...t, stream: first, sql: setFromStream('', first) };
+                  ? { ...t, stream: pick }
+                  : { ...t, stream: pick, sql: setFromStream('', pick) };
               }));
             }
           })
@@ -583,7 +619,9 @@ function App() {
       if (withHistogram) setLiveBars((res.histogram ?? []) as unknown as HistoBucket[]);
       setLiveMeta({ total: Number(res.meta?.total ?? 0), tookMs: res.meta?.tookMs ?? 0, shown: (res.rows ?? []).length });
       setPage(pageNum);
-      if (effStream && effStream !== stream) setActiveStream(effStream); // sync tab to the queried FROM
+      // Sync tab to the queried FROM. Editing the FROM clause selects a stream just
+      // as the dropdown does, so it is remembered the same way.
+      if (effStream && effStream !== stream) { setActiveStream(effStream); rememberStream(effStream); }
     } catch (e: any) {
       if (!queryLatest.isCurrent(token)) return;
       const ae = parseAppError(e);
@@ -647,14 +685,16 @@ function App() {
       });
       const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
       setLiveStreams(mapped);
-      if (mapped.length > 0) {
-        const first = mapped[0].name;
+      // Each context remembers its own stream, so the switch restores the one
+      // this context was last left on rather than carrying the old one over.
+      const pick = pickStream(mapped, await rememberedStream(name));
+      if (pick) {
         // Seed the tab that was active when the switch began (not the current activeTab).
         setTabs((ts) => ts.map((t) => {
           if (t.id !== seedTabId) return t;
           return t.sql.trim()
-            ? { ...t, stream: first }
-            : { ...t, stream: first, sql: setFromStream('', first) };
+            ? { ...t, stream: pick }
+            : { ...t, stream: pick, sql: setFromStream('', pick) };
         }));
       }
     } catch (e: any) {
@@ -730,11 +770,12 @@ function App() {
       const streams = await ListStreams();
       const mapped = withColors(streams.map((x) => ({ name: x.name, size: x.size })));
       setLiveStreams(mapped);
-      if (mapped.length > 0) {
-        const first = mapped[0].name;
+      // Signing back in to a context the user has used before reopens its stream.
+      const pick = pickStream(mapped, await rememberedStream(signInTarget.name));
+      if (pick) {
         setTabs((ts) => ts.map((t) =>
           t.id === seedTabId
-            ? (t.sql.trim() ? { ...t, stream: first } : { ...t, stream: first, sql: setFromStream('', first) })
+            ? (t.sql.trim() ? { ...t, stream: pick } : { ...t, stream: pick, sql: setFromStream('', pick) })
             : t,
         ));
       }
@@ -1061,6 +1102,7 @@ function App() {
                   patchActive(mode === 'sql'
                     ? { stream: name, sql: setFromStream(activeTabData.sql, name) }
                     : { stream: name });
+                  rememberStream(name); // reopen here on the next launch
                   setStreamOpen(false);
                   requestAnimationFrame(() => editorRef.current?.focus());
                 }}
@@ -1246,15 +1288,16 @@ function App() {
               // Best-effort stream load; failure only reopens the wizard on
               // not_configured — it does NOT prevent the wizard from closing.
               ListStreams()
-                .then((s) => {
+                .then(async (s) => {
                   const mapped = withColors(s.map((x) => ({ name: x.name, size: x.size })));
                   setLiveStreams(mapped);
-                  if (mapped.length > 0) {
-                    const s = mapped[0].name;
+                  // Reconfiguring a context the user has used before reopens its stream.
+                  const pick = pickStream(mapped, await rememberedStream(ctx.name));
+                  if (pick) {
                     // Seed the tab that was active when the save began (not the current activeTab).
                     setTabs((ts) => ts.map((t) =>
                       t.id === seedTabId
-                        ? (t.sql.trim() ? { ...t, stream: s } : { ...t, stream: s, sql: setFromStream('', s) })
+                        ? (t.sql.trim() ? { ...t, stream: pick } : { ...t, stream: pick, sql: setFromStream('', pick) })
                         : t,
                     ));
                   }
