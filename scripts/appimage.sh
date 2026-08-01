@@ -28,7 +28,7 @@ VERSION="${VERSION:-${1:-0.0.0}}"
 
 # --- Pinned build tools (URL + SHA-256) -------------------------------------
 LINUXDEPLOY_URL="https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
-LINUXDEPLOY_SHA="e87ee0815d109282fdda73e34c2361d64d02b0ffaea3674b18f1fd1f6a687dcf"
+LINUXDEPLOY_SHA="421ca71d5c69ea97c6309276232990d43df1dcece0edfaa26bbf926ff96ed12e"
 APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
 APPIMAGETOOL_SHA="a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0"
 # The GTK plugin has no release asset — pin the raw script at an immutable commit.
