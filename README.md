@@ -55,6 +55,11 @@ cannot drift apart.
 
 ### 🔗 Connection management
 - **Multiple contexts** — switch between staging, prod, and local instances from the title bar.
+- **Browser sign-in on every platform** — log in through your instance's own web login (SSO
+  included) and o3 captures the session. macOS uses a native WebView window; Windows and Linux
+  drive your Chromium-family browser over the DevTools Protocol. The capture core is shared
+  with [`openobserve-cli`](https://github.com/angelmsger/openobserve-cli), so both clients
+  agree on when a login has actually completed.
 - **OS keychain-backed secrets** — passwords/tokens are stored via
   [go-keyring](https://github.com/zalando/go-keyring), never in plaintext config.
 - **Setup wizard** and a **contexts manager** with a delete guard (you can't remove your last
@@ -175,7 +180,8 @@ cd frontend && npm test
 └───────────────┬─────────────────────────────┘
                 │ shared client (go.work)
 ┌───────────────┴─────────────────────────────┐
-│  openobserve-cli/pkg/{apiclient,auth,config} │
+│  openobserve-cli/pkg/{apiclient,auth,config, │
+│                       webauth}               │
 │  the single source of truth for the O2 API   │
 └──────────────────────────────────────────────┘
 ```
