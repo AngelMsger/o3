@@ -7,6 +7,7 @@ export namespace config {
 	    updateCheck: string;
 	    skipVersion: string;
 	    lastUpdateCheck: string;
+	    lastStreams?: Record<string, string>;
 	
 	    static createFrom(source: any = {}) {
 	        return new Prefs(source);
@@ -20,6 +21,7 @@ export namespace config {
 	        this.updateCheck = source["updateCheck"];
 	        this.skipVersion = source["skipVersion"];
 	        this.lastUpdateCheck = source["lastUpdateCheck"];
+	        this.lastStreams = source["lastStreams"];
 	    }
 	}
 

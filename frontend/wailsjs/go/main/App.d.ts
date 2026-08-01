@@ -49,6 +49,8 @@ export function SetAutoUpdateCheck(arg1:boolean):Promise<void>;
 
 export function SetDockTheme(arg1:boolean):Promise<void>;
 
+export function SetLastStream(arg1:string,arg2:string):Promise<void>;
+
 export function SignOut(arg1:string):Promise<void>;
 
 export function SkipUpdateVersion(arg1:string):Promise<void>;

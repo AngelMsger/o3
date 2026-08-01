@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -37,7 +38,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("round-trip: want %+v got %+v", want, got)
 	}
 }
@@ -125,7 +126,53 @@ func TestMutatePrefsPreservesUntouchedFields(t *testing.T) {
 	}
 	want := start
 	want.SkipVersion = "1.4.0"
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("mutate: want %+v got %+v", want, got)
+	}
+}
+
+// The remembered stream is per context, survives a round trip, and is not
+// disturbed by a mutation that touches an unrelated field.
+func TestLastStreamsRoundTripAndSurviveMutation(t *testing.T) {
+	dir := t.TempDir()
+	start := defaultPrefs()
+	start.LastStreams = map[string]string{"prod": "nginx_access", "staging": "app_logs"}
+	if err := savePrefsTo(dir, start); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got.LastStreams, start.LastStreams) {
+		t.Fatalf("round-trip: want %v got %v", start.LastStreams, got.LastStreams)
+	}
+
+	if err := mutatePrefsIn(dir, func(p *Prefs) { p.Theme = "light" }); err != nil {
+		t.Fatal(err)
+	}
+	got, err = loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got.LastStreams, start.LastStreams) {
+		t.Fatalf("after unrelated mutation: want %v got %v", start.LastStreams, got.LastStreams)
+	}
+}
+
+// A prefs.json written before LastStreams existed must load without one, and
+// "no stream remembered yet" must stay distinguishable from "" — applyDefaults
+// has nothing to backfill here.
+func TestLoadPrefsWithoutLastStreams(t *testing.T) {
+	dir := t.TempDir()
+	if err := writeRawPrefs(dir, `{"theme":"light"}`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.LastStreams != nil {
+		t.Fatalf("want nil LastStreams, got %v", got.LastStreams)
 	}
 }

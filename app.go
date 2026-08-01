@@ -798,6 +798,29 @@ func (a *App) SavePrefs(p config.Prefs) error {
 	}))
 }
 
+// SetLastStream remembers the stream the user selected in a context, so the
+// next launch reopens it instead of falling back to whichever stream the server
+// happens to list first.
+//
+// A dedicated single-field mutator rather than a field on the SavePrefs payload:
+// the frontend writes this on every pick, and routing it through the whole-struct
+// save would make each pick a chance to clobber the fields it does not own.
+// Empty arguments are dropped — there is no key to write under without a context
+// name, and an empty stream is the unseeded state, not a selection.
+func (a *App) SetLastStream(ctxName, stream string) error {
+	if ctxName == "" || stream == "" {
+		return nil
+	}
+	a.updMu.Lock()
+	defer a.updMu.Unlock()
+	return apperr.Wrap(config.MutatePrefs(func(p *config.Prefs) {
+		if p.LastStreams == nil {
+			p.LastStreams = map[string]string{}
+		}
+		p.LastStreams[ctxName] = stream
+	}))
+}
+
 // SetDockTheme swaps the macOS Dock icon to match the active theme: the Void
 // (dark) variant when dark is true, the Signal (light) variant otherwise.
 // No-op on non-darwin platforms.
