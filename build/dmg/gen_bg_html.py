@@ -6,7 +6,7 @@ every pixel here is exactly twice the icon-view point coordinate. render.sh
 screenshots this, downscales it to the 1x variant, and combines both into a
 Retina background.tiff.
 
-Two Finder constraints drive this layout. Both are easy to get wrong and neither
+Three Finder constraints drive this layout. All are easy to get wrong and none
 shows up until you actually open the .dmg:
 
 1. THE FILENAME LABELS ARE ALWAYS BLACK. Once a background image is set, Finder
@@ -30,15 +30,24 @@ shows up until you actually open the .dmg:
    y=381pt / 762px. Hence no full-bleed frame: the previous one was inset 11pt
    and its bottom edge was simply cut off.
 
+3. THE LABEL SITS FURTHER BELOW THE ICON THAN THE ICON BOX SUGGESTS. Finder
+   puts the filename's centre line about 84pt under the icon centre — roughly
+   20pt below the bottom edge of the 128pt icon box, not flush against it. The
+   first cut of this layout assumed flush and the labels came out riding the
+   bottom edge of their chips, with "Applications"' descenders hanging off onto
+   the dark ground. Hence icons at y=216 rather than 226: 216 + 84 = 300, the
+   chips' centre line. Move the icons and the chips must follow, and vice versa.
+
 Layout (2x px; halve for the settings.py point grid):
-  - icon slots      centred at (320, 452) and (1000, 452) -> points (160, 226)
-  - label chips     y 570..630, centred on each icon's x
-  - teal arrow      y=452, spanning the gap (px 540..780)
+  - icon slots      centred at (320, 432) and (1000, 432) -> points (160, 216)
+  - label chips     y 564..636, centred on each icon's x
+  - teal arrow      y=432, spanning the gap (px 540..780)
   - safe zone ends  y=762 (=381pt); below that is plain gradient
 
-The chips are deliberately taller and wider than the text they carry. Finder
-picks its own label baseline and we cannot query it, so the padding is the
-margin of error: a few points adrift still lands the text on the chip.
+The chips are deliberately taller and wider than the text they carry. That 84pt
+is measured off a screenshot, not queried from Finder — we cannot ask it — so
+the padding is the margin of error: the 36pt chip holds a ~16pt line of text
+with ~10pt of slack above and below, and a few points adrift still lands.
 
 The dark Void palette matches the app icon (build/icon/gen_icon_html.py) and the
 site: deep #06121a ground, teal #2dd4bf accents. Usage: gen_bg_html.py <font.ttf> <outdir>
@@ -58,7 +67,7 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
 .win {{ position:relative; width:1320px; height:880px; overflow:hidden;
   background:radial-gradient(130% 120% at 50% -12%, #123039 0%, #0a1a20 46%, #06121a 100%); }}
 /* faint teal glow pooled behind the centre / arrow */
-.glow {{ position:absolute; left:50%; top:452px; width:900px; height:560px;
+.glow {{ position:absolute; left:50%; top:432px; width:900px; height:560px;
   transform:translate(-50%,-50%); border-radius:50%;
   background:radial-gradient(circle, rgba(45,212,191,.13) 0%, transparent 66%); }}
 .wordmark {{ position:absolute; left:0; right:0; top:64px; text-align:center;
@@ -70,7 +79,7 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
 /* Label chips: the pale landing pad for Finder's always-black filenames (see the
    module docstring). Sized per filename — "o3" needs far less room than
    "Applications" — and centred under each icon. */
-.chip {{ position:absolute; top:570px; height:60px; border-radius:30px;
+.chip {{ position:absolute; top:564px; height:72px; border-radius:36px;
   background:linear-gradient(180deg, rgba(206,238,233,.97) 0%, rgba(178,214,209,.95) 100%);
   box-shadow: 0 6px 18px rgba(0,0,0,.45),
               inset 0 0 0 2px rgba(45,212,191,.5),
@@ -89,7 +98,7 @@ html,body {{ margin:0; padding:0; width:1320px; height:880px; }}
   font-family:-apple-system,'Helvetica Neue',sans-serif; font-weight:500; font-size:26px;
   line-height:46px; color:rgba(210,244,239,.52); }}
 .notice b {{ font-weight:600; color:rgba(210,244,239,.78); }}
-.arrow {{ position:absolute; top:452px; left:540px; width:240px; height:0;
+.arrow {{ position:absolute; top:432px; left:540px; width:240px; height:0;
   transform:translateY(-50%); filter:drop-shadow(0 0 16px rgba(45,212,191,.6)); }}
 .shaft {{ position:absolute; top:-4px; left:0; width:210px; height:8px; border-radius:4px;
   background:linear-gradient(90deg, rgba(93,240,221,.18) 0%, #5df0dd 100%); }}

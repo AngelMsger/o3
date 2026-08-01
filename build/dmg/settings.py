@@ -3,16 +3,22 @@
 #
 # The window is 660x440 points; build/dmg/gen_bg_html.py renders the background
 # on the matching grid, so the drag arrow lines up with the icon positions below
-# (app on the left, Applications on the right, both centred at y=226).
+# (app on the left, Applications on the right, both centred at y=216).
 #
-# y=226 is not arbitrary: it lands each icon's filename on the pale chip painted
+# y=216 is not arbitrary: it lands each icon's filename on the pale chip painted
 # on the background. The chips exist because Finder always draws the labels in
 # black once a background image is set — in Dark Mode as well as Light. Move the
 # icons and the labels walk off their chips onto the Void ground, where nobody
 # can read them, so keep these coordinates in step with gen_bg_html.py.
 #
-# icon_size is load-bearing here too: the label hangs off the bottom of the icon,
-# so resizing the icon moves the text without moving the chip.
+# The exact figure comes from what Finder actually does, not from the icon box:
+# it centres the filename about 84pt below the icon centre, so 216 + 84 = 300 is
+# the chips' centre line. An earlier revision used 226 on the assumption that the
+# label sits flush under the 128pt icon, and shipped labels that rode the bottom
+# edge of their chips with the descenders hanging off.
+#
+# icon_size is load-bearing here too: that 84pt offset scales with the icon, so
+# resizing the icon moves the text without moving the chip.
 import os.path
 
 # -D app=/abs/o3.app  -D volicon=/abs/volume.icns  -D background=/abs/background.tiff
@@ -44,6 +50,6 @@ label_pos = "bottom"
 arrange_by = None
 
 icon_locations = {
-    appname: (160, 226),
-    "Applications": (500, 226),
+    appname: (160, 216),
+    "Applications": (500, 216),
 }
