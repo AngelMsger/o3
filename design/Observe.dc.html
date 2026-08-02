@@ -37,34 +37,38 @@
     --sy-str:#a3e08c; --sy-num:#f6c177; --sy-key:#8fb7ff; --sy-bool:#5b9dff;
     --sy-null:#f4685f; --sy-kw:#ff7b9c; --sy-fn:#7dd3fc;
     /* liquid glass (translucent chrome + overlays) */
-    --glass-titl: rgba(17,20,27,.66); --glass-bar: rgba(12,14,19,.60);
-    --glass-pop: rgba(16,20,28,.74); --glass-modal: rgba(13,16,22,.80);
-    --glass-drawer: rgba(11,13,18,.72); --glass-hi: rgba(255,255,255,.06);
-    --glass-blur: saturate(180%) blur(22px);
+    --glass-titl: rgba(17,20,27,.55); --glass-bar: rgba(12,14,19,.46);
+    --glass-pop: rgba(16,20,28,.58); --glass-modal: rgba(13,16,22,.64);
+    --glass-drawer: rgba(11,13,18,.54); --glass-hi: rgba(255,255,255,.10);
+    --glass-blur: saturate(200%) blur(32px);
+    /* cards + sheets */
+    --sheet-bg: transparent;
+    --card-bg: var(--sf-05); --card-bd: rgba(var(--ink),.09); --card-sh: none;
   }
   /* ===== THEME TOKENS — light ===== */
   :root[data-oo-theme="light"] {
-    --ink: 22,30,44;
+    --ink: 20,28,42;
     --glow: 45,180,165;
-    --sf-desk:#e6eaf1; --sf-void:#e1e6ee; --sf-rail:#eef1f6; --sf-tabs:#eef1f6;
-    --sf-main:#ffffff; --sf-01:#f6f8fb; --sf-02:#f6f8fb; --sf-03:#f1f4f9;
-    --sf-04:#f6f8fb; --sf-05:#f8fafc; --sf-modal:#ffffff; --sf-ctrl:#eef2f7;
-    --sf-pop:#ffffff; --sf-hov:#eef1f6; --sf-06:#e8edf4; --sf-07:#e8edf4;
-    --sf-hov2:#e7ecf3; --sf-track:#cfd5df; --sf-atint:#d3f3ec; --sf-atint2:#e0f5f0;
-    --sf-titl:#f4f7fb;
-    --tx-max:#0d141c; --tx-glow:#0a4a41; --tx-hi:#101820; --tx-01:#1b2431;
-    --tx-02:#202836; --tx-03:#28313f; --tx-04:#313b48; --tx-05:#4a5361;
-    --tx-06:#5b6573; --tx-07:#6b7381; --tx-7b:#6e7785; --tx-09:#79818e;
-    --tx-10:#89909c; --tx-11:#8d94a0; --tx-12:#949ca7; --tx-13:#a6adb6;
-    --tx-14:#adb3bd; --tx-15:#b5bac3;
-    --gg-1:#2b4a43; --gg-2:#4b6b63; --gg-3:#5d6f6a; --gg-4:#79857f; --gg-5:#8a938e;
-    --av-1:#c1c9d6; --av-2:#99a2b1;
-    --sy-str:#2f8f3a; --sy-num:#b0741a; --sy-key:#2f5fc4; --sy-bool:#2563eb;
-    --sy-null:#d33a30; --sy-kw:#d23a66; --sy-fn:#0e83ad;
-    --glass-titl: rgba(247,249,252,.68); --glass-bar: rgba(240,243,248,.62);
-    --glass-pop: rgba(252,253,255,.76); --glass-modal: rgba(255,255,255,.82);
-    --glass-drawer: rgba(250,251,253,.74); --glass-hi: rgba(255,255,255,.55);
-    --glass-blur: saturate(180%) blur(22px);
+    --sf-desk:#d1d9e5; --sf-void:#c4cddb; --sf-rail:#e6ebf3; --sf-tabs:#e7ecf3;
+    --sf-main:#ffffff; --sf-01:#ffffff; --sf-02:#ecf1f7; --sf-03:#e6ecf4;
+    --sf-04:#ffffff; --sf-05:#ffffff; --sf-modal:#ffffff; --sf-ctrl:#e9eff5;
+    --sf-pop:#ffffff; --sf-hov:#e9eef4; --sf-06:#e0e7f0; --sf-07:#e6ecf4;
+    --sf-hov2:#e1e8f1; --sf-track:#c6cfdb; --sf-atint:#d0f2eb; --sf-atint2:#e0f5f0;
+    --sf-titl:#edf2f8;
+    --tx-max:#0b1119; --tx-glow:#08423a; --tx-hi:#0e161f; --tx-01:#18212e;
+    --tx-02:#1d2534; --tx-03:#252e3c; --tx-04:#2f3947; --tx-05:#404956;
+    --tx-06:#4c5563; --tx-07:#565f6c; --tx-7b:#5a6370; --tx-09:#576070;
+    --tx-10:#535e6e; --tx-11:#626b79; --tx-12:#6c7482; --tx-13:#838b97;
+    --tx-14:#969ea9; --tx-15:#a4abb6;
+    --gg-1:#243f39; --gg-2:#42605a; --gg-3:#556662; --gg-4:#6e7a76; --gg-5:#828b86;
+    --av-1:#b6bfce; --av-2:#8993a3;
+    --sy-str:#1f7a2b; --sy-num:#9a6410; --sy-key:#2350b8; --sy-bool:#1d4ed8;
+    --sy-null:#c62f26; --sy-kw:#c22f5b; --sy-fn:#0b7295;
+    --glass-titl: rgba(237,241,247,.55); --glass-bar: rgba(232,237,244,.48);
+    --glass-pop: rgba(252,253,255,.60); --glass-modal: rgba(255,255,255,.66);
+    --glass-drawer: rgba(250,251,253,.58); --glass-hi: rgba(255,255,255,.75);
+    --glass-blur: saturate(180%) blur(32px);
+    --sheet-bg:#eef2f7; --card-bg:#ffffff; --card-bd: rgba(20,28,42,.11); --card-sh: 0 1px 2px rgba(28,39,58,.06), 0 6px 16px -8px rgba(28,39,58,.16);
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; }
@@ -81,6 +85,13 @@
   @keyframes ooPulse { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
   @keyframes ooDrawer { from { transform: translateX(14px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   @keyframes ooFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .oo-slogan { cursor: default; user-select: none; transition: letter-spacing .3s ease; }
+  .oo-slogan .kw { color: var(--tx-11); transition: color .3s ease, text-shadow .3s ease; }
+  .oo-slogan .sig { position: relative; }
+  .oo-slogan .sig::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -2px; height: 1px; background: var(--accent, #2dd4bf); box-shadow: 0 0 6px var(--accent, #2dd4bf); transition: right .38s cubic-bezier(.4,0,.2,1); }
+  .oo-slogan:hover { letter-spacing: 1px; }
+  .oo-slogan:hover .kw { color: var(--accent, #2dd4bf); text-shadow: 0 0 10px var(--accent, #2dd4bf); }
+  .oo-slogan:hover .sig::after { right: 0; }
 </style>
 </helmet>
 
@@ -97,14 +108,16 @@
 
     <!-- ===== TITLEBAR ===== -->
     <div style="height: 42px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: var(--glass-titl); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-bottom: 1px solid rgba(var(--ink),.06); box-shadow: inset 0 1px 0 var(--glass-hi); position: relative; z-index: 40;">
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></span>
-        <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
-        <span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></span>
-      </div>
+      <sc-if value="{{ isMac }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span onClick="{{ onClose }}" title="Close" style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></span>
+          <span onClick="{{ onMin }}" title="Minimize" style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
+          <span onClick="{{ onMax }}" title="Zoom" style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></span>
+        </div>
+      </sc-if>
       <div style="display: flex; align-items: center; gap: 8px; margin-left: 6px;">
-        <span style="width: 18px; height: 18px; border-radius: 5px; background: var(--accent, #2dd4bf); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 14px -2px var(--accent, #2dd4bf);">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#06181a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg>
+        <span style="width: 18px; height: 18px; border-radius: 5px; position: relative; overflow: hidden; background: radial-gradient(120% 120% at 30% 8%,#123039,#06121a); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 1px rgba(45,212,191,.28) inset, 0 0 14px -3px rgba(45,212,191,.55);">
+          <span style="font-family:'JetBrains Mono',monospace; font-weight: 800; font-size: 10px; letter-spacing: -.5px; line-height: 1; color: #5df0dd; filter: drop-shadow(0 0 4px rgba(45,212,191,.6));">o3</span>
         </span>
         <span style="font-size: 13px; font-weight: 700; color: var(--tx-02); letter-spacing: .3px;">o3</span>
         <span style="font-size: 11px; color: var(--tx-11); font-weight: 500;">/ Logs</span>
@@ -112,7 +125,37 @@
 
       <div style="flex: 1;"></div>
 
-      <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,var(--av-1),var(--av-2)); border: 1px solid rgba(var(--ink),.08); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--tx-05); font-weight: 600;">JD</div>
+      <span class="oo-slogan" title="SELECT signal FROM noise" style="font-family:'JetBrains Mono',monospace; font-size: 11px; font-weight: 500; letter-spacing: .3px; white-space: nowrap; margin-right: 4px;"><span class="kw">SELECT</span> <span class="sig" style="color: var(--tx-04);">signal</span> <span class="kw">FROM</span> <span style="color: var(--tx-11);">noise</span></span>
+
+      <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,var(--av-1),var(--av-2)); border: 1px solid rgba(var(--ink),.08); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--tx-05); font-weight: 600;" title="{{ userTitle }}">{{ userInitials }}</div>
+
+      <sc-if value="{{ isWin }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: stretch; height: 42px; margin-left: 6px; margin-right: -14px;">
+          <button onClick="{{ onMin }}" title="Minimize" style="width: 46px; height: 42px; border: none; background: transparent; color: var(--tx-05); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:rgba(var(--ink),.08);">
+            <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5 h9" stroke="currentColor" stroke-width="1"/></svg>
+          </button>
+          <button onClick="{{ onMax }}" title="Maximize" style="width: 46px; height: 42px; border: none; background: transparent; color: var(--tx-05); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:rgba(var(--ink),.08);">
+            <svg width="11" height="11" viewBox="0 0 11 11"><rect x="1.2" y="1.2" width="8.6" height="8.6" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+          </button>
+          <button onClick="{{ onClose }}" title="Close" style="width: 46px; height: 42px; border: none; background: transparent; color: var(--tx-05); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:#e81123;color:#fff;">
+            <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg>
+          </button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLin }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; gap: 9px; margin-left: 8px;">
+          <button onClick="{{ onMin }}" title="Minimize" style="width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(var(--ink),.09); color: var(--tx-04); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:rgba(var(--ink),.17);">
+            <svg width="9" height="9" viewBox="0 0 11 11"><path d="M2 7 h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+          <button onClick="{{ onMax }}" title="Maximize" style="width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(var(--ink),.09); color: var(--tx-04); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:rgba(var(--ink),.17);">
+            <svg width="9" height="9" viewBox="0 0 11 11"><rect x="2" y="2" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+          </button>
+          <button onClick="{{ onClose }}" title="Close" style="width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(var(--ink),.09); color: var(--tx-04); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:rgba(232,17,35,.16);color:#e8635f;">
+            <svg width="9" height="9" viewBox="0 0 11 11"><path d="M2.4 2.4 L8.6 8.6 M8.6 2.4 L2.4 8.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </sc-if>
     </div>
 
     <!-- ===== BODY ===== -->
@@ -124,6 +167,15 @@
           <button onClick="{{ n.onPick }}" title="{{ n.title }}" style="{{ n.style }}" data-comment-anchor="60a1cddae6-button">{{ n.icon }}<sc-if value="{{ n.soon }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--tx-15);"></span></sc-if></button>
         </sc-for>
         <div style="flex: 1;"></div>
+
+        <!-- AI Ecosystem shortcut -->
+        <div style="position: relative;">
+          <button onClick="{{ openEcosystem }}" title="{{ ecoTitle }}" style="{{ ecoBtnStyle }}" style-hover="background:var(--sf-hov);color:var(--accent,#2dd4bf);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l6 5-6 5"/><path d="M12 19h8"/></svg>
+            <span style="{{ ecoDotStyle }}"></span>
+          </button>
+        </div>
+
         <button onClick="{{ openSettings }}" title="Settings" style="width: 36px; height: 36px; border-radius: 9px; border: none; background: transparent; color: var(--tx-12); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background:var(--sf-hov);color:var(--tx-05);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" data-comment-anchor="f0fb2d4841-path"/></svg>
         </button>
@@ -135,7 +187,7 @@
         <!-- saved-query tabs -->
         <div class="oo-scroll" style="height: 42px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: var(--glass-bar); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-bottom: 1px solid rgba(var(--ink),.06); box-shadow: inset 0 1px 0 var(--glass-hi); position: relative; z-index: 35; overflow-x: auto; overflow-y: hidden;" data-comment-anchor="df3a0a2b19-div">
           <sc-for list="{{ tabItems }}" as="t" hint-placeholder-count="4">
-            <div onClick="{{ t.onPick }}" onDoubleClick="{{ t.onRename }}" title="stream: {{ t.streamName }} — double-click to rename" style="{{ t.tabStyle }}" style-hover="background:var(--sf-hov2);color:var(--tx-02);">
+            <div onClick="{{ t.onPick }}" onDoubleClick="{{ t.onRename }}" onContextMenu="{{ t.onCtxMenu }}" title="stream: {{ t.streamName }} — double-click or right-click to rename" style="{{ t.tabStyle }}" style-hover="background:var(--sf-hov2);color:var(--tx-02);">
               <span style="{{ t.dotStyle }}"></span>
               <sc-if value="{{ t.editing }}" hint-placeholder-val="{{ false }}">
                 <input ref="{{ t.editRef }}" value="{{ t.name }}" onChange="{{ t.onNameChange }}" onKeyDown="{{ t.onNameKey }}" onBlur="{{ t.onNameBlur }}" onClick="{{ stop }}" spellcheck="false" style="width: 96px; background: var(--sf-ctrl); border: 1px solid var(--accent,#2dd4bf); border-radius: 4px; color: var(--tx-hi); font-size: 11.5px; font-family: inherit; padding: 1px 5px; outline: none;">
@@ -340,15 +392,28 @@
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx-09)" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 <sc-if value="{{ streamOpen }}" hint-placeholder-val="{{ false }}">
-                  <div style="position: absolute; left: 10px; right: 10px; top: 70px; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 9px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.85); overflow: hidden; z-index: 50; padding: 4px; animation: ooFade .1s ease;">
-                    <sc-for list="{{ streams }}" as="s" hint-placeholder-count="5">
-                      <div onClick="{{ s.onPick }}" style="{{ s.style }}">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg>
-                        <span style="font-family:'JetBrains Mono',monospace; font-size: 12px;">{{ s.name }}</span>
-                        <span style="flex: 1;"></span>
-                        <span style="font-family:'JetBrains Mono',monospace; font-size: 9.5px; color: var(--tx-12);">{{ s.size }}</span>
+                  <div onClick="{{ closeStream }}" style="position: fixed; inset: 0; z-index: 49;"></div>
+                  <div style="position: absolute; left: 10px; right: 10px; top: 70px; background: var(--glass-pop); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid rgba(var(--ink),.12); border-radius: 10px; box-shadow: 0 20px 50px -12px rgba(0,0,0,.55), inset 0 1px 0 var(--glass-hi); overflow: hidden; z-index: 50; animation: ooFade .1s ease;">
+                    <div style="padding: 7px 8px; border-bottom: 1px solid rgba(var(--ink),.08);">
+                      <div style="display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 10px; background: var(--sf-04); border: 1px solid rgba(var(--ink),.12); border-radius: 8px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx-11)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                        <input ref="{{ streamSearchRef }}" value="{{ streamFilter }}" onChange="{{ onStreamFilter }}" onClick="{{ stop }}" placeholder="Search streams…" spellcheck="false" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--tx-01); font-size: 12.5px; font-family:'JetBrains Mono',monospace;">
+                        <span style="font-size: 10px; color: var(--tx-12); font-family:'JetBrains Mono',monospace;">{{ streamCount }}</span>
                       </div>
-                    </sc-for>
+                    </div>
+                    <div class="oo-scroll" style="max-height: 258px; overflow-y: auto; padding: 4px;">
+                      <sc-for list="{{ streams }}" as="s" hint-placeholder-count="5">
+                        <div onClick="{{ s.onPick }}" style="{{ s.style }}">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg>
+                          <span style="font-family:'JetBrains Mono',monospace; font-size: 12px;">{{ s.name }}</span>
+                          <span style="flex: 1;"></span>
+                          <span style="font-family:'JetBrains Mono',monospace; font-size: 9.5px; color: var(--tx-12);">{{ s.size }}</span>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ streamEmpty }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding: 18px 12px; text-align: center; font-size: 12px; color: var(--tx-10); font-family:'JetBrains Mono',monospace;">No streams match “{{ streamFilter }}”</div>
+                      </sc-if>
+                    </div>
                   </div>
                 </sc-if>
               </div>
@@ -479,6 +544,17 @@
       </div>
     </div>
 
+    <!-- ===== TAB CONTEXT MENU ===== -->
+    <sc-if value="{{ tabMenuOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeTabMenu }}" onContextMenu="{{ closeTabMenu }}" style="position: fixed; inset: 0; z-index: 90;"></div>
+      <div style="{{ tabMenu.wrapStyle }}">
+        <sc-for list="{{ tabMenu.items }}" as="m" hint-placeholder-count="6">
+          <sc-if value="{{ m.sep }}" hint-placeholder-val="{{ false }}"><div style="{{ m.style }}"></div></sc-if>
+          <sc-if value="{{ m.notSep }}" hint-placeholder-val="{{ true }}"><div onClick="{{ m.onClick }}" style="{{ m.style }}" style-hover="{{ m.hover }}">{{ m.label }}</div></sc-if>
+        </sc-for>
+      </div>
+    </sc-if>
+
     <!-- ===== SETTINGS ===== -->
     <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
       <div onClick="{{ closeSettings }}" style="position: absolute; inset: 0; background: rgba(4,5,7,.5); backdrop-filter: saturate(150%) blur(9px); -webkit-backdrop-filter: saturate(150%) blur(9px); z-index: 80; display: flex; align-items: center; justify-content: center; padding: 38px;">
@@ -495,8 +571,8 @@
                 <button onClick="{{ t.onPick }}" style="{{ t.style }}">{{ t.label }}</button>
               </sc-for>
             </div>
-            <div class="oo-scroll" style="flex: 1; min-width: 0; overflow-y: auto;">
-              <div style="padding: 26px 30px;">
+            <div class="oo-scroll" style="flex: 1; min-width: 0; overflow-y: auto; background: var(--sheet-bg);">
+              <div style="padding: 28px 34px;">
 
             <!-- CONNECTION -->
             <sc-if value="{{ tabConnection }}" hint-placeholder-val="{{ true }}">
@@ -506,23 +582,32 @@
 
                 <!-- CONTEXTS MANAGER (kubectl-style) -->
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
-                  <div style="display: flex; align-items: baseline; gap: 9px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700;">Contexts</div><div style="font-size: 11px; color: var(--tx-12);">switch the active instance any time</div></div>
+                  <div style="display: flex; align-items: baseline; gap: 9px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700;">Contexts</div><div style="font-size: 11px; color: var(--tx-12);">click a row to edit it — editing never switches your tab</div></div>
                   <button onClick="{{ addContext }}" style="height: 28px; padding: 0 11px; border-radius: 7px; border: 1px dashed rgba(var(--ink),.16); background: transparent; color: var(--tx-05); font-size: 12px; cursor: pointer; font-family: inherit;" style-hover="border-color:var(--accent,#2dd4bf);color:var(--tx-hi);">+ Add Context</button>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
                   <sc-for list="{{ ctxRows }}" as="c" hint-placeholder-count="3">
-                    <div onClick="{{ c.onUse }}" style="{{ c.rowStyle }}">
+                    <div onClick="{{ c.onEdit }}" style="{{ c.rowStyle }}">
                       <span style="{{ c.dotStyle }}"></span>
                       <div style="flex: 1; min-width: 0;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 7px;">
                           <span style="font-size: 13px; color: var(--tx-hi); font-weight: 600; font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
-                          <sc-if value="{{ c.isActive }}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--accent,#2dd4bf); background: rgba(45,212,191,.12); padding: 2px 6px; border-radius: 4px; flex: none;">active</span></sc-if>
+                          <sc-if value="{{ c.isDefault }}" hint-placeholder-val="{{ false }}"><span title="Seeds every new tab" style="font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: #f5b340; background: rgba(245,179,64,.13); padding: 2px 6px; border-radius: 4px; flex: none;">★ default</span></sc-if>
+                          <sc-if value="{{ c.inTab }}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--accent,#2dd4bf); background: rgba(45,212,191,.12); padding: 2px 6px; border-radius: 4px; flex: none;">this tab</span></sc-if>
+                          <sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--tx-06); background: rgba(var(--ink),.09); padding: 2px 6px; border-radius: 4px; flex: none;">editing</span></sc-if>
+                          <sc-if value="{{ c.hasErr }}" hint-placeholder-val="{{ false }}"><span title="{{ c.errTitle }}" style="font-size: 11px; color: #f4685f; flex: none;">⚠</span></sc-if>
                         </div>
                         <div style="font-size: 11px; color: var(--tx-09); font-family:'JetBrains Mono',monospace; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.sub }}</div>
                       </div>
-                      <span style="font-size: 10.5px; color: var(--tx-10); white-space: nowrap; flex: none;">{{ c.meta }}</span>
-                      <sc-if value="{{ c.notActive }}" hint-placeholder-val="{{ true }}">
-                        <button onClick="{{ c.onUse }}" style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.12); background: var(--sf-ctrl); color: var(--tx-05); font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; flex: none;" style-hover="color:var(--tx-hi);border-color:rgba(var(--ink),.25);">Use</button>
+                      <div style="text-align: right; flex: none;">
+                        <div style="font-size: 10.5px; color: var(--tx-10); white-space: nowrap;">{{ c.meta }}</div>
+                        <div style="font-size: 10px; color: var(--tx-12); white-space: nowrap; margin-top: 2px;">{{ c.usedLabel }}</div>
+                      </div>
+                      <sc-if value="{{ c.notDefault }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ c.onDefault }}" title="Make default for new tabs" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(var(--ink),.08); background: transparent; color: var(--tx-11); font-size: 12px; cursor: pointer; flex: none;" style-hover="color:#f5b340;border-color:rgba(245,179,64,.4);">☆</button>
+                      </sc-if>
+                      <sc-if value="{{ c.notInTab }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ c.onUse }}" style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.12); background: var(--sf-ctrl); color: var(--tx-05); font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; flex: none;" style-hover="color:var(--tx-hi);border-color:rgba(var(--ink),.25);">Use in this tab</button>
                       </sc-if>
                       <sc-if value="{{ canRemoveCtx }}" hint-placeholder-val="{{ true }}">
                         <button onClick="{{ c.onRemove }}" title="Delete Context" style="width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgba(var(--ink),.08); background: transparent; color: var(--tx-10); font-size: 12px; cursor: pointer; flex: none;" style-hover="color:#f4685f;border-color:rgba(244,104,95,.4);">✕</button>
@@ -530,29 +615,55 @@
                     </div>
                   </sc-for>
                 </div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700; margin-bottom: 11px;">Edit active context</div>
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px;">
+                  <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">New tabs open with</div>
+                  <div style="font-size: 11.5px; color: var(--tx-09); line-height: 1.55; margin-bottom: 12px; text-wrap: pretty;">A context belongs to a query tab, not to the whole app — switching one tab never touches the others. <b style="color:var(--tx-06);">Active context</b> is an openobserve-cli concept; in o3 it maps to the <b style="color:var(--tx-06);">default</b> below, which only seeds brand-new tabs.</div>
+                  <div style="display: flex; gap: 3px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px; margin-bottom: 12px;">
+                    <sc-for list="{{ modeSeg }}" as="m" hint-placeholder-count="2"><button onClick="{{ m.onPick }}" style="{{ m.style }}">{{ m.label }}</button></sc-for>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 9px; font-size: 11.5px; color: var(--tx-09); font-family:'JetBrains Mono',monospace;">
+                    <span>default → <b style="color:var(--tx-04);">{{ defaultCtxName }}</b></span>
+                    <span style="color: var(--tx-13);">·</span>
+                    <span>cli active-context → <b style="color:var(--tx-04);">{{ cliActiveCtx }}</b></span>
+                    <span style="flex: 1;"></span>
+                    <button onClick="{{ adoptCliActive }}" style="height: 26px; padding: 0 10px; border-radius: 7px; border: 1px solid rgba(var(--ink),.12); background: var(--sf-ctrl); color: var(--tx-06); font-size: 11px; cursor: pointer; font-family: inherit; flex: none;" style-hover="color:var(--tx-hi);border-color:rgba(var(--ink),.25);">Follow the CLI</button>
+                  </div>
+                </div>
 
-                <div style="display: flex; align-items: center; gap: 13px; background: var(--sf-05); border: 1px solid rgba(var(--ink),.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
-                  <span style="width: 9px; height: 9px; border-radius: 50%; background: #34e0a1; box-shadow: 0 0 10px #34e0a1; flex: none;"></span>
+                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 11px;">
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 700;">Editing <span style="color:var(--tx-04); font-family:'JetBrains Mono',monospace; text-transform:none; letter-spacing:0;">{{ editingCtxName }}</span></div>
+                  <sc-if value="{{ editingNotTabCtx }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--tx-12);">not the context this tab uses — edits save without switching<button onClick="{{ useEditingHere }}" style="height: 22px; padding: 0 9px; border-radius: 6px; border: 1px solid rgba(var(--ink),.12); background: var(--sf-ctrl); color: var(--tx-06); font-size: 10.5px; cursor: pointer; font-family: inherit;" style-hover="color:var(--tx-hi);">Use in this tab</button></div>
+                  </sc-if>
+                  <sc-if value="{{ editingIsTabCtx }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size: 11px; color: var(--tx-12);">this tab is using it</div>
+                  </sc-if>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 13px; background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+                  <span style="{{ editStatusDotStyle }}"></span>
                   <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 13px; color: var(--tx-01); font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ conn.url }}</div>
-                    <div style="font-size: 11px; color: var(--tx-09); margin-top: 3px;">org <b style="color:var(--tx-06);">{{ conn.org }}</b> · OpenObserve v0.14.1 · 6 streams</div>
+                    <div style="font-size: 13px; color: var(--tx-01); font-family:'JetBrains Mono',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ editingUrl }}</div>
+                    <div style="font-size: 11px; color: var(--tx-09); margin-top: 3px;">org <b style="color:var(--tx-06);">{{ editingOrg }}</b> · OpenObserve v0.14.1 · 6 streams</div>
                   </div>
                   <button onClick="{{ testConn }}" style="height: 32px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.1); color: var(--accent,#2dd4bf); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;">{{ testLabel }}</button>
                 </div>
 
-                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
                   <div style="margin-bottom: 16px;">
                     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Context name</div>
-                    <input value="{{ conn.name }}" onChange="{{ onName }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                    <input value="{{ conn.name }}" onChange="{{ onName }}" onBlur="{{ f.name.onBlur }}" spellcheck="false" style="{{ f.name.style }}">
+                    <sc-if value="{{ f.name.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ f.name.err }}</div></sc-if>
                   </div>
                   <div style="margin-bottom: 16px;">
                     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Server URL</div>
-                    <input value="{{ conn.url }}" onChange="{{ onUrl }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                    <input value="{{ conn.url }}" onChange="{{ onUrl }}" onBlur="{{ f.url.onBlur }}" placeholder="http://localhost:5080" spellcheck="false" style="{{ f.url.style }}">
+                    <sc-if value="{{ f.url.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ f.url.err }}</div></sc-if>
                   </div>
                   <div style="margin-bottom: 16px;">
                     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Organization</div>
-                    <input value="{{ conn.org }}" onChange="{{ onOrg }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+                    <input value="{{ conn.org }}" onChange="{{ onOrg }}" onBlur="{{ f.org.onBlur }}" spellcheck="false" style="{{ f.org.style }}">
+                    <sc-if value="{{ f.org.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ f.org.err }}</div></sc-if>
                   </div>
                   <div style="margin-bottom: 14px;">
                     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Authentication</div>
@@ -562,12 +673,22 @@
                   </div>
                   <sc-if value="{{ authPassword }}" hint-placeholder-val="{{ true }}">
                     <div style="display: flex; gap: 12px;">
-                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" spellcheck="false" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
-                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" onBlur="{{ f.email.onBlur }}" spellcheck="false" style="{{ f.email.style }}"><sc-if value="{{ f.email.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ f.email.err }}</div></sc-if></div>
+                      <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" onBlur="{{ f.password.onBlur }}" style="{{ f.password.style }}"><sc-if value="{{ f.password.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ f.password.err }}</div></sc-if></div>
                     </div>
                   </sc-if>
                   <sc-if value="{{ authToken }}" hint-placeholder-val="{{ false }}">
-                    <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" placeholder="Paste a token from OpenObserve → IAM → Service Accounts" style="width: 100%; height: 36px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                    <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" onBlur="{{ f.token.onBlur }}" placeholder="Paste a token from OpenObserve → IAM → Service Accounts" style="{{ f.token.style }}"><sc-if value="{{ f.token.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ f.token.err }}</div></sc-if></div>
+                  </sc-if>
+                  <sc-if value="{{ authBrowser }}" hint-placeholder-val="{{ false }}">
+                    <div style="background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 10px; padding: 14px 16px;">
+                      <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Sign in through your instance</div>
+                      <div style="font-size: 11.5px; color: var(--tx-09); line-height: 1.5; margin-bottom: 12px;">o3 opens the sign-in page for <b style="color:var(--tx-06); font-family:'JetBrains Mono',monospace;">{{ editingUrl }}</b>, you log in as usual, and the session lands in your keychain.</div>
+                      <button onClick="{{ browserSignIn }}" style="{{ browserBtnStyle }}">{{ browserBtnLabel }}</button>
+                      <sc-if value="{{ browserNeedsUrl }}" hint-placeholder-val="{{ false }}">
+                        <div style="display: flex; align-items: flex-start; gap: 7px; margin-top: 10px; font-size: 11.5px; color: #f4685f; line-height: 1.5;"><span>⚠</span>Fill in the Server URL above first — o3 needs to know which instance to open.</div>
+                      </sc-if>
+                    </div>
                   </sc-if>
                   <sc-if value="{{ authSSO }}" hint-placeholder-val="{{ false }}">
                     <div style="display: flex; gap: 11px; align-items: flex-start; background: rgba(245,179,64,.07); border: 1px solid rgba(245,179,64,.22); border-radius: 9px; padding: 12px 14px;">
@@ -586,6 +707,10 @@
                   <span>Credentials are stored in your OS keychain through Tauri — never written to disk in plaintext.</span>
                 </div>
 
+                <sc-if value="{{ showInvalid }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; gap: 10px; align-items: flex-start; background: rgba(244,104,95,.08); border: 1px solid rgba(244,104,95,.3); border-radius: 10px; padding: 11px 14px; margin-bottom: 14px;"><span style="color:#f4685f;">⚠</span><span style="font-size: 12.5px; color: #e8968f; line-height: 1.5;">{{ invalidLabel }}</span></div>
+                </sc-if>
+
                 <div style="display: flex; gap: 10px;">
                   <button onClick="{{ testConn }}" style="height: 38px; padding: 0 18px; border-radius: 9px; border: none; background: var(--accent,#2dd4bf); color: #06181a; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;">Test &amp; Save</button>
                   <button onClick="{{ openSetup }}" style="height: 38px; padding: 0 16px; border-radius: 9px; border: 1px solid rgba(var(--ink),.12); background: transparent; color: var(--tx-05); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;">Re-run Setup Wizard…</button>
@@ -599,14 +724,14 @@
                 <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">Appearance</div>
                 <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px;">Tune the look and density of the workspace.</div>
 
-                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
                   <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 12px;">Accent</div>
                   <div style="display: flex; gap: 12px;">
                     <sc-for list="{{ accentSwatches }}" as="s" hint-placeholder-count="5"><button onClick="{{ s.onPick }}" style="{{ s.style }}"></button></sc-for>
                   </div>
                 </div>
 
-                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
                   <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Row Density</div>
                   <div style="font-size: 11.5px; color: var(--tx-09); margin-bottom: 12px;">Ultra-dense fits the most rows on screen for power users.</div>
                   <div style="display: flex; gap: 4px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
@@ -614,11 +739,11 @@
                   </div>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 13px; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 13px; background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px;">
                   <div style="flex: 1;"><div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600;">Show Histogram By Default</div><div style="font-size: 11.5px; color: var(--tx-09); margin-top: 2px;">The event-volume chart above the results.</div></div>
-                  <button onClick="{{ toggleHisto }}" style="{{ mcpToggleStyle }}"><span style="{{ mcpKnobStyle }}"></span></button>
+                  <button onClick="{{ toggleHisto }}" style="{{ histoDefToggle }}"><span style="{{ histoDefKnob }}"></span></button>
                 </div>
-                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
                   <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Theme</div>
                   <div style="font-size: 11.5px; color: var(--tx-09); margin-bottom: 14px;">Choose a look, or let it follow your macOS appearance automatically.</div>
                   <div style="display: flex; gap: 10px;">
@@ -636,48 +761,67 @@
               </div>
             </sc-if>
 
-            <!-- AGENT / MCP -->
+            <!-- AI ECOSYSTEM -->
             <sc-if value="{{ tabAgent }}" hint-placeholder-val="{{ false }}">
               <div>
-                <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">Agent · MCP</div>
-                <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px; line-height: 1.55;">Let a local coding agent (Claude Code, Codex…) drive this same session through a Model Context Protocol server. The app stays the tool — your agent brings the reasoning.</div>
+                <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">AI Ecosystem</div>
+                <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px; line-height: 1.55;">o3 pairs with <b style="color:var(--tx-06);">openobserve-cli</b> — an agent-native command-line tool that lets Claude Code, Codex and other coding agents query this instance directly. It covers the agent scenarios end-to-end, so there's no MCP server to run or expose. Install the CLI and its companion Skill below.</div>
 
-                <div style="display: flex; align-items: center; gap: 13px; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px;">
-                  <div style="flex: 1;"><div style="font-size: 13px; color: var(--tx-01); font-weight: 600;">Expose Local MCP Server</div><div style="font-size: 11.5px; color: var(--tx-09); margin-top: 2px;">Loopback only · token-protected · shares your live query session.</div></div>
-                  <button onClick="{{ toggleMcp }}" style="{{ mcpToggleStyle }}"><span style="{{ mcpKnobStyle }}"></span></button>
+                <!-- openobserve-cli -->
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 20px; margin-bottom: 14px;">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                    <span style="width: 40px; height: 40px; border-radius: 10px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); display: flex; align-items: center; justify-content: center; flex: none; font-family:'JetBrains Mono',monospace; color: var(--accent,#2dd4bf); font-size: 15px; font-weight: 700;">&gt;_</span>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 13.5px; color: var(--tx-01); font-weight: 600; font-family:'JetBrains Mono',monospace;">openobserve-cli</span><span style="{{ cliVerStyle }}">{{ cliVerLabel }}</span></div>
+                      <div style="font-size: 11.5px; color: var(--tx-09); margin-top: 2px;">Query logs, metrics & traces from the terminal — JSON output built for agents.</div>
+                    </div>
+                    <span style="{{ cliPillStyle }}">{{ cliPillLabel }}</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;"><code style="flex: 1; min-width: 0; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: #a3e08c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ cliCmd }}</code><button style="height: 33px; padding: 0 11px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); font-size: 12px; cursor: pointer; font-family:'JetBrains Mono',monospace; flex: none;">⧉</button></div>
+                  <div style="display: flex; gap: 8px;">
+                    <button onClick="{{ cliPrimary.onClick }}" style="{{ cliPrimary.style }}">{{ cliPrimary.label }}</button>
+                    <sc-if value="{{ cliInstalled }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ uninstallCli }}" style="{{ dangerBtnStyle }}">Uninstall</button>
+                    </sc-if>
+                  </div>
                 </div>
 
-                <sc-if value="{{ mcpOn }}" hint-placeholder-val="{{ true }}">
-                  <div>
-                    <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Endpoint</div>
-                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;"><code style="flex: 1; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 12px; color: #a3e08c;">http://127.0.0.1:7878/sse</code><button style="height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); font-size: 11.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">⧉ Copy</button></div>
-                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Access token</div>
-                      <div style="display: flex; align-items: center; gap: 8px;"><code style="flex: 1; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 12px; color: #7c8696;">oo_mcp_••••••••••••••3f9d</code><button style="height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(var(--ink),.1); background: var(--sf-ctrl); color: var(--tx-06); font-size: 11.5px; cursor: pointer; font-family:'JetBrains Mono',monospace;">↻ Rotate</button></div>
+                <!-- companion Skill -->
+                <div style="{{ skillCardStyle }}">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                    <span style="width: 40px; height: 40px; border-radius: 10px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); display: flex; align-items: center; justify-content: center; flex: none;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#2dd4bf)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"></path><path d="M19 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"></path></svg></span>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 13.5px; color: var(--tx-01); font-weight: 600; font-family:'JetBrains Mono',monospace;">openobserve</span><span style="font-size: 11px; color: var(--tx-10);">Skill</span></div>
+                      <div style="font-size: 11.5px; color: var(--tx-09); margin-top: 2px;">Teaches your coding agent the CLI — deploys into each agent it detects.</div>
                     </div>
-
-                    <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                      <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 10px;">Connect Your Agent</div>
-                      <pre style="margin: 0; background: var(--sf-rail); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 12px 14px; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--tx-03); white-space: pre-wrap; word-break: break-all; line-height: 1.6;"><span style="color:#7dd3fc;">claude</span> mcp add openobserve \
-  --transport sse http://127.0.0.1:7878/sse \
-  --header <span style="color:#a3e08c;">"Authorization: Bearer $OO_MCP_TOKEN"</span></pre>
-                      <div style="font-size: 11px; color: var(--tx-09); margin-top: 9px;">Exposes tools: <b style="color:var(--tx-06);">run_sql · get_schema · get_field_stats · summarize_results</b> + the live session as a resource.</div>
-                    </div>
-
-                    <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                      <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Default Leash</div>
-                      <div style="font-size: 11.5px; color: var(--tx-09); margin-bottom: 12px;">{{ agentDesc }}</div>
-                      <div style="display: flex; gap: 4px; background: var(--sf-02); border: 1px solid rgba(var(--ink),.07); border-radius: 8px; padding: 3px;">
-                        <sc-for list="{{ agentTabs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onPick }}" style="{{ a.style }}">{{ a.label }}</button></sc-for>
-                      </div>
-                    </div>
-
-                    <div style="display: flex; gap: 12px;">
-                      <div style="flex: 1; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 10px; padding: 14px 16px;"><div style="font-size: 11px; color: var(--tx-09); margin-bottom: 4px;">Max Scan / Query</div><div style="font-size: 14px; color: var(--tx-01); font-family:'JetBrains Mono',monospace;">5.0 GB</div></div>
-                      <div style="flex: 1; background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 10px; padding: 14px 16px;"><div style="font-size: 11px; color: var(--tx-09); margin-bottom: 4px;">Max Rows Returned</div><div style="font-size: 14px; color: var(--tx-01); font-family:'JetBrains Mono',monospace;">10,000</div></div>
-                    </div>
+                    <span style="{{ skillPillStyle }}">{{ skillPillLabel }}</span>
                   </div>
-                </sc-if>
+
+                  <sc-if value="{{ skillDeployed }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+                      <span style="font-size: 11px; color: var(--tx-10);">Deployed to</span>
+                      <sc-for list="{{ skillAgents }}" as="ag" hint-placeholder-count="2"><span style="{{ ag.style }}"><span style="width:5px;height:5px;border-radius:50%;background:var(--accent,#2dd4bf);"></span>{{ ag.name }}</span></sc-for>
+                    </div>
+                  </sc-if>
+
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;"><code style="flex: 1; min-width: 0; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.08); border-radius: 7px; padding: 8px 11px; font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: #a3e08c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">openobserve-cli skill install</code></div>
+                  <div style="display: flex; gap: 8px;">
+                    <button onClick="{{ skillPrimary.onClick }}" style="{{ skillPrimary.style }}">{{ skillPrimary.label }}</button>
+                    <sc-if value="{{ skillInstalled }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ uninstallSkill }}" style="{{ dangerBtnStyle }}">Uninstall</button>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ cliMissing }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 11px; color: var(--tx-10); margin-top: 10px;">Install openobserve-cli first — the Skill ships inside the binary.</div>
+                  </sc-if>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--tx-10); margin-top: 4px;">
+                  <span>Learn more:</span>
+                  <span style="color: var(--accent,#2dd4bf); cursor: pointer;">CLI reference</span>
+                  <span style="opacity:.4;">·</span>
+                  <span style="color: var(--accent,#2dd4bf); cursor: pointer;">GitHub</span>
+                </div>
               </div>
             </sc-if>
 
@@ -686,8 +830,8 @@
               <div>
                 <div style="font-size: 19px; font-weight: 600; color: var(--tx-hi); margin-bottom: 5px;">About</div>
                 <div style="font-size: 13px; color: var(--tx-09); margin-bottom: 22px;">o3 — a native desktop client for OpenObserve.</div>
-                <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.06); border-radius: 12px; padding: 22px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                  <span style="width: 44px; height: 44px; border-radius: 12px; background: var(--accent,#2dd4bf); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 22px -4px var(--accent,#2dd4bf); flex: none;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06181a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg></span>
+                <div style="background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 12px; padding: 22px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                  <span style="width: 44px; height: 44px; border-radius: 12px; position: relative; overflow: hidden; background: radial-gradient(120% 120% at 30% 8%,#123039,#06121a); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 1px rgba(45,212,191,.2) inset, 0 0 22px -4px rgba(45,212,191,.5); flex: none;"><span style="font-family:'JetBrains Mono',monospace; font-weight: 800; font-size: 24px; letter-spacing: -1.2px; line-height: 1; color: #5df0dd; filter: drop-shadow(0 0 6px rgba(45,212,191,.6));">o3</span></span>
                   <div style="flex: 1;"><div style="font-size: 15px; color: var(--tx-hi); font-weight: 600;">o3 <span style="font-size: 11px; color: var(--tx-09); font-weight: 400;">· OpenObserve desktop client</span></div><div style="font-family:'JetBrains Mono',monospace; font-size: 11.5px; color: var(--accent,#2dd4bf); margin-top: 4px;">SELECT signal FROM noise</div><div style="font-size: 12px; color: var(--tx-09); font-family:'JetBrains Mono',monospace; margin-top: 4px;">v0.1.0 · Tauri 2.0 · macOS arm64</div></div>
                   <button style="height: 34px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(var(--ink),.12); background: transparent; color: var(--tx-05); font-size: 12.5px; cursor: pointer; font-family: inherit;">Check For Updates</button>
                 </div>
@@ -715,7 +859,7 @@
             <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
             <span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></span>
           </div>
-          <span style="width: 40px; height: 40px; border-radius: 11px; background: var(--accent,#2dd4bf); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 26px -4px var(--accent,#2dd4bf); margin-bottom: 22px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06181a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg></span>
+          <span style="width: 40px; height: 40px; border-radius: 11px; position: relative; overflow: hidden; background: radial-gradient(120% 120% at 30% 8%,#123039,#06121a); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 1px rgba(45,212,191,.2) inset, 0 0 26px -4px rgba(45,212,191,.5); margin-bottom: 22px;"><span style="font-family:'JetBrains Mono',monospace; font-weight: 800; font-size: 22px; letter-spacing: -1.1px; line-height: 1; color: #5df0dd; filter: drop-shadow(0 0 6px rgba(45,212,191,.6));">o3</span></span>
           <div style="font-size: 26px; font-weight: 700; color: var(--tx-max); line-height: 1.2; margin-bottom: 8px;">Welcome To o3</div>
           <div style="font-family:'JetBrains Mono',monospace; font-size: 13px; color: var(--accent,#2dd4bf); margin-bottom: 14px;">SELECT signal FROM noise</div>
           <div style="font-size: 13px; color: var(--gg-3); line-height: 1.6; margin-bottom: 30px;">A fast, native desktop client for OpenObserve. Point it at your self-hosted instance to begin.</div>
@@ -748,15 +892,18 @@
 
             <div style="margin-bottom: 15px;">
               <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Context name</div>
-              <input value="{{ conn.name }}" onChange="{{ onName }}" placeholder="prod, staging, local…" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+              <input value="{{ conn.name }}" onChange="{{ onName }}" onBlur="{{ fw.name.onBlur }}" placeholder="prod, staging, local…" spellcheck="false" style="{{ fw.name.style }}">
+              <sc-if value="{{ fw.name.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ fw.name.err }}</div></sc-if>
             </div>
             <div style="margin-bottom: 15px;">
               <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Server URL</div>
-              <input value="{{ conn.url }}" onChange="{{ onUrl }}" placeholder="http://localhost:5080" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+              <input value="{{ conn.url }}" onChange="{{ onUrl }}" onBlur="{{ fw.url.onBlur }}" placeholder="http://localhost:5080" spellcheck="false" style="{{ fw.url.style }}">
+              <sc-if value="{{ fw.url.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ fw.url.err }}</div></sc-if>
             </div>
             <div style="margin-bottom: 15px;">
               <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Organization</div>
-              <input value="{{ conn.org }}" onChange="{{ onOrg }}" placeholder="default" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;">
+              <input value="{{ conn.org }}" onChange="{{ onOrg }}" onBlur="{{ fw.org.onBlur }}" placeholder="default" spellcheck="false" style="{{ fw.org.style }}">
+              <sc-if value="{{ fw.org.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ fw.org.err }}</div></sc-if>
             </div>
             <div style="margin-bottom: 15px;">
               <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Authentication</div>
@@ -766,12 +913,22 @@
             </div>
             <sc-if value="{{ authPassword }}" hint-placeholder-val="{{ true }}">
               <div style="display: flex; gap: 11px; margin-bottom: 15px;">
-                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" spellcheck="false" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
-                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Email</div><input value="{{ conn.email }}" onChange="{{ onEmail }}" onBlur="{{ fw.email.onBlur }}" spellcheck="false" style="{{ fw.email.style }}"><sc-if value="{{ fw.email.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ fw.email.err }}</div></sc-if></div>
+                <div style="flex: 1; min-width: 0;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Password</div><input type="password" value="{{ conn.password }}" onChange="{{ onPass }}" onBlur="{{ fw.password.onBlur }}" style="{{ fw.password.style }}"><sc-if value="{{ fw.password.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ fw.password.err }}</div></sc-if></div>
               </div>
             </sc-if>
             <sc-if value="{{ authToken }}" hint-placeholder-val="{{ false }}">
-              <div style="margin-bottom: 15px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" placeholder="oo_sa_…" style="width: 100%; height: 38px; padding: 0 12px; background: var(--sf-ctrl); border: 1px solid rgba(var(--ink),.1); border-radius: 8px; color: var(--tx-01); font-size: 13px; font-family:'JetBrains Mono',monospace; outline: none; box-sizing: border-box;"></div>
+              <div style="margin-bottom: 15px;"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--tx-10); font-weight: 600; margin-bottom: 8px;">Service-account token</div><input value="{{ conn.token }}" onChange="{{ onToken }}" onBlur="{{ fw.token.onBlur }}" placeholder="oo_sa_…" style="{{ fw.token.style }}"><sc-if value="{{ fw.token.hasErr }}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #f4685f;"><span>⚠</span>{{ fw.token.err }}</div></sc-if></div>
+            </sc-if>
+            <sc-if value="{{ authBrowser }}" hint-placeholder-val="{{ false }}">
+              <div style="background: var(--sf-05); border: 1px solid rgba(var(--ink),.07); border-radius: 11px; padding: 15px 16px; margin-bottom: 15px;">
+                <div style="font-size: 12.5px; color: var(--tx-01); font-weight: 600; margin-bottom: 4px;">Sign in through your instance</div>
+                <div style="font-size: 11.5px; color: var(--tx-09); line-height: 1.5; margin-bottom: 12px;">Works for every OpenObserve edition — no token to create. o3 opens the sign-in page and keeps the session in your keychain.</div>
+                <button onClick="{{ browserSignIn }}" style="{{ browserBtnStyle }}">{{ browserBtnLabel }}</button>
+                <sc-if value="{{ browserNeedsUrl }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: flex-start; gap: 7px; margin-top: 10px; font-size: 11.5px; color: #f4685f; line-height: 1.5;"><span>⚠</span>Fill in the Server URL above first — o3 needs to know which instance to open.</div>
+                </sc-if>
+              </div>
             </sc-if>
             <sc-if value="{{ authSSO }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; gap: 11px; align-items: flex-start; background: rgba(245,179,64,.07); border: 1px solid rgba(245,179,64,.22); border-radius: 9px; padding: 12px 14px; margin-bottom: 15px;"><span style="color: #f5b340; font-size: 15px; line-height: 1;">⚠</span><div style="font-size: 12.5px; color: #c8b083; line-height: 1.55;">OAuth / SSO needs <b style="color:#f5d9a0;">OpenObserve Enterprise</b>. On the OSS edition, use email + password or a token.</div></div>
@@ -788,7 +945,7 @@
             </div>
 
             <div style="display: flex; gap: 11px;">
-              <button onClick="{{ closeSetup }}" style="flex: 1; height: 42px; border-radius: 10px; border: none; background: var(--accent,#2dd4bf); color: #06181a; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;">Connect &amp; Continue</button>
+              <button onClick="{{ connectAndContinue }}" style="flex: 1; height: 42px; border-radius: 10px; border: none; background: var(--accent,#2dd4bf); color: #06181a; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;">Connect &amp; Continue</button>
               <button onClick="{{ closeSetup }}" style="height: 42px; padding: 0 18px; border-radius: 10px; border: 1px solid rgba(var(--ink),.12); background: transparent; color: var(--tx-07); font-size: 13px; cursor: pointer; font-family: inherit;">Skip</button>
             </div>
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 11px; color: var(--tx-12);"><span style="color: var(--accent,#2dd4bf);">🔒</span> Stored in your OS keychain via Tauri — never in plaintext.</div>
@@ -868,7 +1025,9 @@
   &quot;accent&quot;: { &quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#2dd4bf&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;#2dd4bf&quot;, &quot;#7c83ff&quot;, &quot;#f5a86a&quot;, &quot;#5b9dff&quot;] },
   &quot;density&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;ultra&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;ultra&quot;, &quot;comfortable&quot;] },
   &quot;showHistogram&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; },
-  &quot;defaultTheme&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;dark&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;], &quot;section&quot;: &quot;Appearance&quot; }
+  &quot;osUser&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;alex&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Account&quot; },
+  &quot;defaultTheme&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;dark&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;], &quot;section&quot;: &quot;Appearance&quot; },
+  &quot;platform&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;macOS&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;macOS&quot;, &quot;Windows&quot;, &quot;Linux&quot;], &quot;section&quot;: &quot;Window&quot; }
 }">
 class Component extends DCLogic {
   constructor(props) {
@@ -959,13 +1118,14 @@ class Component extends DCLogic {
       caret: this.TABS[0].q.length,
       showSuggest: false,
       suggestIndex: 0,
-      stream: 'demo_logs', streamOpen: false,
+      stream: 'demo_logs', streamOpen: false, streamFilter: '',
+      tabMenu: null,
       timeRange: 'Past 15 Minutes', timeOpen: false,
       timeTab: 'relative', relAmount: 15, relUnit: 'm',
       absFrom: '2026-06-25 13:00:00', absTo: '2026-06-25 14:00:00',
       running: false, queryMs: 596,
       activeTabId: 't1',
-      tabs: this.TABS.map(t => ({ ...t })),
+      tabs: this.TABS.map((t, i) => ({ ...t, ctxId: i === 3 ? 'ctx-staging' : 'ctx-prod' })),
       editingTabId: null,
       selectedId: null,
       fieldFilter: '',
@@ -992,15 +1152,23 @@ class Component extends DCLogic {
       accentChoice: null,
       density: this.props.density || 'ultra',
       testStatus: 'ok',
-      mcpOn: true,
-      agentMode: 'propose',
+      cli: { installed: true, version: '0.4.1', busy: null },
+      skill: { installed: false, busy: null },
       contexts: [
         { id: 'ctx-prod', name: 'prod', color: '#34e0a1', url: 'https://observe.example.internal', org: 'default', auth: 'password', email: 'ops@example.com', password: 'svc-7f3a-corp-key-2f9d', token: '', selfSigned: true },
         { id: 'ctx-staging', name: 'staging', color: '#f5b340', url: 'https://observe.staging.example.internal', org: 'default', auth: 'token', email: '', password: '', token: 'oo_sa_St4g1ng_b7f2e9d14a', selfSigned: true },
         { id: 'ctx-local', name: 'local-dev', color: '#7c83ff', url: 'http://localhost:5080', org: 'dev', auth: 'password', email: 'root@example.com', password: 'Complexpass#123', token: '', selfSigned: false }
       ],
       currentContextId: 'ctx-prod',
-      ctxSwitchOpen: false
+      ctxSwitchOpen: false,
+      editingCtxId: 'ctx-prod',
+      defaultCtxId: 'ctx-prod',
+      cliActiveCtx: 'prod',
+      newTabCtxMode: 'last',
+      lastCtxId: 'ctx-prod',
+      touched: {},
+      saveTried: false,
+      browserAuth: 'idle'
     };
   }
 
@@ -1334,7 +1502,9 @@ class Component extends DCLogic {
   }
 
   // ---- menus / actions ----
-  toggleStream = () => this.setState(s => ({ streamOpen: !s.streamOpen, timeOpen: false }));
+  toggleStream = () => this.setState(s => ({ streamOpen: !s.streamOpen, timeOpen: false, streamFilter: '' }));
+  closeStream = () => this.setState({ streamOpen: false });
+  onStreamFilter = (e) => this.setState({ streamFilter: e.target.value });
   toggleTime = () => this.setState(s => ({ timeOpen: !s.timeOpen, streamOpen: false }));
   setTimeTab = (t) => this.setState({ timeTab: t });
   pickQuick = (label, amount, unit) => this.setState({ timeRange: label, relAmount: amount, relUnit: unit, timeTab: 'relative', timeOpen: false });
@@ -1352,12 +1522,63 @@ class Component extends DCLogic {
   toggleHisto = () => this.setState(s => ({ showHisto: !s.showHisto }));
   toggleGuide = () => this.setState(s => ({ guideOpen: !s.guideOpen }));
   openSettings = () => this.setState({ view: 'settings' });
+  openEcosystem = () => this.setState({ view: 'settings', setTab: 'agent' });
   closeSettings = () => this.setState({ view: 'app' });
   openSetup = () => this.setState({ setupOpen: true });
   closeSetup = () => this.setState({ setupOpen: false });
   currentContext() { return this.state.contexts.find(c => c.id === this.state.currentContextId) || this.state.contexts[0]; }
-  setConn = (k, v) => this.setState(s => ({ contexts: s.contexts.map(c => c.id === s.currentContextId ? { ...c, [k]: v } : c) }));
-  useContext = (id) => this.setState({ currentContextId: id, ctxSwitchOpen: false, testStatus: 'idle' });
+  editingContext() { return this.state.contexts.find(c => c.id === this.state.editingCtxId) || this.currentContext(); }
+  setConn = (k, v) => this.setState(s => ({ contexts: s.contexts.map(c => c.id === s.editingCtxId ? { ...c, [k]: v } : c) }));
+  // switching a context only affects the tab you are on — o3 has no global active context
+  useContext = (id) => this.setState(s => ({
+    currentContextId: id, lastCtxId: id, ctxSwitchOpen: false, testStatus: 'idle',
+    tabs: s.tabs.map(t => t.id === s.activeTabId ? { ...t, ctxId: id } : t)
+  }));
+  editCtx = (id, e) => { if (e) e.stopPropagation(); this.setState({ editingCtxId: id, testStatus: 'idle', browserAuth: 'idle', saveTried: false }); };
+  setDefaultCtx = (id, e) => { if (e) e.stopPropagation(); this.setState({ defaultCtxId: id }); };
+  setNewTabMode = (m) => this.setState({ newTabCtxMode: m });
+  adoptCliActive = () => this.setState(s => { const m = s.contexts.find(c => c.name === s.cliActiveCtx); return m ? { defaultCtxId: m.id, newTabCtxMode: 'default' } : {}; });
+  newTabCtxId() { const s = this.state; return s.newTabCtxMode === 'default' ? s.defaultCtxId : (s.lastCtxId || s.defaultCtxId); }
+  VALIDATORS = {
+    name: (v) => !String(v).trim() ? 'Context name is required' : (/\s/.test(String(v).trim()) ? 'Use dashes instead of spaces' : ''),
+    url: (v) => !String(v).trim() ? 'Server URL is required' : (!/^https?:\/\/[^\s]+$/i.test(String(v).trim()) ? 'Must start with http:// or https://' : ''),
+    org: (v) => !String(v).trim() ? 'Organization is required' : '',
+    email: (v) => !String(v).trim() ? 'Email is required for basic auth' : (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v).trim()) ? 'Not a valid email address' : ''),
+    password: (v) => !String(v) ? 'Password is required for basic auth' : '',
+    token: (v) => !String(v).trim() ? 'A service-account token is required' : (!/^oo_/.test(String(v).trim()) ? 'Tokens normally start with oo_sa_' : '')
+  };
+  ctxErrors(c) {
+    if (!c) return {};
+    const e = {};
+    ['name', 'url', 'org'].forEach(k => { const m = this.VALIDATORS[k](c[k] || ''); if (m) e[k] = m; });
+    if (c.auth === 'password') ['email', 'password'].forEach(k => { const m = this.VALIDATORS[k](c[k] || ''); if (m) e[k] = m; });
+    if (c.auth === 'token') { const m = this.VALIDATORS.token(c.token || ''); if (m) e.token = m; }
+    return e;
+  }
+  touch = (k) => this.setState(s => ({ touched: { ...s.touched, [s.editingCtxId + ':' + k]: true } }));
+  touchAll = () => this.setState(s => {
+    const t = { ...s.touched };
+    ['name', 'url', 'org', 'email', 'password', 'token'].forEach(k => { t[s.editingCtxId + ':' + k] = true; });
+    return { touched: t, saveTried: true };
+  });
+  browserSignIn = () => {
+    const c = this.editingContext();
+    if (this.VALIDATORS.url(c.url || '')) {
+      this.setState(s => ({ touched: { ...s.touched, [s.editingCtxId + ':url']: true }, browserAuth: 'needs-url' }));
+      return;
+    }
+    this.setState({ browserAuth: 'opening' });
+    clearTimeout(this._bt);
+    this._bt = setTimeout(() => this.setState({ browserAuth: 'signed', testStatus: 'ok' }), 1100);
+  };
+  connectAndContinue = () => {
+    if (Object.keys(this.ctxErrors(this.editingContext())).length) { this.touchAll(); return; }
+    this.closeSetup();
+  };
+  osUserName() { return this.props.osUser || 'alex'; }
+  osUserParts() { return String(this.osUserName()).split(/[.\-_\s]+/).filter(Boolean); }
+  userInitials() { const p = this.osUserParts(); return (p.length > 1 ? p[0][0] + p[1][0] : (p[0] || '?').slice(0, 2)).toUpperCase(); }
+  osUserDisplay() { return this.osUserParts().map(x => x[0].toUpperCase() + x.slice(1)).join(' ') || 'Unknown'; }
   toggleCtxSwitch = () => this.setState(s => ({ ctxSwitchOpen: !s.ctxSwitchOpen }));
   closeCtxSwitch = () => this.setState({ ctxSwitchOpen: false });
   openContextSettings = () => this.setState({ view: 'settings', setTab: 'connection', ctxSwitchOpen: false });
@@ -1365,7 +1586,7 @@ class Component extends DCLogic {
     const id = 'ctx-' + Date.now();
     const palette = ['#34e0a1', '#f5b340', '#7c83ff', '#5b9dff', '#f4685f', '#2dd4bf', '#f5a86a', '#b58bff'];
     const nc = { id, name: 'new-context', color: palette[this.state.contexts.length % palette.length], url: '', org: 'default', auth: 'password', email: '', password: '', token: '', selfSigned: false };
-    this.setState(s => ({ contexts: [...s.contexts, nc], currentContextId: id, testStatus: 'idle' }));
+    this.setState(s => ({ contexts: [...s.contexts, nc], editingCtxId: id, testStatus: 'idle', saveTried: false, browserAuth: 'idle' }));
     return id;
   };
   addContextFromMenu = () => { this.addContext(); this.setState({ ctxSwitchOpen: false, view: 'settings', setTab: 'connection' }); };
@@ -1374,11 +1595,38 @@ class Component extends DCLogic {
     this.setState(s => {
       if (s.contexts.length <= 1) return {};
       const remaining = s.contexts.filter(c => c.id !== id);
-      return { contexts: remaining, currentContextId: s.currentContextId === id ? remaining[0].id : s.currentContextId };
+      const fb = remaining[0].id;
+      return {
+        contexts: remaining,
+        currentContextId: s.currentContextId === id ? fb : s.currentContextId,
+        editingCtxId: s.editingCtxId === id ? fb : s.editingCtxId,
+        defaultCtxId: s.defaultCtxId === id ? fb : s.defaultCtxId,
+        lastCtxId: s.lastCtxId === id ? fb : s.lastCtxId,
+        tabs: s.tabs.map(t => t.ctxId === id ? { ...t, ctxId: fb } : t)
+      };
     });
   };
-  testConn = () => { this.setState({ testStatus: 'testing' }); setTimeout(() => this.setState({ testStatus: 'ok' }), 780); };
-  toggleMcp = () => this.setState(s => ({ mcpOn: !s.mcpOn }));
+  testConn = () => {
+    if (Object.keys(this.ctxErrors(this.editingContext())).length) { this.touchAll(); this.setState({ testStatus: 'invalid' }); return; }
+    this.setState({ testStatus: 'testing' });
+    setTimeout(() => this.setState({ testStatus: 'ok' }), 780);
+  };
+  CLI_LATEST = '0.4.3';
+  DETECTED_AGENTS = ['Claude Code', 'Codex'];
+  _pkg(target, phase, patch, extra) {
+    this.setState(s => ({ [target]: { ...s[target], busy: phase } }));
+    clearTimeout(this['_t_' + target]);
+    this['_t_' + target] = setTimeout(() => {
+      this.setState(s => ({ [target]: { ...s[target], busy: null, ...patch } }));
+      if (extra) extra();
+    }, 950);
+  }
+  installCli = () => this._pkg('cli', 'installing', { installed: true, version: this.CLI_LATEST });
+  upgradeCli = () => this._pkg('cli', 'upgrading', { version: this.CLI_LATEST });
+  uninstallCli = () => this._pkg('cli', 'removing', { installed: false, version: '' }, () => this.setState({ skill: { installed: false, busy: null } }));
+  installSkill = () => this._pkg('skill', 'installing', { installed: true });
+  reinstallSkill = () => this._pkg('skill', 'reinstalling', { installed: true });
+  uninstallSkill = () => this._pkg('skill', 'removing', { installed: false });
   toggleSidebar = () => this.setState(s => ({ sidebarCollapsed: !s.sidebarCollapsed }));
   toggleHistory = () => this.setState(s => ({ historyOpen: !s.historyOpen, streamOpen: false, timeOpen: false }));
   closeHistory = () => this.setState({ historyOpen: false });
@@ -1396,7 +1644,7 @@ class Component extends DCLogic {
   stop = (e) => { e.stopPropagation(); };
   onFieldFilter = (e) => this.setState({ fieldFilter: e.target.value });
   closeDrawer = () => this.setState({ selectedId: null });
-  pickTab = (t) => this.setState({ query: t.q, caret: t.q.length, activeTabId: t.id, selectedId: null });
+  pickTab = (t) => this.setState(s => ({ query: t.q, caret: t.q.length, activeTabId: t.id, selectedId: null, currentContextId: t.ctxId || s.currentContextId }));
   closeTab = (id, e) => {
     if (e) e.stopPropagation();
     this.setState(s => {
@@ -1415,13 +1663,39 @@ class Component extends DCLogic {
     });
   };
   startRename = (id, e) => { if (e) e.stopPropagation(); this.setState({ editingTabId: id }); };
+  // ---- tab context menu / bulk actions ----
+  openTabMenu = (id, e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    this.setState({ tabMenu: { id, x: e ? e.clientX : 0, y: e ? e.clientY : 0 }, editingTabId: null });
+  };
+  closeTabMenu = (e) => { if (e) e.preventDefault(); this.setState({ tabMenu: null }); };
+  _closeTabsBy = (keep, targetId) => this.setState(s => {
+    let tabs = s.tabs.filter((t, i) => keep(t, i, s.tabs));
+    if (tabs.length === 0) tabs = s.tabs.slice(-1);
+    const patch = { tabs, editingTabId: null, tabMenu: null };
+    if (!tabs.some(t => t.id === s.activeTabId)) {
+      const next = tabs.find(t => t.id === targetId) || tabs[tabs.length - 1];
+      patch.activeTabId = next.id; patch.query = next.q; patch.caret = next.q.length; patch.selectedId = null;
+    }
+    return patch;
+  });
+  closeTabsLeft = (id) => this._closeTabsBy((t, i, arr) => i >= arr.findIndex(x => x.id === id), id);
+  closeTabsRight = (id) => this._closeTabsBy((t, i, arr) => i <= arr.findIndex(x => x.id === id), id);
+  closeOtherTabs = (id) => this._closeTabsBy((t) => t.id === id, id);
+  closeAllTabs = () => {
+    const id = 't' + Date.now();
+    const q = 'SELECT *\nFROM ' + this.state.stream + '\n';
+    const cid = this.newTabCtxId();
+    this.setState({ tabs: [{ id, name: 'untitled', q, stream: this.state.stream, group: null, ctxId: cid }], activeTabId: id, currentContextId: cid, query: q, caret: q.length, editingTabId: null, tabMenu: null, selectedId: null });
+  };
   onTabName = (id, e) => { const v = e.target.value; this.setState(s => ({ tabs: s.tabs.map(t => t.id === id ? { ...t, name: v } : t) })); };
   commitRename = () => this.setState({ editingTabId: null });
   onTabNameKey = (e) => { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); this.setState({ editingTabId: null }); } };
   newTab = () => {
     const id = 't' + Date.now();
     const q = 'SELECT *\nFROM ' + this.state.stream + '\n';
-    this.setState(s => ({ tabs: [...s.tabs, { id, name: 'untitled', q, stream: s.stream, group: null }], activeTabId: id, query: q, caret: q.length, selectedId: null }));
+    const cid = this.newTabCtxId();
+    this.setState(s => ({ tabs: [...s.tabs, { id, name: 'untitled', q, stream: s.stream, group: null, ctxId: cid }], activeTabId: id, currentContextId: cid, query: q, caret: q.length, selectedId: null }));
   };
   runQuery = () => {
     this.recordHistory();
@@ -1475,6 +1749,7 @@ class Component extends DCLogic {
         onClose: (e) => this.closeTab(t.id, e),
         canClose: st.tabs.length > 1,
         onRename: (e) => this.startRename(t.id, e),
+        onCtxMenu: (e) => this.openTabMenu(t.id, e),
         onNameChange: (e) => this.onTabName(t.id, e),
         onNameKey: this.onTabNameKey,
         onNameBlur: this.commitRename,
@@ -1484,6 +1759,38 @@ class Component extends DCLogic {
     const byGroup = {};
     st.tabs.forEach(t => { const k = t.group || '_'; (byGroup[k] = byGroup[k] || []).push(t); });
     const tabItems = st.tabs.map(t => makeTab(t, null));
+
+    // tab context menu
+    let tabMenu = null;
+    const tm = st.tabMenu;
+    if (tm) {
+      const idx = st.tabs.findIndex(t => t.id === tm.id);
+      const many = st.tabs.length > 1;
+      const raw = [
+        { label: 'Rename Tab', on: () => this.setState({ tabMenu: null, editingTabId: tm.id }), en: true },
+        { sep: true },
+        { label: 'Close Tab', on: () => { this.closeTab(tm.id); this.closeTabMenu(); }, en: many },
+        { sep: true },
+        { label: 'Close Tabs to the Left', on: () => this.closeTabsLeft(tm.id), en: idx > 0 },
+        { label: 'Close Tabs to the Right', on: () => this.closeTabsRight(tm.id), en: idx < st.tabs.length - 1 },
+        { label: 'Close Other Tabs', on: () => this.closeOtherTabs(tm.id), en: many },
+        { sep: true },
+        { label: 'Close All', on: () => this.closeAllTabs(), en: true }
+      ];
+      const vw = (typeof window !== 'undefined') ? window.innerWidth : 1200;
+      const left = Math.min(tm.x, vw - 232);
+      tabMenu = {
+        wrapStyle: `position:fixed;left:${Math.max(8, left)}px;top:${tm.y + 4}px;min-width:216px;background:var(--glass-pop);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid rgba(var(--ink),.12);border-radius:11px;box-shadow:0 24px 56px -12px rgba(0,0,0,.55),inset 0 1px 0 var(--glass-hi);padding:5px;z-index:91;animation:ooFade .1s ease;`,
+        items: raw.map(it => it.sep
+          ? { sep: true, notSep: false, style: 'height:1px;margin:5px 9px;background:rgba(var(--ink),.09);' }
+          : {
+              sep: false, notSep: true, label: it.label,
+              onClick: it.en ? ((e) => { if (e) e.stopPropagation(); it.on(); }) : ((e) => { if (e) e.stopPropagation(); }),
+              hover: it.en ? 'background:var(--sf-hov2);color:var(--tx-hi);' : '',
+              style: `display:flex;align-items:center;height:31px;padding:0 12px;border-radius:7px;font-size:12.5px;font-family:inherit;white-space:nowrap;cursor:${it.en ? 'pointer' : 'default'};color:${it.en ? 'var(--tx-02)' : 'var(--tx-13)'};`
+            })
+      };
+    }
 
 
     // editor
@@ -1519,8 +1826,9 @@ class Component extends DCLogic {
       style: `flex:1;text-align:center;padding:6px 4px;border-radius:6px;border:none;cursor:pointer;font-size:11.5px;font-family:inherit;${st.relUnit === id ? 'background:' + this.hexA(accent, 0.18) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
 
-    // streams
-    const streams = this.STREAMS.map(([name, size]) => ({
+    // streams (filtered by search)
+    const sf = (st.streamFilter || '').trim().toLowerCase();
+    const streams = this.STREAMS.filter(([name]) => !sf || name.toLowerCase().includes(sf)).map(([name, size]) => ({
       name, size,
       onPick: () => this.setState({ stream: name, streamOpen: false }),
       style: `display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;cursor:pointer;${st.stream===name ? 'background:'+this.hexA(accent,0.12)+';color:'+accent : 'color:var(--tx-05)'}`
@@ -1601,19 +1909,19 @@ class Component extends DCLogic {
 
     // ---- settings + setup ----
     const cur = this.currentContext();
-    const conn = cur;
+    const conn = this.editingContext(); // the edit form targets the context you picked, not the tab's
     const settingsOpen = st.view === 'settings';
-    const ST = [['connection', 'Connection'], ['appearance', 'Appearance'], ['agent', 'Agent · MCP'], ['about', 'About']];
+    const ST = [['connection', 'Connection'], ['appearance', 'Appearance'], ['agent', 'AI Ecosystem'], ['about', 'About']];
     const setTabs = ST.map(([id, label]) => ({
       label, onPick: () => this.setState({ setTab: id }),
       style: `display:flex;align-items:center;width:100%;padding:9px 11px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:inherit;text-align:left;margin-bottom:2px;${st.setTab === id ? 'background:' + this.hexA(accent, 0.14) + ';color:' + accent + ';font-weight:600' : 'background:transparent;color:var(--tx-06)'}`
     }));
-    const authOpts = [['password', 'Email & Password'], ['token', 'API Token'], ['sso', 'SSO']];
+    const authOpts = [['browser', 'Browser sign-in'], ['password', 'Email & Password'], ['token', 'API Token'], ['sso', 'SSO']];
     const authTabs = authOpts.map(([id, label]) => ({
-      label, onPick: () => this.setConn('auth', id),
+      label, onPick: () => { this.setConn('auth', id); this.setState({ browserAuth: 'idle', testStatus: 'idle' }); },
       style: `flex:1;text-align:center;padding:7px 4px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;${conn.auth === id ? 'background:' + this.hexA(accent, 0.18) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
-    const testMap = { testing: 'Testing…', ok: '✓ Connected', fail: '✕ Failed', idle: 'Test Connection' };
+    const testMap = { testing: 'Testing…', ok: '✓ Connected', fail: '✕ Failed', invalid: '⚠ Check the fields', idle: 'Test Connection' };
     const ACC = ['#2dd4bf', '#7c83ff', '#f5a86a', '#5b9dff', '#f4685f'];
     const accentSwatches = ACC.map(c => ({
       onPick: () => this.setState({ accentChoice: c }),
@@ -1624,27 +1932,76 @@ class Component extends DCLogic {
       label, onPick: () => this.setState({ density: id }),
       style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-family:inherit;${st.density === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
     }));
-    const mcpToggleStyle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${st.mcpOn ? 'background:' + accent : 'background:var(--sf-track)'}`;
-    const mcpKnobStyle = `position:absolute;top:2px;${st.mcpOn ? 'left:19px;background:#06181a' : 'left:2px;background:var(--tx-10)'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
+    const histoDefToggle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${st.showHisto ? 'background:' + accent : 'background:var(--sf-track)'}`;
+    const histoDefKnob = `position:absolute;top:2px;${st.showHisto ? 'left:19px;background:#06181a' : 'left:2px;background:var(--tx-10)'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
     const ssToggleStyle = `width:38px;height:21px;border-radius:11px;border:none;cursor:pointer;position:relative;flex:none;${conn.selfSigned ? 'background:' + accent : 'background:var(--sf-track)'}`;
     const ssKnobStyle = `position:absolute;top:2px;${conn.selfSigned ? 'left:19px;background:#06181a' : 'left:2px;background:var(--tx-10)'};width:17px;height:17px;border-radius:50%;transition:left .12s`;
-    const AG = [['observe', 'Observe'], ['propose', 'Propose'], ['autorun', 'Autorun']];
-    const agentTabs = AG.map(([id, label]) => ({
-      label, onPick: () => this.setState({ agentMode: id }),
-      style: `flex:1;text-align:center;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-weight:500;font-family:inherit;${st.agentMode === id ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-07)'}`
+
+    // ---- AI ecosystem: openobserve-cli + companion Skill ----
+    const cli = st.cli, skill = st.skill;
+    const primaryBtn = (dim) => `flex:1;height:36px;border-radius:8px;border:none;font-size:12.5px;font-weight:600;font-family:inherit;${dim ? 'background:var(--sf-ctrl);color:var(--tx-09);border:1px solid rgba(var(--ink),.08);cursor:default' : 'background:' + accent + ';color:#06181a;cursor:pointer'}`;
+    this.dangerBtn = `height:36px;padding:0 16px;border-radius:8px;border:1px solid rgba(244,104,95,.35);background:transparent;color:#f4685f;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;flex:none;`;
+    const pill = (color) => `font-size:10.5px;font-weight:600;font-family:'JetBrains Mono',monospace;padding:3px 9px;border-radius:20px;flex:none;background:${this.hexA(color.replace('#','#'), 0.14)};color:${color};`;
+    const busyLbl = { installing: 'Installing…', upgrading: 'Upgrading…', removing: 'Removing…', reinstalling: 'Reinstalling…' };
+    // CLI
+    const cliUpToDate = cli.installed && cli.version === this.CLI_LATEST;
+    const cliUpdate = cli.installed && !cliUpToDate;
+    const cliPillStyle = cli.busy ? pill(accent) : !cli.installed ? pill('#8b93a1') : cliUpToDate ? pill('#34e0a1') : pill('#f5b340');
+    const cliPillLabel = cli.busy ? busyLbl[cli.busy] : !cli.installed ? 'Not installed' : cliUpToDate ? 'Up to date' : 'Update available';
+    const cliVerLabel = cli.installed ? ('v' + cli.version) : '';
+    const cliVerStyle = `font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx-10);${cli.installed ? '' : 'display:none'}`;
+    const cliCmd = !cli.installed ? 'npm install -g @angelmsger/openobserve-cli'
+      : cliUpdate ? 'npm update -g @angelmsger/openobserve-cli'
+      : 'openobserve-cli doctor';
+    let cliPrimary;
+    if (cli.busy) cliPrimary = { label: busyLbl[cli.busy], onClick: () => {}, style: primaryBtn(true) };
+    else if (!cli.installed) cliPrimary = { label: 'Install CLI', onClick: this.installCli, style: primaryBtn(false) };
+    else if (cliUpdate) cliPrimary = { label: 'Upgrade to v' + this.CLI_LATEST, onClick: this.upgradeCli, style: primaryBtn(false) };
+    else cliPrimary = { label: '✓ Up to date', onClick: () => {}, style: primaryBtn(true) };
+    // Skill
+    const cliMissing = !cli.installed;
+    const skillPillStyle = skill.busy ? pill(accent) : cliMissing ? pill('#8b93a1') : skill.installed ? pill('#34e0a1') : pill('#8b93a1');
+    const skillPillLabel = skill.busy ? busyLbl[skill.busy] : cliMissing ? 'Unavailable' : skill.installed ? 'Installed' : 'Not installed';
+    const skillDeployed = skill.installed && !skill.busy;
+    const skillAgents = this.DETECTED_AGENTS.map(name => ({
+      name,
+      style: `display:inline-flex;align-items:center;gap:6px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--tx-05);background:var(--sf-ctrl);border:1px solid rgba(var(--ink),.08);border-radius:20px;padding:3px 10px;`
     }));
-    const agentDesc = { observe: 'Agent can read your session, schema and results \u2014 but runs nothing. Pure analysis and suggestions.', propose: 'Agent stages rewritten queries into the editor; you review the diff and hit Run.', autorun: 'Agent runs queries itself within the guardrails below. Watch the activity stream and stop anytime.' }[st.agentMode];
+    const skillCardStyle = `background:var(--card-bg);border:1px solid var(--card-bd);box-shadow:var(--card-sh);border-radius:12px;padding:20px;margin-bottom:14px;${cliMissing ? 'opacity:.6;' : ''}`;
+    let skillPrimary;
+    if (skill.busy) skillPrimary = { label: busyLbl[skill.busy], onClick: () => {}, style: primaryBtn(true) };
+    else if (cliMissing) skillPrimary = { label: 'Requires openobserve-cli', onClick: () => {}, style: primaryBtn(true) };
+    else if (!skill.installed) skillPrimary = { label: 'Install Skill', onClick: this.installSkill, style: primaryBtn(false) };
+    else skillPrimary = { label: 'Reinstall / detect agents', onClick: this.reinstallSkill, style: primaryBtn(false) };
+
+    // AI Ecosystem nav shortcut
+    const ecoActive = st.view === 'settings' && st.setTab === 'agent';
+    const ecoBtnStyle = `position:relative;width:36px;height:36px;border-radius:9px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;${ecoActive ? 'background:' + this.hexA(accent, 0.14) + ';color:' + accent : 'background:transparent;color:var(--tx-12)'}`;
+    const ecoStatusColor = cli.busy ? accent : !cli.installed ? '#8b93a1' : cliUpToDate ? '#34e0a1' : '#f5b340';
+    const ecoDotStyle = `position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:${ecoStatusColor};box-shadow:0 0 0 2px var(--sf-rail);`;
+    const ecoTitle = 'AI Ecosystem \u00b7 ' + (!cli.installed ? 'openobserve-cli not installed' : cliUpToDate ? 'openobserve-cli ready' : 'CLI update available');
 
     // ---- contexts (kubectl-style) ----
-    const authShort = { password: 'basic auth', token: 'token', sso: 'SSO' };
+    const authShort = { password: 'basic auth', token: 'token', sso: 'SSO', browser: 'browser session' };
+    const tabsPerCtx = {};
+    st.tabs.forEach(t => { const k = t.ctxId || st.currentContextId; tabsPerCtx[k] = (tabsPerCtx[k] || 0) + 1; });
     const ctxRows = st.contexts.map(c => {
-      const active = c.id === st.currentContextId;
+      const inTab = c.id === st.currentContextId;
+      const editing = c.id === st.editingCtxId;
+      const isDefault = c.id === st.defaultCtxId;
+      const used = tabsPerCtx[c.id] || 0;
+      const nErr = Object.keys(this.ctxErrors(c)).length;
+      const bd = editing ? this.hexA(accent, 0.55) : inTab ? this.hexA(c.color, 0.4) : 'rgba(var(--ink),.07)';
       return {
         id: c.id, name: c.name, sub: c.url || 'no endpoint set', meta: c.org + ' \u00b7 ' + (authShort[c.auth] || c.auth),
-        active, isActive: active, notActive: !active,
+        usedLabel: used ? 'open in ' + used + (used === 1 ? ' tab' : ' tabs') : 'not open in any tab',
+        inTab, notInTab: !inTab, editing, isDefault, notDefault: !isDefault,
+        hasErr: nErr > 0, errTitle: nErr + (nErr === 1 ? ' field needs attention' : ' fields need attention'),
         dotStyle: `width:9px;height:9px;border-radius:50%;flex:none;background:${c.color};box-shadow:0 0 8px -1px ${c.color}`,
-        rowStyle: `display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;cursor:pointer;transition:border-color .12s;border:1px solid ${active ? this.hexA(c.color, 0.45) : 'rgba(var(--ink),.07)'};background:${active ? this.hexA(c.color, 0.08) : 'var(--sf-05)'}`,
-        onUse: () => this.useContext(c.id),
+        rowStyle: `display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;cursor:pointer;transition:border-color .12s;border:1px solid ${bd};background:${editing ? this.hexA(accent, 0.07) : inTab ? this.hexA(c.color, 0.06) : 'var(--sf-05)'}`,
+        onEdit: (e) => this.editCtx(c.id, e),
+        onUse: (e) => { if (e) e.stopPropagation(); this.useContext(c.id); },
+        onDefault: (e) => this.setDefaultCtx(c.id, e),
         onRemove: (e) => this.removeContext(c.id, e)
       };
     });
@@ -1659,6 +2016,25 @@ class Component extends DCLogic {
       };
     });
     const curCtxDotStyle = `width:8px;height:8px;border-radius:50%;flex:none;background:${cur.color};box-shadow:0 0 7px -1px ${cur.color}`;
+
+    // new-tab context policy + per-field validation of the context being edited
+    const defCtx = st.contexts.find(c => c.id === st.defaultCtxId) || st.contexts[0];
+    const modeSeg = [['last', 'Last used'], ['default', 'Default context']].map(([k, label]) => ({
+      label, onPick: () => this.setNewTabMode(k),
+      style: `flex:1;text-align:center;padding:8px 6px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;${st.newTabCtxMode === k ? 'background:' + this.hexA(accent, 0.16) + ';color:' + accent : 'background:transparent;color:var(--tx-09)'}`
+    }));
+    const ec = this.editingContext();
+    const cErrs = this.ctxErrors(ec);
+    const mkField = (k, h) => {
+      const show = !!cErrs[k] && (!!st.touched[st.editingCtxId + ':' + k] || st.saveTried);
+      return {
+        err: cErrs[k] || '', hasErr: show, onBlur: () => this.touch(k),
+        style: `width:100%;height:${h}px;padding:0 12px;background:${show ? 'rgba(244,104,95,.07)' : 'var(--sf-ctrl)'};border:1px solid ${show ? 'rgba(244,104,95,.7)' : 'rgba(var(--ink),.1)'};border-radius:8px;color:var(--tx-01);font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;box-sizing:border-box`
+      };
+    };
+    const f = {}, fw = {};
+    ['name', 'url', 'org', 'email', 'password', 'token'].forEach(k => { f[k] = mkField(k, 36); fw[k] = mkField(k, 38); });
+    const errCount = Object.keys(cErrs).length;
 
     // theme switch (light / dark / system)
     const eff = this.effTheme();
@@ -1678,8 +2054,14 @@ class Component extends DCLogic {
       };
     });
 
+    const platform = this.props.platform || 'macOS';
+    const winCtl = (fn) => { const t = window.__TAURI__ && window.__TAURI__.window; if (!t) return; try { const cur = t.getCurrentWindow ? t.getCurrentWindow() : t.appWindow; cur && cur[fn] && cur[fn](); } catch (e) {} };
     return {
+      isMac: platform === 'macOS', isWin: platform === 'Windows', isLin: platform === 'Linux',
+      onMin: () => winCtl('minimize'), onMax: () => winCtl('toggleMaximize'), onClose: () => winCtl('close'),
       nav, tabItems, newTab: this.newTab,
+      openEcosystem: this.openEcosystem,
+      ecoBtnStyle, ecoDotStyle, ecoTitle,
       sidebarCollapsed: st.sidebarCollapsed, toggleSidebar: this.toggleSidebar,
       historyOpen: st.historyOpen, toggleHistory: this.toggleHistory, closeHistory: this.closeHistory, history, historyCount: st.history.length,
       query: st.query, queryHighlight: this.highlight(st.query), lineNos,
@@ -1695,6 +2077,10 @@ class Component extends DCLogic {
       runQuery: this.runQuery, running: st.running, notRunning: !st.running, runLabel: st.running ? 'Running' : 'Run', runStyle,
       toggleHisto: this.toggleHisto, histoToggle, histoKnob,
       stream: st.stream, toggleStream: this.toggleStream, streamOpen: st.streamOpen, streams,
+      streamFilter: st.streamFilter, onStreamFilter: this.onStreamFilter, closeStream: this.closeStream,
+      streamCount: streams.length + '/' + this.STREAMS.length, streamEmpty: streams.length === 0,
+      streamSearchRef: (el) => { if (el) el.focus(); },
+      tabMenu, tabMenuOpen: !!tabMenu, closeTabMenu: this.closeTabMenu,
       fieldFilter: st.fieldFilter, onFieldFilter: this.onFieldFilter, fields, fieldCount: fieldsAll.length,
       showFields, showHisto, histogram: this.buildHistogram(accent),
       histoPeak, histoSelActive: !!st.histoSel, histoSelLabel: st.histoSel ? st.histoSel.label : '', clearHistoSel: this.clearHistoSel,
@@ -1708,14 +2094,28 @@ class Component extends DCLogic {
       openSetup: this.openSetup, closeSetup: this.closeSetup, setupOpen: st.setupOpen,
       conn, authTabs,
       tabConnection: st.setTab === 'connection', tabAppearance: st.setTab === 'appearance', tabAgent: st.setTab === 'agent', tabAbout: st.setTab === 'about',
-      authPassword: conn.auth === 'password', authToken: conn.auth === 'token', authSSO: conn.auth === 'sso',
+      authPassword: conn.auth === 'password', authToken: conn.auth === 'token', authSSO: conn.auth === 'sso', authBrowser: conn.auth === 'browser',
+      f, fw, showInvalid: st.saveTried && errCount > 0,
+      invalidLabel: errCount + (errCount === 1 ? ' field needs attention before this context can connect.' : ' fields need attention before this context can connect.'),
+      browserSignIn: this.browserSignIn, connectAndContinue: this.connectAndContinue,
+      browserNeedsUrl: st.browserAuth === 'needs-url',
+      browserBtnLabel: st.browserAuth === 'opening' ? 'Waiting for your browser…' : st.browserAuth === 'signed' ? '✓ Signed in — session stored in keychain' : 'Sign in with browser',
+      browserBtnStyle: `height:38px;padding:0 16px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;${st.browserAuth === 'signed' ? 'background:rgba(52,224,161,.14);color:#34e0a1' : st.browserAuth === 'opening' ? 'background:' + this.hexA(accent, 0.2) + ';color:' + accent : 'background:' + accent + ';color:#06181a'}`,
+      editStatusDotStyle: `width:9px;height:9px;border-radius:50%;flex:none;background:${errCount ? '#f5b340' : '#34e0a1'};box-shadow:0 0 10px ${errCount ? '#f5b340' : '#34e0a1'}`,
       onUrl: (e) => this.setConn('url', e.target.value), onOrg: (e) => this.setConn('org', e.target.value),
       onEmail: (e) => this.setConn('email', e.target.value), onPass: (e) => this.setConn('password', e.target.value), onToken: (e) => this.setConn('token', e.target.value),
       testConn: this.testConn, testLabel: testMap[st.testStatus] || 'Test Connection', tested: st.testStatus === 'ok',
       accentSwatches, densityTabs,
-      mcpOn: st.mcpOn, toggleMcp: this.toggleMcp, mcpToggleStyle, mcpKnobStyle,
+      histoDefToggle, histoDefKnob,
       ssToggleStyle, ssKnobStyle, toggleSelfSigned: () => this.setConn('selfSigned', !conn.selfSigned),
-      agentTabs, agentDesc,
+      cliInstalled: cli.installed, cliMissing, cliPillStyle, cliPillLabel, cliVerLabel, cliVerStyle, cliCmd, cliPrimary, uninstallCli: this.uninstallCli,
+      skillInstalled: skill.installed, skillDeployed, skillPillStyle, skillPillLabel, skillCardStyle, skillAgents, skillPrimary, uninstallSkill: this.uninstallSkill,
+      dangerBtnStyle: this.dangerBtn,
+      userInitials: this.userInitials(), userTitle: this.osUserDisplay() + ' \u00b7 ' + this.osUserName() + ' (system account)',
+      editingCtxName: ec.name, editingIsTabCtx: ec.id === st.currentContextId, editingNotTabCtx: ec.id !== st.currentContextId,
+      editingUrl: ec.url || 'no endpoint set', editingOrg: ec.org || '—',
+      useEditingHere: () => this.useContext(ec.id),
+      defaultCtxName: defCtx ? defCtx.name : '—', cliActiveCtx: st.cliActiveCtx, adoptCliActive: this.adoptCliActive, modeSeg,
       curCtxName: cur.name, curCtxDotStyle, ctxCount: st.contexts.length,
       ctxSwitchOpen: st.ctxSwitchOpen, toggleCtxSwitch: this.toggleCtxSwitch, closeCtxSwitch: this.closeCtxSwitch, ctxMenu,
       ctxRows, canRemoveCtx: st.contexts.length > 1, addContext: this.addContext, addContextFromMenu: this.addContextFromMenu,
