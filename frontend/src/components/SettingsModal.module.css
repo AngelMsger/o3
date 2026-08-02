@@ -733,3 +733,212 @@
 .skipClear:hover {
   text-decoration: underline;
 }
+
+/* ===== Per-field validation — design Observe.dc.html `f.<field>` styles =====
+   A failing field gets a red border and a tinted fill, plus an inline reason
+   under it; the banner summarises the lot once a save was attempted. */
+.fieldInputBad {
+  background: rgba(244, 104, 95, 0.07);
+  border-color: rgba(244, 104, 95, 0.7);
+}
+
+.fieldInputBad:focus {
+  border-color: rgba(244, 104, 95, 0.9);
+}
+
+.fieldError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #f4685f;
+}
+
+.invalidBanner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: rgba(244, 104, 95, 0.08);
+  border: 1px solid rgba(244, 104, 95, 0.3);
+  border-radius: 10px;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+}
+
+.invalidBannerIcon {
+  color: #f4685f;
+  flex: none;
+}
+
+.invalidBannerText {
+  font-size: 12.5px;
+  color: #e8968f;
+  line-height: 1.5;
+}
+
+/* ===== New-tab context policy card — design "New tabs open with" ===== */
+.newTabCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-bd);
+  box-shadow: var(--card-sh);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+}
+
+.newTabTitle {
+  font-size: 12.5px;
+  color: var(--tx-01);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.newTabDesc {
+  font-size: 11.5px;
+  color: var(--tx-09);
+  line-height: 1.55;
+  margin-bottom: 12px;
+  text-wrap: pretty;
+}
+
+.newTabSeg {
+  display: flex;
+  gap: 3px;
+  background: var(--sf-02);
+  border: 1px solid rgba(var(--ink),0.07);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 12px;
+}
+
+.newTabSegTab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--tx-09);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.newTabFacts {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--tx-09);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.newTabFactValue {
+  color: var(--tx-04);
+}
+
+.followCliBtn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(var(--ink),0.12);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  flex: none;
+  transition: color var(--motion-fast) var(--motion-ease), border-color var(--motion-fast) var(--motion-ease);
+}
+
+.followCliBtn:hover {
+  color: var(--tx-hi);
+  border-color: rgba(var(--ink),0.25);
+}
+
+/* ===== Context rows: default star, usage count, invalid marker ===== */
+.ctxRowMeta {
+  text-align: right;
+  flex: none;
+}
+
+.ctxRowMetaTop {
+  font-size: 10.5px;
+  color: var(--tx-10);
+  white-space: nowrap;
+}
+
+.ctxRowMetaSub {
+  font-size: 10px;
+  color: var(--tx-12);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.ctxWarn {
+  font-size: 11px;
+  color: #f4685f;
+  flex: none;
+}
+
+.ctxStarBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(var(--ink),0.08);
+  background: transparent;
+  color: var(--tx-11);
+  font-size: 12px;
+  cursor: pointer;
+  flex: none;
+  transition: color var(--motion-fast) var(--motion-ease), border-color var(--motion-fast) var(--motion-ease);
+}
+
+.ctxStarBtn:hover {
+  color: #f5b340;
+  border-color: rgba(245, 179, 64, 0.4);
+}
+
+/* ===== "Editing <name>" header above the form ===== */
+.editCtxHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 11px;
+}
+
+.editCtxName {
+  color: var(--tx-04);
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.editCtxNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--tx-12);
+}
+
+.useHereBtn {
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--ink),0.12);
+  background: var(--sf-ctrl);
+  color: var(--tx-06);
+  font-size: 10.5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--motion-fast) var(--motion-ease);
+}
+
+.useHereBtn:hover {
+  color: var(--tx-hi);
+}

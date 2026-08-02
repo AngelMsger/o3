@@ -30,6 +30,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	want := Prefs{
 		Theme: "system", Accent: "#7c83ff", Density: "cozy",
 		UpdateCheck: "off", SkipVersion: "1.3.0", LastUpdateCheck: "2026-07-14T10:00:00Z",
+		DefaultContext: "prod", NewTabContext: "default",
 	}
 	if err := savePrefsTo(dir, want); err != nil {
 		t.Fatal(err)
@@ -55,6 +56,43 @@ func TestLoadPrefsIgnoresUnknownKeysAndFillsDefaults(t *testing.T) {
 	}
 	if got.Theme != "light" || got.Accent != "#2dd4bf" || got.Density != "ultra" {
 		t.Fatalf("want theme=light + defaults for the rest, got %+v", got)
+	}
+	// A prefs.json written before per-tab contexts existed has no newTabContext;
+	// new tabs must follow the last-used context rather than an empty mode.
+	if got.NewTabContext != "last" {
+		t.Fatalf("newTabContext should backfill to last, got %q", got.NewTabContext)
+	}
+}
+
+func TestLoadPrefsInvalidNewTabContextFallsBackToLast(t *testing.T) {
+	dir := t.TempDir()
+	if err := writeRawPrefs(dir, `{"newTabContext":"whatever"}`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.NewTabContext != "last" {
+		t.Fatalf("invalid newTabContext should fall back to last, got %q", got.NewTabContext)
+	}
+}
+
+// DefaultContext is o3's own starred context, NOT the shared config's
+// current-context. "" is meaningful ("never chosen"), so it must survive a load
+// untouched — backfilling it would silently pin new tabs to a context the user
+// never starred.
+func TestLoadPrefsLeavesDefaultContextEmpty(t *testing.T) {
+	dir := t.TempDir()
+	if err := writeRawPrefs(dir, `{"theme":"dark"}`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadPrefsFrom(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.DefaultContext != "" {
+		t.Fatalf("defaultContext should stay empty, got %q", got.DefaultContext)
 	}
 }
 
@@ -112,6 +150,7 @@ func TestMutatePrefsPreservesUntouchedFields(t *testing.T) {
 	start := Prefs{
 		Theme: "light", Accent: "#ff0000", Density: "cozy",
 		UpdateCheck: "off", SkipVersion: "1.3.0", LastUpdateCheck: "2026-07-14T10:00:00Z",
+		DefaultContext: "prod", NewTabContext: "default",
 	}
 	if err := savePrefsTo(dir, start); err != nil {
 		t.Fatal(err)

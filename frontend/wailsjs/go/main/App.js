@@ -90,16 +90,16 @@ export function SetLastStream(arg1, arg2) {
   return window['go']['main']['App']['SetLastStream'](arg1, arg2);
 }
 
+export function SetTabContextPolicy(arg1, arg2) {
+  return window['go']['main']['App']['SetTabContextPolicy'](arg1, arg2);
+}
+
 export function SignOut(arg1) {
   return window['go']['main']['App']['SignOut'](arg1);
 }
 
 export function SkipUpdateVersion(arg1) {
   return window['go']['main']['App']['SkipUpdateVersion'](arg1);
-}
-
-export function SwitchContext(arg1) {
-  return window['go']['main']['App']['SwitchContext'](arg1);
 }
 
 export function TestConnection(arg1) {
@@ -116,4 +116,8 @@ export function UninstallSkill() {
 
 export function UpgradeCLI() {
   return window['go']['main']['App']['UpgradeCLI']();
+}
+
+export function UseContext(arg1) {
+  return window['go']['main']['App']['UseContext'](arg1);
 }

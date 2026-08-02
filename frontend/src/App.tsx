@@ -41,10 +41,11 @@ import { effectiveTheme, applyThemeAttr } from './lib/theme';
 import { relativeRange, rangeToMicros, rangeLabel, parseAbsolute, type TimeRange } from './lib/timeRange';
 import { createLatest } from './lib/latest';
 import { draftName, preserveDrafts, seedIfEmpty } from './lib/contexts';
+import { errorCount } from './lib/ctxValidate';
 import { IDLE, type ConnTest } from './lib/connTest';
 import { forgetResult, recallResult, rememberResult, type TabResult, type TabResults } from './lib/tabResults';
 import {
-  ListContexts, SwitchContext, SaveContext, TestConnection, RemoveContext,
+  ListContexts, UseContext, SetTabContextPolicy, SaveContext, TestConnection, RemoveContext,
   ListStreams, GetFields, RunQuery, GetPrefs, SavePrefs, SetDockTheme, SetAppearance,
   EcosystemStatus, InstallCLI, UpgradeCLI, UninstallCLI, InstallSkill, UninstallSkill,
   BrowserSignIn as BrowserSignInCall, SessionStatus, SignOut,
@@ -74,6 +75,8 @@ function parseAppError(e: unknown): { category: string; message: string; hint: s
 const EMPTY_PREFS = {
   theme: '', accent: '', density: '',
   updateCheck: '', skipVersion: '', lastUpdateCheck: '',
+  // Owned by SetTabContextPolicy, not by the theme save — sent back untouched.
+  defaultContext: '', newTabContext: '',
 };
 
 const STREAM_PALETTE = ['#2dd4bf', '#60a5fa', '#f59e0b', '#a78bfa', '#f4685f', '#34d399'];
@@ -94,6 +97,14 @@ interface UICtx {
 
 // Context color palette — distinct from stream palette
 const CTX_PALETTE = ['#34e0a1', '#f5b340', '#7c83ff', '#2dd4bf', '#60a5fa', '#f4685f'];
+
+// Short auth labels for a context row's meta line ("default · basic auth").
+const AUTH_SHORT: Record<string, string> = {
+  basic: 'basic auth',
+  token: 'token',
+  session: 'browser session',
+  sso: 'SSO',
+};
 
 // toUICtx maps ContextInfo[] from the backend to the UI representation.
 const toUICtx = (infos: { name: string; url: string; org: string; scheme: string; username: string; hasSecret: boolean; isCurrent: boolean }[]): UICtx[] =>
@@ -138,9 +149,12 @@ function App() {
     email: 'ops@example.com',
   });
   const [tabs, setTabs] = useState<QueryTab[]>([
-    { id: 't1', name: 'untitled', mode: 'sql', sql: '', search: '', stream: '' },
+    { id: 't1', name: 'untitled', mode: 'sql', sql: '', search: '', stream: '', ctx: '' },
   ]);
   const [activeTab, setActiveTab] = useState<string>('t1');
+  // Which tab is being renamed inline. Lifted out of QueryTabs so the
+  // right-click menu's "Rename Tab" can start the same edit.
+  const [renamingTab, setRenamingTab] = useState<string | null>(null);
   // Query results banked per tab, so switching away and back does not lose them.
   const [tabResults, setTabResults] = useState<TabResults>({});
   const tabSeq = useRef(0);
@@ -149,12 +163,28 @@ function App() {
 
   // Contexts state — kubectl-style named contexts loaded from shared config
   const [contexts, setContexts] = useState<UICtx[]>([]);
+  // currentName is the context the LIVE CLIENT is bound to, which is always the
+  // active tab's context. o3 has no app-wide active context (see the "New tabs
+  // open with" explainer in Settings): a context belongs to a query tab.
   const [currentName, setCurrentName] = useState<string>('');
   // editingName is which context the Settings form is EDITING — deliberately
   // separate from currentName (the active connection). Adding/browsing a context
   // in Settings must not hijack the live connection.
   const [editingName, setEditingName] = useState<string>('');
   const [ctxSwitchOpen, setCtxSwitchOpen] = useState(false);
+  // Which context a brand-new tab opens on. defaultCtxName is o3's OWN starred
+  // context (prefs.defaultContext) — deliberately not the shared config's
+  // current-context, which is openobserve-cli's active-context and stays the
+  // CLI's to manage. Settings offers an explicit "Follow the CLI" action to
+  // adopt it. newTabMode picks between the starred context and the one you were
+  // last working in ('last' — the default, since real work usually stays on one
+  // instance).
+  const [defaultCtxName, setDefaultCtxName] = useState<string>('');
+  const [newTabMode, setNewTabMode] = useState<'last' | 'default'>('last');
+  // lastCtxName is the context most recently switched to, seeding new tabs in
+  // 'last' mode. It is not just currentName: closing the active tab can land on
+  // an older one, and that should not redefine "last used".
+  const lastCtxName = useRef<string>('');
 
   // Browser sign-in overlay state. signInTarget carries the context being
   // connected so onAuthorize can persist under the right name after capture.
@@ -296,6 +326,8 @@ function App() {
       if (p.density) setDensity(p.density as Density);
       setAutoCheck(p.updateCheck !== 'off');
       setSkipVersion(p.skipVersion ?? '');
+      if (p.defaultContext) setDefaultCtxName(p.defaultContext);
+      if (p.newTabContext === 'default' || p.newTabContext === 'last') setNewTabMode(p.newTabContext);
       prefsLoaded.current = true;
     }).catch(() => { prefsLoaded.current = true; });
   }, []);
@@ -485,8 +517,11 @@ function App() {
     const infos = await ListContexts();
     const ui = toUICtx(infos as any);
     setContexts((prev) => preserveDrafts(ui, prev));
-    const cur = ui.find((c) => c.isCurrent) ?? ui[0];
-    setCurrentName(cur?.name ?? '');
+    // Do NOT re-point the live connection at the config's current-context here:
+    // that is the CLI's active-context, and the tab the user is on owns which
+    // context is live. Only fall back when the current one has gone away (it was
+    // just removed, or nothing is bound yet).
+    setCurrentName((prev) => (prev && ui.some((c) => c.name === prev) ? prev : ui[0]?.name ?? ''));
     return ui;
   };
 
@@ -503,14 +538,25 @@ function App() {
       setCurrentName((n) => n || 'default');
     };
     refreshContexts()
-      .then((ui) => {
-        const cur = ui.find((c) => c.isCurrent) ?? ui[0];
+      .then(async (ui) => {
+        // The first tab opens on the starred default when there is one, else on
+        // the CLI's active-context. Both are just seeds — from here on the tab
+        // owns its context.
+        const p = await loadPrefs().catch(() => null);
+        const starred = p?.defaultContext ? ui.find((c) => c.name === p.defaultContext) : undefined;
+        const cur = starred ?? ui.find((c) => c.isCurrent) ?? ui[0];
         if (!cur || !cur.hasSecret) {
           if (ui.length === 0) seedFirstRun();
           setConfigured(false);
           setSetupOpen(true);
           return;
         }
+        setCurrentName(cur.name);
+        lastCtxName.current = cur.name;
+        setTabs((ts) => ts.map((t) => (t.id === seedTabId ? { ...t, ctx: cur.name } : t)));
+        // Bind the backend to the seeded context. Skipped when it is already the
+        // config's current-context — startup built that client itself.
+        if (!cur.isCurrent) await UseContext(cur.name).catch(() => {});
         setConfigured(true);
         return ListStreams()
           .then(async (s) => {
@@ -660,25 +706,41 @@ function App() {
     runQueryAt(1, { resultsRange: computeRange(), withHistogram: false });
   };
 
-  // handleSwitchContext switches the active context and reloads streams.
-  const handleSwitchContext = async (name: string) => {
-    const seedTabId = activeTab; // capture before any awaits
+  // handleSwitchContext points a query tab at a context: it binds the backend
+  // client, records the context on the tab, and reloads that instance's streams.
+  //
+  // `tabId` is which tab is being re-pointed — the active one for a user gesture,
+  // or the tab being entered when a tab switch carries its own context. Nothing
+  // here writes the shared config: the CLI's active-context is not o3's to move.
+  //
+  // `reset` distinguishes the two callers. Changing a tab's context invalidates
+  // what is on screen, so the rows and the query are cleared. Merely *entering* a
+  // tab that already belonged to this context does not: its banked results were
+  // produced by this very instance, and wiping them would undo the restore
+  // selectTab just did.
+  const handleSwitchContext = async (name: string, tabId: string = activeTab, reset: boolean = true) => {
+    const seedTabId = tabId; // capture before any awaits
     queryLatest.invalidate(); // discard queries in flight against the previous context
     setRunning(false); setLoading(false); // invalidated query won't clear the spinner itself
     try {
-      await SwitchContext(name);
+      await UseContext(name);
       setCurrentName(name);
-      setEditingName(name); // the newly active context is what Settings now edits
+      lastCtxName.current = name;
+      setTabs((ts) => ts.map((t) => (t.id === seedTabId ? { ...t, ctx: name } : t)));
+      setEditingName(name); // the newly bound context is what Settings now edits
       await refreshContexts();
       setConfigured(true);
-      setQueryError(null);
-      setLiveRows([]); setLiveBars([]);
-      // Results are only meaningful for the context that produced them. The
-      // active tab's view is cleared just above; drop every OTHER tab's banked
-      // results too, or switching to one would show rows from the old context
-      // under the new context's name.
-      setTabResults({});
-      setSelectedRow(null);
+      if (reset) {
+        setQueryError(null);
+        setLiveRows([]); setLiveBars([]);
+        // Results are only meaningful for the context that produced them, and
+        // only THIS tab changed context — every other tab is still on the
+        // instance that produced its banked rows, so those stay. (Before
+        // contexts were per tab, a switch moved the whole app and every bank had
+        // to be dropped.)
+        forgetTabs([seedTabId]);
+        setSelectedRow(null);
+      }
       const s = await ListStreams().catch((e) => {
         if (parseAppError(e).category === 'not_configured') { setConfigured(false); setSetupOpen(true); }
         return [];
@@ -687,7 +749,9 @@ function App() {
       setLiveStreams(mapped);
       // Each context remembers its own stream, so the switch restores the one
       // this context was last left on rather than carrying the old one over.
-      const pick = pickStream(mapped, await rememberedStream(name));
+      // Only when the tab is actually changing context: a tab being re-entered
+      // already holds the stream the user left it on.
+      const pick = reset ? pickStream(mapped, await rememberedStream(name)) : '';
       if (pick) {
         // Seed the tab that was active when the switch began (not the current activeTab).
         setTabs((ts) => ts.map((t) => {
@@ -700,10 +764,12 @@ function App() {
     } catch (e: any) {
       const ae = parseAppError(e);
       if (ae.category === 'not_configured') {
-        // C1: the switch persisted on disk but the context has no keychain secret.
-        // Update the title bar to the new context and open the wizard so the user
-        // can supply credentials — do NOT leave the UI showing the old context.
+        // C1: the context exists but has no keychain secret. Move the tab onto it
+        // anyway and open the wizard so the user can supply credentials — do NOT
+        // leave the UI showing the old context.
         setCurrentName(name);
+        lastCtxName.current = name;
+        setTabs((ts) => ts.map((t) => (t.id === seedTabId ? { ...t, ctx: name } : t)));
         await refreshContexts();
         setConfigured(false);
         setSetupOpen(true);
@@ -740,6 +806,14 @@ function App() {
     // I1: pass origName so the backend can remove the old entry when the context was renamed.
     await SaveContext({ name: ctx.name, url: ctx.url, org: ctx.org, scheme: ctx.scheme, username: ctx.username, secret, origName: ctx.origName } as any);
     setConfigured(true);
+    // A rename leaves every tab (and the starred default) pointing at a name
+    // that no longer exists — carry them onto the new one.
+    if (ctx.origName && ctx.origName !== ctx.name) {
+      setTabs((ts) => ts.map((t) => (t.ctx === ctx.origName ? { ...t, ctx: ctx.name } : t)));
+      setCurrentName((n) => (n === ctx.origName ? ctx.name : n));
+      if (lastCtxName.current === ctx.origName) lastCtxName.current = ctx.name;
+      if (defaultCtxName === ctx.origName) handleSetDefaultContext(ctx.name);
+    }
     await refreshContexts(); // reloads from disk; toUICtx re-sets origName to the new persisted name
   };
 
@@ -762,6 +836,12 @@ function App() {
     } as any);
     setConfigured(true);
     await refreshContexts();
+    // Signing in configures a context to work in: point the tab that started the
+    // flow at it and bind the client, the same as the wizard's save.
+    setTabs((ts) => ts.map((t) => (t.id === seedTabId ? { ...t, ctx: signInTarget.name } : t)));
+    setCurrentName(signInTarget.name);
+    lastCtxName.current = signInTarget.name;
+    await UseContext(signInTarget.name).catch(() => {});
     setSessionInfo({ email: s.email, expiresAt: s.expiresAt, valid: true });
     // Load streams for the freshly connected session — mirrors the wizard's
     // onSave and startup. Without this, a successful browser sign-in left the
@@ -838,8 +918,16 @@ function App() {
     try {
       await RemoveContext(name);
       const ui = await refreshContexts();
-      const cur = ui.find((c) => c.isCurrent) ?? ui[0];
-      if (cur) { setEditingName(cur.name); await handleSwitchContext(cur.name); }
+      // Any tab that was on the removed context has to land somewhere. The
+      // starred default is the natural home; fall back to the first survivor.
+      const fallback = ui.find((c) => c.name === defaultCtxName) ?? ui.find((c) => c.isCurrent) ?? ui[0];
+      if (!fallback) return;
+      setTabs((ts) => ts.map((t) => (t.ctx === name ? { ...t, ctx: fallback.name } : t)));
+      if (defaultCtxName === name) handleSetDefaultContext(fallback.name);
+      if (lastCtxName.current === name) lastCtxName.current = fallback.name;
+      setEditingName(fallback.name);
+      // Only re-bind the live client when the tab you are on lost its context.
+      if (currentName === name) await handleSwitchContext(fallback.name);
     } catch (e: any) {
       setWizardError(parseAppError(e).message);
     }
@@ -879,6 +967,13 @@ function App() {
     // The invalidated query no longer clears the busy state, so reset it here to
     // avoid a spinner sticking on the freshly selected tab.
     setRunning(false); setLoading(false);
+    // A tab carries its own context, so entering one may re-point the live
+    // client. Only when it actually differs — the common case is staying on the
+    // same instance, and re-binding there would needlessly reload its streams.
+    const incomingCtx = tabs.find((t) => t.id === id)?.ctx ?? '';
+    if (incomingCtx && incomingCtx !== currentName) {
+      void handleSwitchContext(incomingCtx, id, false);
+    }
   };
 
   // forgetTabs drops the banked results of closed tabs so a recycled id cannot
@@ -887,12 +982,56 @@ function App() {
     setTabResults((prev) => ids.reduce(forgetResult, prev));
   };
 
+  // newTabCtxName is the context a brand-new tab opens on: the starred default
+  // when new tabs are pinned to it, otherwise the context last switched to.
+  // Falls back through the current binding so a fresh install (nothing starred,
+  // nothing switched) still lands somewhere real.
+  const newTabCtxName = (): string => {
+    if (newTabMode === 'default' && defaultCtxName && contexts.some((c) => c.name === defaultCtxName)) {
+      return defaultCtxName;
+    }
+    return lastCtxName.current || currentName;
+  };
+
   const handleNewTab = () => {
     tabSeq.current += 1;
     const id = `t-new-${tabSeq.current}`;
-    const s = activeTabData.stream;
-    setTabs((prev) => [...prev, { id, name: 'untitled', mode: 'sql', sql: s ? setFromStream('', s) : '', search: '', stream: s }]);
+    const ctx = newTabCtxName();
+    // A new tab on a DIFFERENT instance must not inherit this instance's stream:
+    // the name almost certainly does not exist over there.
+    const s = ctx === currentName ? activeTabData.stream : '';
+    setTabs((prev) => [...prev, { id, name: 'untitled', mode: 'sql', sql: s ? setFromStream('', s) : '', search: '', stream: s, ctx }]);
     selectTab(id);
+    // selectTab binds from the tab list it can see, which does not yet include
+    // this tab — so a new tab that opens on a DIFFERENT context has to bind here
+    // or it would query the previous instance.
+    if (ctx && ctx !== currentName) void handleSwitchContext(ctx, id);
+  };
+
+  // handleSetDefaultContext stars a context: the ☆ button in the contexts list.
+  // Persisted in o3's own prefs — it does not touch openobserve-cli's
+  // active-context, which is the CLI's setting to make.
+  const handleSetDefaultContext = (name: string) => {
+    setDefaultCtxName(name);
+    SetTabContextPolicy(name, newTabMode).catch(() => {});
+  };
+
+  const handleSetNewTabMode = (mode: 'last' | 'default') => {
+    setNewTabMode(mode);
+    SetTabContextPolicy(defaultCtxName, mode).catch(() => {});
+  };
+
+  // handleAdoptCliContext is the "Follow the CLI" action: take openobserve-cli's
+  // active-context as o3's default and pin new tabs to it, so the two agree
+  // about where work starts. Explicit rather than automatic — the whole point of
+  // keeping them separate is that o3 never moves the CLI's pointer behind the
+  // user's back, and the reverse should be a deliberate choice too.
+  const handleAdoptCliContext = () => {
+    const cli = contexts.find((c) => c.isCurrent);
+    if (!cli) return;
+    setDefaultCtxName(cli.name);
+    setNewTabMode('default');
+    SetTabContextPolicy(cli.name, 'default').catch(() => {});
   };
 
   const handleRenameTab = (id: string, name: string) =>
@@ -940,15 +1079,19 @@ function App() {
     tabSeq.current += 1;
     const id = `t-new-${tabSeq.current}`;
     const closed = tabs.map((t) => t.id);
-    setTabs([{ id, name: 'untitled', mode: 'sql', sql: '', search: '', stream: '' }]);
+    const ctx = newTabCtxName();
+    setTabs([{ id, name: 'untitled', mode: 'sql', sql: '', search: '', stream: '', ctx }]);
     selectTab(id);
     // After selectTab, which banks the outgoing tab — one of the closed ones.
     forgetTabs(closed);
+    // Same reason as handleNewTab: selectTab cannot see the replacement tab yet.
+    if (ctx && ctx !== currentName) void handleSwitchContext(ctx, id);
   };
   const onTabMenuPick = (action: TabMenuAction) => {
     if (!tabMenu) return;
     const id = tabMenu.id;
-    if (action === 'close') handleCloseTab(id);
+    if (action === 'rename') setRenamingTab(id);
+    else if (action === 'close') handleCloseTab(id);
     else if (action === 'closeLeft') closeTabsLeft(id);
     else if (action === 'closeRight') closeTabsRight(id);
     else if (action === 'closeOthers') closeOtherTabs(id);
@@ -965,7 +1108,7 @@ function App() {
     <div className={styles.shell}>
       <div className={styles.card}>
         {/* TitleBar — design line 41; context switcher added in task 3 */}
-        <TitleBar isDark={effectiveTheme(themePref, systemDark) === 'dark'} />
+        <TitleBar isDark={effectiveTheme(themePref, systemDark) === 'dark'} user={appInfo?.user ?? ''} />
 
         {/* BODY flex row — design line 61 */}
         <div className={styles.body}>
@@ -994,6 +1137,8 @@ function App() {
             <QueryTabs
               tabs={tabs}
               activeId={activeTab}
+              editingId={renamingTab}
+              onEditing={setRenamingTab}
               onPick={selectTab}
               onNew={handleNewTab}
               onClose={handleCloseTab}
@@ -1220,11 +1365,33 @@ function App() {
             onToggleHisto={() => setShowHistogram((v) => !v)}
             onConnField={(key, value) => setConn((prev) => ({ ...prev, [key]: value }))}
             onOpenSetup={() => { setSetupOpen(true); setSettingsOpen(false); }}
-            contexts={contexts.map((c) => ({ name: c.name, color: c.color, isCurrent: c.name === currentName, isEditing: c.name === editSel, isDraft: c.draft }))}
-            active={editingCtx ? { name: editingCtx.name, url: editingCtx.url, org: editingCtx.org, scheme: editingCtx.scheme, username: editingCtx.username, password: editingCtx.password, token: editingCtx.token } : null}
+            contexts={contexts.map((c) => ({
+              name: c.name,
+              color: c.color,
+              // "this tab", not an app-wide active connection.
+              isCurrent: c.name === currentName,
+              isEditing: c.name === editSel,
+              isDefault: c.name === defaultCtxName,
+              isDraft: c.draft,
+              tabCount: tabs.filter((t) => t.ctx === c.name).length,
+              errors: errorCount(c),
+              meta: `${c.org} · ${AUTH_SHORT[c.scheme] ?? c.scheme}`,
+            }))}
+            active={editingCtx ? { name: editingCtx.name, url: editingCtx.url, org: editingCtx.org, scheme: editingCtx.scheme, username: editingCtx.username, password: editingCtx.password, token: editingCtx.token, hasSecret: editingCtx.hasSecret } : null}
             canRemove={contexts.length > 1}
+            newTab={{
+              mode: newTabMode,
+              defaultName: defaultCtxName,
+              // isCurrent on a backend ContextInfo means "the shared config's
+              // current-context" — which is exactly openobserve-cli's
+              // active-context, and nothing else in o3 follows it.
+              cliActiveName: contexts.find((c) => c.isCurrent)?.name ?? '',
+              onMode: handleSetNewTabMode,
+              onAdoptCli: handleAdoptCliContext,
+            }}
             onAddContext={() => handleAddContext(false)}
             onSelect={handleSelectContext}
+            onSetDefault={handleSetDefaultContext}
             test={connTest}
             onUse={(name) => handleSwitchContext(name)}
             onRemove={(name) => handleRemoveContext(name)}
@@ -1285,6 +1452,12 @@ function App() {
               setSetupOpen(false);
               setConfigured(true);
               setWizardError(null);
+              // The wizard configures a context to work in, so put the tab that
+              // opened it onto that context and bind the client to it.
+              setTabs((ts) => ts.map((t) => (t.id === seedTabId ? { ...t, ctx: ctx.name } : t)));
+              setCurrentName(ctx.name);
+              lastCtxName.current = ctx.name;
+              await UseContext(ctx.name).catch(() => {});
               // Best-effort stream load; failure only reopens the wizard on
               // not_configured — it does NOT prevent the wizard from closing.
               ListStreams()

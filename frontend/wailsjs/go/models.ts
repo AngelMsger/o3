@@ -8,6 +8,8 @@ export namespace config {
 	    skipVersion: string;
 	    lastUpdateCheck: string;
 	    lastStreams?: Record<string, string>;
+	    defaultContext?: string;
+	    newTabContext: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Prefs(source);
@@ -22,6 +24,8 @@ export namespace config {
 	        this.skipVersion = source["skipVersion"];
 	        this.lastUpdateCheck = source["lastUpdateCheck"];
 	        this.lastStreams = source["lastStreams"];
+        this.defaultContext = source["defaultContext"];
+        this.newTabContext = source["newTabContext"];
 	    }
 	}
 
@@ -113,6 +117,7 @@ export namespace main {
 	    wails: string;
 	    isDev: boolean;
 	    updateMode: string;
+	    user: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppInfo(source);
@@ -126,6 +131,7 @@ export namespace main {
 	        this.wails = source["wails"];
 	        this.isDev = source["isDev"];
 	        this.updateMode = source["updateMode"];
+        this.user = source["user"];
 	    }
 	}
 	export class ConnConfig {

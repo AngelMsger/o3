@@ -26,12 +26,16 @@ import (
 )
 
 // App is the Wails-bound application. It owns a lazily-built client for the
-// current context in the shared config.
+// context the frontend is currently working in.
 type App struct {
 	ctx context.Context
 
 	mu     sync.Mutex
-	client api.Client // nil until built for the current context
+	client api.Client // nil until built for the active context
+	// active is the context name a.client was built for, "" before the first
+	// build. o3 binds the client per query tab (see UseContext), so this — not
+	// the shared config's current-context — is what the live client follows.
+	active string
 
 	// eco is built lazily through ecoService, never assigned directly: Wails can
 	// dispatch bound-method calls before startup() finishes building it.
@@ -232,41 +236,85 @@ func buildClient(url, org, scheme, username, secret string, def cfgshared.Defaul
 	})
 }
 
-// rebuildClient rebuilds a.client from the current context plus its keychain
-// secret. Returns a not-configured error when there is no current context or
-// no stored secret.
-func (a *App) rebuildClient() error {
+// clientForContext builds a client for a named context plus its keychain
+// secret. An empty name selects the shared config's current-context (falling
+// back to the first entry) — the cold-start case, before the frontend has told
+// us which context its active tab is on. The resolved name is returned even on
+// failure so callers can record what they were pointed at.
+func (a *App) clientForContext(name string) (api.Client, string, error) {
 	dir, err := configDir()
 	if err != nil {
-		return apperr.Wrap(err)
+		return nil, "", apperr.Wrap(err)
 	}
 	f, ok, err := cfgshared.ReadFile(dir)
 	if err != nil {
-		return apperr.Wrap(err)
+		return nil, "", apperr.Wrap(err)
 	}
 	if !ok || len(f.Contexts) == 0 {
-		return apperr.NotConfigured("no contexts configured")
+		return nil, "", apperr.NotConfigured("no contexts configured")
 	}
-	cur, ok := f.Context(f.CurrentContext)
-	if !ok {
+	target := name
+	if target == "" {
+		target = f.CurrentContext
+	}
+	cur, found := f.Context(target)
+	if !found {
+		if name != "" {
+			return nil, "", apperr.Wrap(fmt.Errorf("unknown context %q", name))
+		}
 		cur = f.Contexts[0]
 	}
 	scheme := schemeOrBasic(cur.Auth.Scheme)
 	secret, has, err := config.LoadSecret(cur.BaseURL, scheme)
 	if err != nil {
-		return apperr.Wrap(err)
+		return nil, cur.Name, apperr.Wrap(err)
 	}
 	if !has {
-		return apperr.NotConfigured("no stored credential for the current context")
+		return nil, cur.Name, apperr.NotConfigured("no stored credential for context " + cur.Name)
 	}
 	client, err := buildClient(cur.BaseURL, cur.Org, scheme, cur.Auth.Username, secret, f.Defaults)
 	if err != nil {
-		return apperr.Wrap(err)
+		return nil, cur.Name, apperr.Wrap(err)
 	}
+	return client, cur.Name, nil
+}
+
+// bindContext points the live client at a context. On failure the client is
+// cleared but `active` still records the intended context, so a later retry
+// cannot silently fall back to a different one and answer with its data.
+func (a *App) bindContext(name string) error {
+	client, resolved, err := a.clientForContext(name)
 	a.mu.Lock()
-	a.client = client
+	a.client = client // nil on failure
+	if resolved != "" {
+		a.active = resolved
+	}
 	a.mu.Unlock()
-	return nil
+	return err
+}
+
+// UseContext binds the live client to a named context WITHOUT touching the
+// shared config's current-context.
+//
+// o3 scopes a context to a query tab rather than to the whole app, so switching
+// tabs re-points the client many times a session. current-context is
+// openobserve-cli's active-context — a setting the user manages from the CLI —
+// and rewriting it on every tab switch would hijack it. See the "New tabs open
+// with" explainer in Settings.
+func (a *App) UseContext(name string) error {
+	if name == "" {
+		return apperr.Wrap(fmt.Errorf("context name is required"))
+	}
+	return a.bindContext(name)
+}
+
+// rebuildClient rebuilds a.client for whichever context is currently bound,
+// falling back to the config's current-context on a cold start.
+func (a *App) rebuildClient() error {
+	a.mu.Lock()
+	name := a.active
+	a.mu.Unlock()
+	return a.bindContext(name)
 }
 
 // requireClient returns the built client or a not-configured error.
@@ -307,32 +355,6 @@ func (a *App) ListContexts() ([]ContextInfo, error) {
 		return present
 	}
 	return contextInfos(f, has), nil
-}
-
-// SwitchContext sets the current context and rebuilds the client.
-func (a *App) SwitchContext(name string) error {
-	dir, err := configDir()
-	if err != nil {
-		return apperr.Wrap(err)
-	}
-	f, ok, err := cfgshared.ReadFile(dir)
-	if err != nil {
-		return apperr.Wrap(err)
-	}
-	if !ok {
-		return apperr.NotConfigured("no contexts configured")
-	}
-	if _, found := f.Context(name); !found {
-		return apperr.Wrap(fmt.Errorf("unknown context %q", name))
-	}
-	f.CurrentContext = name
-	if err := cfgshared.WriteFile(dir, f); err != nil {
-		return apperr.Wrap(err)
-	}
-	a.mu.Lock()
-	a.client = nil
-	a.mu.Unlock()
-	return apperr.Wrap(a.rebuildClient())
 }
 
 // SaveContext upserts a context into the shared config (and its secret into the
@@ -432,11 +454,15 @@ func (a *App) SaveContext(c ConnConfig) error {
 			_ = config.DeleteSecret(oldCtx.BaseURL, oldScheme)
 		}
 	}
-	if c.Name == f.CurrentContext {
-		a.mu.Lock()
-		a.client = nil
-		a.mu.Unlock()
-		return apperr.Wrap(a.rebuildClient())
+	// Rebuild when the saved context is the one the live client is bound to.
+	// That is the tab's context, not the config's current-context: with contexts
+	// scoped per tab, editing the context you are querying must take effect, and
+	// editing a different one must not disturb the live connection.
+	a.mu.Lock()
+	live := a.active
+	a.mu.Unlock()
+	if strings.EqualFold(c.Name, live) || (live == "" && c.Name == f.CurrentContext) {
+		return apperr.Wrap(a.bindContext(c.Name))
 	}
 	return nil
 }
@@ -474,7 +500,13 @@ func (a *App) RemoveContext(name string) error {
 	if !accountInUse(f, ctx.BaseURL, oldScheme, "") {
 		_ = config.DeleteSecret(ctx.BaseURL, oldScheme)
 	}
+	// The removed context may be the one the live client was bound to; drop that
+	// binding so the rebuild resolves a surviving context rather than a name that
+	// no longer exists.
 	a.mu.Lock()
+	if strings.EqualFold(a.active, name) {
+		a.active = ""
+	}
 	a.client = nil
 	a.mu.Unlock()
 	return apperr.Wrap(a.rebuildClient())
@@ -814,6 +846,28 @@ func (a *App) SetLastStream(ctxName, stream string) error {
 			p.LastStreams = map[string]string{}
 		}
 		p.LastStreams[ctxName] = stream
+	}))
+}
+
+// SetTabContextPolicy persists which context a brand-new query tab opens on:
+// defaultContext is the starred context, mode is "last" or "default".
+//
+// A dedicated mutator for the same reason as SetLastStream: it is written from
+// two small controls (the ☆ button and the "New tabs open with" segment) and
+// must not be able to clobber the prefs it does not own. An unrecognised mode
+// is ignored rather than written, so a stale frontend cannot poison the file —
+// LoadPrefs would silently rewrite it to "last" on the next read anyway.
+func (a *App) SetTabContextPolicy(defaultContext, mode string) error {
+	if mode != "" && mode != "last" && mode != "default" {
+		return apperr.Wrap(fmt.Errorf("unknown new-tab context mode %q", mode))
+	}
+	a.updMu.Lock()
+	defer a.updMu.Unlock()
+	return apperr.Wrap(config.MutatePrefs(func(p *config.Prefs) {
+		p.DefaultContext = defaultContext
+		if mode != "" {
+			p.NewTabContext = mode
+		}
 	}))
 }
 

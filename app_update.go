@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/user"
 	"runtime"
+	"strings"
 	"time"
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -44,6 +47,32 @@ type AppInfo struct {
 	// UpdateMode is "native" when an OS framework (Sparkle/WinSparkle) owns the
 	// update flow, "custom" for the check-only flow the frontend renders itself.
 	UpdateMode string `json:"updateMode"`
+	// User is the OS login name, used for the title-bar avatar's initials (the
+	// design's `osUser`). It is the local account, not an OpenObserve identity —
+	// o3 has no notion of a signed-in product user. "" when it cannot be read,
+	// which the frontend renders as a neutral placeholder.
+	User string `json:"user"`
+}
+
+// osUserName returns the OS login name. os/user.Current shells out to the
+// directory service on some platforms and can fail in sandboxes, so the
+// environment is used as a fallback and "" is an accepted answer.
+func osUserName() string {
+	if u, err := user.Current(); err == nil && u != nil {
+		if u.Username != "" {
+			// Windows reports DOMAIN\user; the avatar wants just the account.
+			if i := strings.LastIndexAny(u.Username, `\/`); i >= 0 {
+				return u.Username[i+1:]
+			}
+			return u.Username
+		}
+	}
+	for _, k := range []string{"USER", "USERNAME", "LOGNAME"} {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // AppInfo reports the running version and platform.
@@ -59,6 +88,7 @@ func (a *App) AppInfo() AppInfo {
 		Wails:      wailsVersion,
 		IsDev:      update.IsDev(version),
 		UpdateMode: mode,
+		User:       osUserName(),
 	}
 }
 

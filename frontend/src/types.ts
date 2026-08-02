@@ -20,6 +20,10 @@ export interface QueryTab {
   sql: string;       // SQL-mode buffer
   search: string;    // Search-mode buffer (free-text terms)
   stream: string;    // target stream
+  // Connection context this tab queries. o3 scopes a context to a tab rather
+  // than to the whole app, so switching one tab's instance leaves the others
+  // where they were. '' until the first context is known (cold start).
+  ctx: string;
 }
 export interface GuideSection { title: string; items: { code: string; note: string }[]; }
 export interface NavItem { name: string; icon: 'logs'|'metrics'|'traces'|'streams'|'dash'|'alerts'; soon: boolean; }

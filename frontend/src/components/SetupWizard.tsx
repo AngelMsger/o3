@@ -1,9 +1,12 @@
 /* SetupWizard — design/Observe.dc.html lines 563-659 (multi-context variant).
    Left panel shows "Your contexts" list + "+ New context"; right pane edits the
    selected context (name, URL, org, auth, test, save). */
+import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import { authTabToScheme, schemeToAuthTab } from '../lib/signin';
 import { connTestLabel, type ConnTest } from '../lib/connTest';
+import { ctxErrors, invalidLabel, showError, touchKey, VALIDATORS } from '../lib/ctxValidate';
+import type { FieldKey } from '../lib/ctxValidate';
 import { usesTLS } from '../lib/tls';
 import { BrandMark } from './BrandMark';
 import styles from './SetupWizard.module.css';
@@ -65,6 +68,48 @@ export function SetupWizard({
   // displayed tab always matches what handleSaveContext / handleTestContext will use.
   const authTab = schemeToAuthTab(selected?.scheme ?? '');
   const isSession = authTab === 'session';
+
+  // Same per-field validation as Settings (lib/ctxValidate), so a first launch
+  // gets told what is wrong here rather than at the first failed request.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [saveTried, setSaveTried] = useState(false);
+  const [browserNeedsUrl, setBrowserNeedsUrl] = useState(false);
+  const selName = selected?.name ?? '';
+  const errors = ctxErrors(selected ?? null);
+  const errCount = Object.keys(errors).length;
+
+  useEffect(() => {
+    setSaveTried(false);
+    setBrowserNeedsUrl(false);
+  }, [selName]);
+
+  const touch = (k: FieldKey) => setTouched((t) => ({ ...t, [touchKey(selName, k)]: true }));
+  const bad = (k: FieldKey) => showError(errors, touched, selName, k, saveTried);
+  const inputClass = (k: FieldKey) => `${styles.fieldInput}${bad(k) ? ` ${styles.fieldInputBad}` : ''}`;
+  const fieldError = (k: FieldKey) =>
+    bad(k) ? <div className={styles.fieldError}><span>⚠</span>{errors[k]}</div> : null;
+
+  // Connect & Continue refuses to save a context that cannot connect, revealing
+  // every outstanding field at once instead of failing at the server.
+  const handleConnect = () => {
+    if (!selected) return;
+    if (errCount > 0) { setSaveTried(true); return; }
+    setSaveTried(false);
+    void onSave(selected);
+  };
+
+  // Browser sign-in only needs a URL to open, so it flags that one field rather
+  // than the whole form — and says why, instead of leaving a disabled button.
+  const handleBrowserSignIn = () => {
+    if (!selected) return;
+    if (VALIDATORS.url(selected.url ?? '')) {
+      touch('url');
+      setBrowserNeedsUrl(true);
+      return;
+    }
+    setBrowserNeedsUrl(false);
+    onBrowserSignIn(selected);
+  };
 
   return (
     <div className={`${styles.overlay} ${visible ? styles.shown : styles.hidden}`}>
@@ -170,36 +215,42 @@ export function SetupWizard({
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Context name</div>
             <input
-              className={styles.fieldInput}
+              className={inputClass('name')}
               value={selected?.name ?? ''}
               onChange={(e) => selected && onUpdateCtx(selected.name, 'name', e.target.value)}
+              onBlur={() => touch('name')}
               placeholder="prod, staging, local..."
               spellCheck={false}
             />
+            {fieldError('name')}
           </div>
 
           {/* Server URL — design line 671 */}
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Server URL</div>
             <input
-              className={styles.fieldInput}
+              className={inputClass('url')}
               value={selected?.url ?? ''}
               onChange={(e) => selected && onUpdateCtx(selected.name, 'url', e.target.value)}
+              onBlur={() => touch('url')}
               placeholder="http://localhost:5080"
               spellCheck={false}
             />
+            {fieldError('url')}
           </div>
 
           {/* Organization */}
           <div className={styles.fieldWrap}>
             <div className={styles.fieldLabel}>Organization</div>
             <input
-              className={styles.fieldInput}
+              className={inputClass('org')}
               value={selected?.org ?? ''}
               onChange={(e) => selected && onUpdateCtx(selected.name, 'org', e.target.value)}
+              onBlur={() => touch('org')}
               placeholder="default"
               spellCheck={false}
             />
+            {fieldError('org')}
           </div>
 
           {/* Authentication segmented tabs */}
@@ -229,15 +280,19 @@ export function SetupWizard({
               <div className={styles.browserDesc}>
                 Log in through your instance's own web page — o3 opens a secure window, captures the session, and stores it in your OS keychain. No token to create or paste; works for everyone.
               </div>
-              <button
-                className={styles.browserBtn}
-                onClick={() => selected && onBrowserSignIn(selected)}
-                disabled={!selected || !selected.url}
-              >
+              {/* Enabled unconditionally: a disabled button with a hint beside
+                  it never says WHICH field is wrong. Clicking now flags the URL
+                  and explains what it is needed for. */}
+              <button className={styles.browserBtn} onClick={handleBrowserSignIn} disabled={!selected}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#06181a" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
                 Open sign-in window
               </button>
-              {!selected?.url && <div className={styles.browserHint}>Enter your Server URL above first.</div>}
+              {browserNeedsUrl && (
+                <div className={styles.fieldError}>
+                  <span>⚠</span>
+                  Fill in the Server URL above first — o3 needs to know which instance to open.
+                </div>
+              )}
             </div>
           )}
 
@@ -247,20 +302,24 @@ export function SetupWizard({
               <div>
                 <div className={styles.fieldLabel}>Email</div>
                 <input
-                  className={styles.fieldInput}
+                  className={inputClass('username')}
                   value={selected?.username ?? ''}
                   onChange={(e) => selected && onUpdateCtx(selected.name, 'username', e.target.value)}
+                  onBlur={() => touch('username')}
                   spellCheck={false}
                 />
+                {fieldError('username')}
               </div>
               <div>
                 <div className={styles.fieldLabel}>Password</div>
                 <input
                   type="password"
-                  className={styles.fieldInput}
+                  className={inputClass('password')}
                   value={selected?.password ?? ''}
                   onChange={(e) => selected && onUpdateCtx(selected.name, 'password', e.target.value)}
+                  onBlur={() => touch('password')}
                 />
+                {fieldError('password')}
               </div>
             </div>
           )}
@@ -270,11 +329,13 @@ export function SetupWizard({
             <div className={styles.fieldWrap}>
               <div className={styles.fieldLabel}>Service-account token</div>
               <input
-                className={styles.fieldInput}
+                className={inputClass('token')}
                 value={selected?.token ?? ''}
                 onChange={(e) => selected && onUpdateCtx(selected.name, 'token', e.target.value)}
+                onBlur={() => touch('token')}
                 placeholder="oo_sa_..."
               />
+              {fieldError('token')}
             </div>
           )}
 
@@ -312,10 +373,14 @@ export function SetupWizard({
               <div className={styles.testRow}>
                 <button
                   className={styles.testBtn}
-                  onClick={() => selected && onTest(selected)}
+                  onClick={() => {
+                    if (!selected) return;
+                    if (errCount > 0) { setSaveTried(true); return; }
+                    onTest(selected);
+                  }}
                   disabled={!selected || test.state === 'testing'}
                 >
-                  Test Connection
+                  {errCount > 0 && saveTried ? '⚠ Check the fields' : 'Test Connection'}
                 </button>
                 {test.state !== 'idle' && (
                   <span className={test.state === 'error' ? styles.testError : styles.testedLabel}>
@@ -331,13 +396,21 @@ export function SetupWizard({
           )}
           </>)}
 
+          {/* Summary banner — everything still outstanding, in one place. */}
+          {saveTried && errCount > 0 && (
+            <div className={styles.invalidBanner}>
+              <span className={styles.invalidBannerIcon}>⚠</span>
+              <span className={styles.invalidBannerText}>{invalidLabel(errCount)}</span>
+            </div>
+          )}
+
           {/* Action buttons — browser sign-in connects via the sign-in window,
               so it only offers Skip; typed methods keep Connect & Continue. */}
           <div className={styles.actions}>
             {!isSession && (
               <button
                 className={styles.btnPrimary}
-                onClick={() => selected && onSave(selected)}
+                onClick={handleConnect}
                 disabled={!selected}
               >
                 Connect &amp; Continue

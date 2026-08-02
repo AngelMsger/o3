@@ -87,6 +87,7 @@ const info = (over: Partial<AppInfo> = {}): AppInfo => ({
   wails: 'v2.12.0',
   isDev: false,
   updateMode: 'custom',
+  user: 'alex',
   ...over,
 });
 

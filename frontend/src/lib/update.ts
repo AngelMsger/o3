@@ -28,6 +28,8 @@ export interface AppInfo {
   // its own dialogs, download, install, relaunch. "custom" everywhere else
   // (Linux, dev builds): the check-only flow rendered by UpdateSheet.
   updateMode: string;
+  // OS login name, for the title-bar avatar's initials. "" when unreadable.
+  user: string;
 }
 
 // nativeUpdates reports whether the running build delegates updates to an OS

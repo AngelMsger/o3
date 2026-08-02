@@ -1,5 +1,5 @@
 /* QueryTabs — design/Observe.dc.html lines 77–91 */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './QueryTabs.module.css';
 import { STREAMS } from '../data/mock';
 import type { QueryTab } from '../types';
@@ -10,9 +10,13 @@ const STREAM_COLORS: Record<string, string> = Object.fromEntries(
   STREAMS.map(s => [s.name, s.color])
 );
 
-export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename, onContextMenu }: {
+export function QueryTabs({ tabs, activeId, editingId, onEditing, onPick, onNew, onClose, onRename, onContextMenu }: {
   tabs: QueryTab[];
   activeId: string;
+  // Which tab is being renamed inline. Lifted out of this component because the
+  // right-click menu's "Rename Tab" has to start the same edit from outside it.
+  editingId: string | null;
+  onEditing: (id: string | null) => void;
   onPick: (id: string) => void;
   onNew: () => void;
   onClose: (id: string) => void;
@@ -20,16 +24,24 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename, on
   onContextMenu?: (id: string, e: MouseEvent) => void;
 }): ReactElement {
   const closable = tabs.length > 1;
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<string>('');
   // committingRef prevents the double-commit that occurs when Enter clears
   // editingId (unmounting the input) and the resulting blur fires commit again.
   const committingRef = useRef(false);
 
+  // Seed the draft whenever an edit starts, wherever it started from — a
+  // double-click on the tab or "Rename Tab" in the right-click menu.
+  useEffect(() => {
+    if (editingId) setDraft(tabs.find((t) => t.id === editingId)?.name ?? '');
+    // Only on the identity of the tab being renamed: re-seeding on every `tabs`
+    // change would overwrite what the user is typing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingId]);
+
   const commit = (id: string, fallback: string) => {
     const name = draft.trim() || fallback;
     onRename(id, name);
-    setEditingId(null);
+    onEditing(null);
   };
 
   return (
@@ -44,9 +56,9 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename, on
             key={t.id}
             className={`${styles.tab} ${active ? styles.active : ''}`}
             onClick={() => onPick(t.id)}
-            onDoubleClick={() => { setEditingId(t.id); setDraft(t.name); }}
+            onDoubleClick={() => onEditing(t.id)}
             onContextMenu={(e) => { e.preventDefault(); onContextMenu?.(t.id, e); }}
-            title={`stream: ${t.stream} — double-click to rename`}
+            title={`stream: ${t.stream} — double-click or right-click to rename`}
           >
             {/* design line 81 — stream color dot */}
             <span
@@ -63,7 +75,7 @@ export function QueryTabs({ tabs, activeId, onPick, onNew, onClose, onRename, on
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') { e.preventDefault(); committingRef.current = true; commit(t.id, t.name); }
-                  else if (e.key === 'Escape') { e.preventDefault(); committingRef.current = true; setEditingId(null); }
+                  else if (e.key === 'Escape') { e.preventDefault(); committingRef.current = true; onEditing(null); }
                 }}
                 onBlur={() => {
                   if (committingRef.current) { committingRef.current = false; return; }

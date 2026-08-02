@@ -36,6 +36,20 @@ type Prefs struct {
 	// "nothing remembered" and the caller falls back to the first stream, so
 	// applyDefaults has nothing to backfill.
 	LastStreams map[string]string `json:"lastStreams,omitempty"`
+
+	// DefaultContext is the context a brand-new query tab starts on when
+	// NewTabContext is "default". It is o3's own setting, deliberately separate
+	// from the shared config's current-context (openobserve-cli's
+	// active-context): o3 scopes a context to a query tab, so it must not rewrite
+	// the CLI's choice as a side effect of ordinary tab use. Settings offers an
+	// explicit "Follow the CLI" action to copy that value over. "" means "not
+	// chosen yet" and the app falls back to the CLI's active-context.
+	DefaultContext string `json:"defaultContext,omitempty"`
+
+	// NewTabContext is "last" (the default — a new tab inherits the context you
+	// were just working in) or "default" (every new tab starts on
+	// DefaultContext). Empty is backfilled to "last".
+	NewTabContext string `json:"newTabContext"`
 }
 
 // prefsFileName is the file name for the persisted prefs, relative to o3's
@@ -45,7 +59,7 @@ const prefsFileName = "prefs.json"
 // defaultPrefs returns the built-in defaults, kept in one place so both the
 // missing-file case and the field-backfill case agree.
 func defaultPrefs() Prefs {
-	return Prefs{Theme: "dark", Accent: "#2dd4bf", Density: "ultra", UpdateCheck: "auto"}
+	return Prefs{Theme: "dark", Accent: "#2dd4bf", Density: "ultra", UpdateCheck: "auto", NewTabContext: "last"}
 }
 
 // validThemes are the only accepted values for Prefs.Theme.
@@ -53,6 +67,9 @@ var validThemes = map[string]bool{"light": true, "dark": true, "system": true}
 
 // validUpdateChecks are the only accepted values for Prefs.UpdateCheck.
 var validUpdateChecks = map[string]bool{"auto": true, "off": true}
+
+// validNewTabContexts are the only accepted values for Prefs.NewTabContext.
+var validNewTabContexts = map[string]bool{"last": true, "default": true}
 
 // applyDefaults fills any empty/invalid field of p with the default value,
 // and normalizes an unrecognized Theme to "dark".
@@ -69,6 +86,9 @@ func applyDefaults(p Prefs) Prefs {
 	}
 	if p.UpdateCheck == "" || !validUpdateChecks[p.UpdateCheck] {
 		p.UpdateCheck = d.UpdateCheck
+	}
+	if p.NewTabContext == "" || !validNewTabContexts[p.NewTabContext] {
+		p.NewTabContext = d.NewTabContext
 	}
 	return p
 }

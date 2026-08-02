@@ -51,11 +51,11 @@ export function SetDockTheme(arg1:boolean):Promise<void>;
 
 export function SetLastStream(arg1:string,arg2:string):Promise<void>;
 
+export function SetTabContextPolicy(arg1:string,arg2:string):Promise<void>;
+
 export function SignOut(arg1:string):Promise<void>;
 
 export function SkipUpdateVersion(arg1:string):Promise<void>;
-
-export function SwitchContext(arg1:string):Promise<void>;
 
 export function TestConnection(arg1:main.ConnConfig):Promise<main.ConnInfo>;
 
@@ -64,3 +64,5 @@ export function UninstallCLI():Promise<void>;
 export function UninstallSkill():Promise<void>;
 
 export function UpgradeCLI():Promise<void>;
+
+export function UseContext(arg1:string):Promise<void>;

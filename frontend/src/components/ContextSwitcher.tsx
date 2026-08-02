@@ -1,8 +1,9 @@
 /* ContextSwitcher — design/Observe.dc.html lines 168-208.
-   The active-context selector, relocated from the title bar into the query
-   toolbar (control row) per the design refresh. o3 keeps a single global
-   active context (shared with the CLI config), so the "this query" framing is
-   presentational; switching still changes the app-wide context. */
+   The context selector for the tab you are on, relocated from the title bar
+   into the query toolbar (control row) per the design refresh. Contexts are
+   scoped per query tab, so the "this tab" framing is literal: switching here
+   re-points only this tab, and leaves openobserve-cli's active-context alone.
+   Which context a NEW tab starts on is set in Settings ▸ Connection. */
 import styles from './ContextSwitcher.module.css';
 import type { ReactElement } from 'react';
 
