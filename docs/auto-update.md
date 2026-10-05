@@ -1,5 +1,12 @@
 # Auto-update
 
+> [!NOTE]
+> o3 is archived and v0.3.0 is its final release, so installed copies will find nothing
+> newer through this mechanism. The document is kept as a description of how updates work,
+> and as a guide for anyone setting them up in a fork (substitute your own repository for
+> `AngelMsger/o3` in the commands). See the [project status](../README.md#project-status)
+> for the background.
+
 Release builds of o3 update themselves through the platform's native update
 framework: [Sparkle](https://sparkle-project.org) on macOS and
 [WinSparkle](https://winsparkle.org) on Windows. Linux (AppImage) and dev

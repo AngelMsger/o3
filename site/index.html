@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>o3 — OpenObserve, as a Native App</title>
-<meta name="description" content="A fast, native desktop client for OpenObserve. Query logs, explore metrics, and manage connections from a purpose-built app — no browser tab, no context switching.">
+<title>o3 — OpenObserve, as a Native App (Archived)</title>
+<meta name="description" content="o3 is a native desktop client for OpenObserve. Development is paused and the project is archived; the final release, v0.3.0, remains available to download.">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
 
 <!-- Open Graph / Twitter -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="o3 — OpenObserve, as a Native App">
-<meta property="og:description" content="A fast, native desktop client for OpenObserve. Query logs, explore metrics, and manage connections from a purpose-built app.">
+<meta property="og:title" content="o3 — OpenObserve, as a Native App (Archived)">
+<meta property="og:description" content="A native desktop client for OpenObserve. Development is paused and the project is archived; the final release, v0.3.0, remains available to download.">
 <meta property="og:url" content="https://angelmsger.github.io/o3/">
 <meta property="og:image" content="https://angelmsger.github.io/o3/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="o3 — OpenObserve, as a Native App">
-<meta name="twitter:description" content="A fast, native desktop client for OpenObserve. Query logs, explore metrics, and manage connections from a purpose-built app.">
+<meta name="twitter:title" content="o3 — OpenObserve, as a Native App (Archived)">
+<meta name="twitter:description" content="A native desktop client for OpenObserve. Development is paused and the project is archived; the final release, v0.3.0, remains available to download.">
 <meta name="twitter:image" content="https://angelmsger.github.io/o3/assets/og.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,12 +53,18 @@
   .o3slogan:hover .kw { color: #5df0dd; text-shadow: 0 0 10px rgba(45,212,191,.7); }
   .o3slogan:hover .sig::after { right: 0; }
 
+  /* Terminal sample in the status section — one command per line on desktop. */
+  .o3term { white-space: nowrap; overflow-x: auto; }
+
   /* Responsive — collapse the desktop grids and shrink the hero on narrow screens. */
   @media (max-width: 760px) {
     .o3nav { flex-wrap: wrap; padding: 20px 20px !important; }
     .o3h1 { font-size: 40px !important; }
     .o3grid3 { grid-template-columns: 1fr !important; }
     .o3grid2 { grid-template-columns: 1fr !important; }
+    /* Let the commands wrap rather than hide behind a scrollbar, and give them room. */
+    .o3term { white-space: normal; overflow-wrap: anywhere; }
+    .o3cli-cell { padding: 26px 22px !important; border-right: 0 !important; }
   }
 </style>
 <script>try { localStorage.setItem('oo-theme','dark'); } catch(e) {}</script>
@@ -78,7 +84,8 @@
     <span style="width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 30% 8%,#123039,#06121a);box-shadow:0 0 0 1px rgba(45,212,191,.22) inset;"><span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:15px;letter-spacing:-1.2px;color:#5df0dd;filter:drop-shadow(0 0 5px rgba(45,212,191,.6));">o3</span></span>
     <span style="font-size:16px; font-weight:700; letter-spacing:.2px; color:#f0f3f8;">o3</span>
     <span style="flex:1;"></span>
-    <a href="#features" class="o3link" style="font-size:13.5px; color:#aeb6c4; text-decoration:none; font-weight:500;">Features</a>
+    <a href="#status" class="o3link" style="font-size:13.5px; color:#aeb6c4; text-decoration:none; font-weight:500;">Status</a>
+    <a href="#features" class="o3link" style="font-size:13.5px; color:#aeb6c4; text-decoration:none; font-weight:500; margin-left:26px;">Features</a>
     <a href="#download" class="o3link" style="font-size:13.5px; color:#aeb6c4; text-decoration:none; font-weight:500; margin-left:26px;">Download</a>
     <a href="https://github.com/AngelMsger/o3#readme" target="_blank" rel="noopener" class="o3link" style="font-size:13.5px; color:#aeb6c4; text-decoration:none; font-weight:500; margin-left:26px;">Docs</a>
     <a href="https://github.com/AngelMsger/o3" target="_blank" rel="noopener" class="o3btn" style="margin-left:26px; font-size:13px; color:#cfd6e4; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:8px; height:34px; padding:0 14px; border-radius:9px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03);">
@@ -89,27 +96,29 @@
 
   <!-- hero -->
   <div style="max-width:900px; margin:0 auto; padding:56px 40px 26px; text-align:center;">
-    <div style="display:inline-flex; align-items:center; gap:9px; padding:6px 14px; border-radius:999px; border:1px solid rgba(45,212,191,.24); background:rgba(45,212,191,.06); margin-bottom:18px;">
-      <span style="width:7px; height:7px; border-radius:50%; background:#34e0a1; box-shadow:0 0 8px #34e0a1;"></span>
-      <span style="font-size:12.5px; color:#8fe8dc; font-weight:500; letter-spacing:.2px;">Free &amp; Open Source</span>
-    </div>
+    <!-- status pill — amber, the same palette as the macOS first-launch note -->
+    <a href="#status" class="o3btn" style="display:inline-flex; align-items:center; gap:9px; padding:6px 14px; border-radius:999px; border:1px solid rgba(229,199,123,.26); background:rgba(229,199,123,.07); margin-bottom:18px; text-decoration:none;">
+      <span style="width:7px; height:7px; border-radius:50%; background:#e6c07b;"></span>
+      <span style="font-size:12.5px; color:#e9d8ac; font-weight:500; letter-spacing:.2px;">Archived · Development Paused</span>
+    </a>
     <div style="margin-bottom:22px;">
       <span class="o3slogan" title="SELECT signal FROM noise"><span class="kw">SELECT</span> <span class="sig">signal</span> <span class="kw">FROM</span> <span style="color:#5b6371;">noise</span></span>
     </div>
     <h1 class="o3h1" style="margin:0 0 22px; font-size:62px; line-height:1.04; letter-spacing:-2px; font-weight:700; color:#f4f7fb;">OpenObserve,<br><span style="color:#5df0dd; filter:drop-shadow(0 0 24px rgba(45,212,191,.35));">as a Native App.</span></h1>
-    <p style="margin:0 auto 38px; max-width:600px; font-size:18px; line-height:1.6; color:#9aa3b2;">A fast, native desktop client for OpenObserve. Query logs, explore metrics, and manage connections from a purpose-built app — no browser tab, no context switching.</p>
+    <p style="margin:0 auto 38px; max-width:640px; font-size:18px; line-height:1.6; color:#9aa3b2;">o3 is a fast, native desktop client for OpenObserve: query logs, explore metrics, and manage connections from a purpose-built app. Development is now paused and the project is archived — these days we ask an AI agent in the terminal rather than open a GUI.</p>
+    <!-- The explanation leads; the final build stays one click away as the secondary action. -->
     <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
-      <a id="o3-hero-dl" data-o3dl="darwin" href="https://github.com/AngelMsger/o3/releases/download/v0.3.0/o3-0.3.0-universal.dmg" rel="noopener" class="o3btn" style="display:inline-flex; align-items:center; gap:10px; height:50px; padding:0 26px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; color:#04120f; background:linear-gradient(165deg,#5df0dd,#2dd4bf); box-shadow:0 16px 34px -12px rgba(45,212,191,.6);">
-        <svg class="o3-hero-icon" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M16.36 12.6c-.03-2.72 2.22-4.02 2.32-4.09-1.26-1.85-3.23-2.1-3.93-2.13-1.68-.17-3.27 .99-4.12 .99-.84 0-2.15-.96-3.54-.94-1.82 .03-3.5 1.06-4.44 2.69-1.89 3.28-.48 8.14 1.36 10.8 .9 1.3 1.98 2.76 3.38 2.71 1.36-.06 1.87-.88 3.51-.88 1.64 0 2.1 .88 3.53 .85 1.46-.03 2.38-1.33 3.27-2.63 1.03-1.51 1.46-2.97 1.48-3.05-.03-.01-2.84-1.09-2.87-4.31zM13.7 4.7c.75-.9 1.25-2.17 1.11-3.43-1.08 .04-2.38 .72-3.15 1.62-.69 .8-1.29 2.08-1.13 3.31 1.2 .1 2.42-.61 3.17-1.5z"/></svg>
-        <span class="o3-hero-label">Download for Mac</span>
-        <span data-o3dl-size style="font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700; color:rgba(4,18,15,.66); padding:3px 8px; border-radius:7px; background:rgba(4,18,15,.12);">13.0 MB</span>
+      <a href="#status" class="o3btn" style="display:inline-flex; align-items:center; gap:10px; height:50px; padding:0 26px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; color:#04120f; background:linear-gradient(165deg,#5df0dd,#2dd4bf); box-shadow:0 16px 34px -12px rgba(45,212,191,.6);">
+        Why We Paused
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
       </a>
-      <a href="https://github.com/AngelMsger/o3" target="_blank" rel="noopener" class="o3btn" style="display:inline-flex; align-items:center; gap:10px; height:50px; padding:0 22px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; color:#dbe2ec; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14);">
-        View on GitHub
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+      <a id="o3-hero-dl" data-o3dl="darwin" href="https://github.com/AngelMsger/o3/releases/download/v0.3.0/o3-0.3.0-universal.dmg" rel="noopener" class="o3btn" style="display:inline-flex; align-items:center; gap:10px; height:50px; padding:0 22px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; color:#dbe2ec; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+        <span class="o3-hero-label">Download for Mac</span>
+        <span data-o3dl-size style="font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700; color:#8b93a3; padding:3px 8px; border-radius:7px; background:rgba(255,255,255,.06);">13.0 MB</span>
       </a>
     </div>
-    <div style="margin-top:20px; font-size:12.5px; color:#5b6371; font-family:'JetBrains Mono',monospace;">Apple Silicon · Intel · Windows · Linux — <span data-o3-version>v0.3.0</span></div>
+    <div style="margin-top:20px; font-size:12.5px; color:#5b6371; font-family:'JetBrains Mono',monospace;">Final release <span data-o3-version>v0.3.0</span> · Apple Silicon · Intel · Windows · Linux</div>
     <!-- macOS first-launch hint — revealed only for macOS visitors (see o3InitMacNote) -->
     <button onclick="o3ScrollGuide(event)" class="o3btn o3-mac-only" data-mac-display="inline-flex" style="display:none; cursor:pointer; margin-top:22px; align-items:center; gap:11px; padding:11px 16px 11px 14px; border-radius:12px; text-align:left; background:rgba(229,199,123,.07); border:1px solid rgba(229,199,123,.26);">
       <span style="flex:none; width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:rgba(229,199,123,.12); border:1px solid rgba(229,199,123,.28);">
@@ -123,8 +132,99 @@
   </div>
   <!-- ===== HERO ZONE end ===== -->
 
-  <!-- ===== LIVE INTERACTIVE DEMO ===== -->
-  <div style="max-width:1120px; margin:0 auto; padding:14px 40px 70px; position:relative;">
+  <!-- ===== PROJECT STATUS — why development is paused, and what we use now ===== -->
+  <div id="status" style="max-width:1080px; margin:0 auto; padding:44px 40px 20px; scroll-margin-top:24px;">
+    <div style="text-align:center; margin-bottom:34px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#e6c07b; margin-bottom:12px;">Project Status</div>
+      <h2 style="margin:0; font-size:36px; letter-spacing:-1px; font-weight:700; color:#f0f3f8;">Why We Paused o3</h2>
+    </div>
+
+    <!-- the story, in a reading-width column -->
+    <div style="max-width:720px; margin:0 auto 44px; font-size:16.5px; line-height:1.7; color:#9aa3b2;">
+      <p style="margin:0 0 18px;">o3 began with a simple premise: working with logs and metrics deserves a purpose-built tool. So we built one, with an editor that knows your stream's fields, a histogram of event volume, and an inspector for every record, all tuned to keep the query-inspect-refine loop fast for the person at the keyboard.</p>
+      <p style="margin:0 0 18px;">What has changed since then is <b style="color:#dbe2ec; font-weight:600;">who runs that loop</b>. AI models and the tooling around them have matured to the point where, more often than not, we no longer write the query ourselves. We open a terminal, describe the problem to a coding agent, and let it do the digging. That is more efficient than driving a GUI by hand, and it fits naturally into the agent ecosystem.</p>
+      <p style="margin:0;">With that as our everyday workflow, we no longer need a complex desktop client, so we have paused its development and archived the project. Nothing went wrong with o3; the way we work changed around it.</p>
+    </div>
+
+    <!-- then vs. now -->
+    <div class="o3grid2" style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+      <div style="padding:30px; border-radius:16px; background:#0a0c10; border:1px solid rgba(255,255,255,.06);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+          <span style="width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);"><span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;letter-spacing:-1px;color:#9aa3b2;">o3</span></span>
+          <span style="font-size:16px; font-weight:700; color:#aeb6c4;">The o3 App</span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#5b6371; margin-bottom:20px;">you run the loop</div>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+          <div style="display:flex; gap:11px; align-items:flex-start;"><span style="flex:none; width:18px; height:18px; margin-top:2px; display:inline-flex; align-items:center; justify-content:center;"><span style="width:5px; height:5px; border-radius:50%; background:#5b6371;"></span></span><span style="font-size:14.5px; color:#8b93a3; line-height:1.5;">You pick the stream and write the SQL or PromQL</span></div>
+          <div style="display:flex; gap:11px; align-items:flex-start;"><span style="flex:none; width:18px; height:18px; margin-top:2px; display:inline-flex; align-items:center; justify-content:center;"><span style="width:5px; height:5px; border-radius:50%; background:#5b6371;"></span></span><span style="font-size:14.5px; color:#8b93a3; line-height:1.5;">You read the histogram and inspect the records</span></div>
+          <div style="display:flex; gap:11px; align-items:flex-start;"><span style="flex:none; width:18px; height:18px; margin-top:2px; display:inline-flex; align-items:center; justify-content:center;"><span style="width:5px; height:5px; border-radius:50%; background:#5b6371;"></span></span><span style="font-size:14.5px; color:#8b93a3; line-height:1.5;">You refine the query and run it again</span></div>
+          <div style="display:flex; gap:11px; align-items:flex-start;"><span style="flex:none; width:18px; height:18px; margin-top:2px; display:inline-flex; align-items:center; justify-content:center;"><span style="width:5px; height:5px; border-radius:50%; background:#5b6371;"></span></span><span style="font-size:14.5px; color:#8b93a3; line-height:1.5;">All of it in a separate window, away from the rest of your work</span></div>
+        </div>
+      </div>
+      <div style="padding:30px; border-radius:16px; background:linear-gradient(180deg,rgba(45,212,191,.06),transparent); border:1px solid rgba(45,212,191,.28);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+          <span style="width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 30% 8%,#123039,#06121a);box-shadow:0 0 0 1px rgba(45,212,191,.22) inset;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5M13 17h6"/></svg></span>
+          <span style="font-size:16px; font-weight:700; color:#f0f3f8;">An Agent in the Terminal</span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#2dd4bf; margin-bottom:20px;">you describe the problem</div>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">You say what you are looking for, in plain language</span></div>
+          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">It finds the stream, writes the query, and runs it</span></div>
+          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">It reads the results and refines until it has an answer</span></div>
+          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">It is the same agent already working on your code</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- what we use now: openobserve-cli -->
+    <div style="margin-top:18px; border-radius:20px; overflow:hidden; background:#0a0c11; border:1px solid rgba(255,255,255,.1);">
+      <div class="o3grid2" style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+        <div class="o3cli-cell" style="padding:34px; border-right:1px solid rgba(255,255,255,.06);">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#2dd4bf; margin-bottom:12px;">What We Use Now</div>
+          <h3 style="margin:0 0 12px; font-family:'JetBrains Mono',monospace; font-size:22px; letter-spacing:-.5px; font-weight:700; color:#f4f7fb;">openobserve-cli</h3>
+          <p style="margin:0 0 14px; font-size:14.5px; line-height:1.65; color:#9aa3b2;">o3's command-line sibling; o3 itself is built on its Go client. It is designed for coding agents: it covers logs, metrics, and traces, returns structured JSON, and ships a Skill that teaches agents such as Claude Code, Codex, and Cursor how to use it.</p>
+          <p style="margin:0 0 24px; font-size:13.5px; line-height:1.6; color:#6b7282;">Already using o3? The CLI reads the same configuration and keychain entries, so your connections are already in place.</p>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="https://github.com/AngelMsger/openobserve-cli" target="_blank" rel="noopener" class="o3btn" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border-radius:10px; text-decoration:none; font-weight:600; font-size:13.5px; color:#04120f; background:linear-gradient(165deg,#5df0dd,#2dd4bf);">
+              Get openobserve-cli
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+            </a>
+            <a href="https://angelmsger.github.io/openobserve-cli/" target="_blank" rel="noopener" class="o3btn" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border-radius:10px; text-decoration:none; font-weight:600; font-size:13.5px; color:#dbe2ec; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14);">
+              Read the Docs
+            </a>
+          </div>
+        </div>
+        <div class="o3cli-cell" style="padding:34px; display:flex; align-items:center; min-width:0;">
+          <div style="width:100%; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.09); background:#08090c;">
+            <div style="display:flex; align-items:center; gap:7px; padding:11px 15px; border-bottom:1px solid rgba(255,255,255,.06);">
+              <span style="width:10px;height:10px;border-radius:50%;background:#3a3f47;"></span>
+              <span style="width:10px;height:10px;border-radius:50%;background:#3a3f47;"></span>
+              <span style="width:10px;height:10px;border-radius:50%;background:#3a3f47;"></span>
+              <span style="margin-left:8px; font-size:11px; color:#5b6371; font-family:'JetBrains Mono',monospace;">Terminal · zsh</span>
+            </div>
+            <div class="o3term" style="padding:16px; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.9;">
+              <div style="color:#5b6371;"># install the CLI, then teach your agent to use it</div>
+              <div style="color:#e6eaf2;"><span style="color:#a3e08c;">$</span> npm install -g @angelmsger/openobserve-cli</div>
+              <div style="color:#e6eaf2;"><span style="color:#a3e08c;">$</span> openobserve-cli skill install</div>
+              <div style="color:#5b6371; margin-top:10px;"># then ask your agent</div>
+              <div style="color:#8fe8dc;"><span style="color:#5df0dd;">&gt;</span> why did checkout errors spike in the last hour?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== PROJECT STATUS end ===== -->
+
+  <!-- ===== THE APP — what the final release does: live demo, then the feature grid ===== -->
+  <div id="features" style="max-width:1080px; margin:0 auto; padding:76px 40px 0; text-align:center; scroll-margin-top:24px;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#2dd4bf; margin-bottom:12px;">The Final Release</div>
+    <h2 style="margin:0 0 12px; font-size:36px; letter-spacing:-1px; font-weight:700; color:#f0f3f8;">What o3 Does</h2>
+    <p style="margin:0 auto; max-width:640px; font-size:16px; line-height:1.6; color:#8b93a3;">Development is paused, but the app still runs. The logs and metrics explorers are complete; traces, dashboards, and alerts were never built. Try the logs explorer right here — the demo below is interactive.</p>
+  </div>
+
+  <!-- live interactive demo -->
+  <div style="max-width:1120px; margin:0 auto; padding:40px 40px 50px; position:relative;">
     <div style="position:absolute; left:50%; top:12%; width:74%; height:66%; transform:translateX(-50%); background:radial-gradient(circle, rgba(45,212,191,.22) 0%, transparent 66%); filter:blur(22px); animation:o3glow 4.6s ease-in-out infinite; pointer-events:none;"></div>
     <div style="position:relative; width:1040px; max-width:100%; margin:0 auto; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.1); box-shadow:0 44px 100px -34px rgba(0,0,0,.92), 0 0 0 1px rgba(45,212,191,.1); background:#0a0c11;">
       <iframe src="observe-demo.html" title="o3 — live logs demo" onload="o3ForceDemoDark(this)" scrolling="no" loading="lazy" style="display:block; width:100%; height:672px; border:0; background:#0a0c11;"></iframe>
@@ -132,106 +232,68 @@
   </div>
 
   <!-- feature grid -->
-  <div id="features" style="max-width:1080px; margin:0 auto; padding:30px 40px 20px; scroll-margin-top:24px;">
-    <div style="text-align:center; margin-bottom:44px;">
-      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#2dd4bf; margin-bottom:12px;">Purpose-Built</div>
-      <h2 style="margin:0; font-size:36px; letter-spacing:-1px; font-weight:700; color:#f0f3f8;">Everything the Web UI Does — Faster</h2>
-    </div>
+  <div style="max-width:1080px; margin:0 auto; padding:0 40px 20px;">
     <div class="o3grid3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px;">
-
-      <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
-        <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg></div>
-        <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Native Performance</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">A Go core via Wails. Opens instantly, sips memory, and stays responsive over millions of events. No Electron bloat.</div>
-      </div>
 
       <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg></div>
         <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">SQL Query Editor</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Full syntax highlighting, field autocomplete, and history. Hit <b style="color:#cfd6e4;font-weight:600;font-family:'JetBrains Mono',monospace;">⌘↵</b> to run against any stream.</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Syntax highlighting and autocomplete that knows your stream's fields, in as many query tabs as you need. Hit <b style="color:#cfd6e4;font-weight:600;font-family:'JetBrains Mono',monospace;">⌘↵</b> to run.</div>
       </div>
 
       <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
-        <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Live Log Explorer</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Virtualized rows, level filters, and a JSON inspector drawer for every event. Scroll 400k+ results without a hitch.</div>
+        <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Results &amp; Inspector</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Paged results with a JSON inspector drawer for every event. Click any value to filter on it, exclude it, or aggregate by it.</div>
       </div>
 
       <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M9 19V5M14 19v-8M19 19v-5"/></svg></div>
         <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Interactive Histogram</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">See event volume at a glance and drag across the bars to narrow the time range — the query re-runs instantly.</div>
-      </div>
-
-      <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
-        <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4-9 4-9-4zM3 12l9 4 9-4M3 17l9 4 9-4"/></svg></div>
-        <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Multiple Connections</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Save every OpenObserve instance and org. Switch context from the titlebar — credentials stay on your machine.</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">See event volume at a glance, and drag across the bars to narrow the time range.</div>
       </div>
 
       <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v4h-7zM14 11h7v7h-7zM3 14h7v7H3z"/></svg></div>
         <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Streams &amp; Fields</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Browse streams with sizes, filter fields inline, and one-click any field into your query. <span style="color:#6b7282;">Metrics, Traces &amp; Dashboards coming soon.</span></div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Browse streams with their sizes, filter fields inline, and add any field to your query with one click.</div>
       </div>
 
-    </div>
-  </div>
+      <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
+        <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/></svg></div>
+        <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Metrics Explorer</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">PromQL range queries drawn as multi-series line charts, with legend toggles and a zoom brush.</div>
+      </div>
 
-  <!-- comparison -->
-  <div style="max-width:1080px; margin:0 auto; padding:70px 40px 20px;">
-    <div style="text-align:center; margin-bottom:40px;">
-      <h2 style="margin:0 0 10px; font-size:34px; letter-spacing:-1px; font-weight:700; color:#f0f3f8;">Why a Desktop App?</h2>
-      <p style="margin:0; font-size:16px; color:#8b93a3;">The same OpenObserve backend, without living in a browser tab.</p>
-    </div>
-    <div class="o3grid2" style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
-      <div style="padding:30px; border-radius:16px; background:linear-gradient(180deg,rgba(45,212,191,.06),transparent); border:1px solid rgba(45,212,191,.28);">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:22px;">
-          <span style="width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 30% 8%,#123039,#06121a);box-shadow:0 0 0 1px rgba(45,212,191,.22) inset;"><span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;letter-spacing:-1px;color:#5df0dd;">o3</span></span>
-          <span style="font-size:16px; font-weight:700; color:#f0f3f8;">The o3 App</span>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:15px;">
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">Launches instantly and restores your last session</span></div>
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">Native query tabs that never get lost in browser chrome</span></div>
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">Global keyboard shortcuts &amp; multi-window support</span></div>
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34e0a1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14.5px; color:#cfd6e4; line-height:1.5;">Connections stored locally &amp; encrypted by the OS</span></div>
-        </div>
+      <div class="o3card" style="padding:26px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
+        <div style="width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5df0dd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4-9 4-9-4zM3 12l9 4 9-4M3 17l9 4 9-4"/></svg></div>
+        <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Multiple Connections</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Keep every OpenObserve instance and org side by side. Each query tab is bound to its own context, and credentials stay in your OS keychain.</div>
       </div>
-      <div style="padding:30px; border-radius:16px; background:#0a0c10; border:1px solid rgba(255,255,255,.06);">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:22px;">
-          <span style="width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7b8496" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg></span>
-          <span style="font-size:16px; font-weight:700; color:#aeb6c4;">The Browser UI</span>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:15px;">
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6371" stroke-width="2.2" stroke-linecap="round" style="flex:none;margin-top:1px;"><path d="M18 6L6 18M6 6l12 12"/></svg><span style="font-size:14.5px; color:#7b8496; line-height:1.5;">Cold page loads and lost sessions on refresh</span></div>
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6371" stroke-width="2.2" stroke-linecap="round" style="flex:none;margin-top:1px;"><path d="M18 6L6 18M6 6l12 12"/></svg><span style="font-size:14.5px; color:#7b8496; line-height:1.5;">One more tab buried among fifty others</span></div>
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6371" stroke-width="2.2" stroke-linecap="round" style="flex:none;margin-top:1px;"><path d="M18 6L6 18M6 6l12 12"/></svg><span style="font-size:14.5px; color:#7b8496; line-height:1.5;">Shortcuts fight with the browser's own</span></div>
-          <div style="display:flex; gap:11px; align-items:flex-start;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6371" stroke-width="2.2" stroke-linecap="round" style="flex:none;margin-top:1px;"><path d="M18 6L6 18M6 6l12 12"/></svg><span style="font-size:14.5px; color:#7b8496; line-height:1.5;">Credentials re-entered in every new session</span></div>
-        </div>
-      </div>
+
     </div>
   </div>
 
   <!-- install steps -->
   <div style="max-width:1080px; margin:0 auto; padding:70px 40px 20px;">
     <div style="text-align:center; margin-bottom:44px;">
-      <h2 style="margin:0; font-size:34px; letter-spacing:-1px; font-weight:700; color:#f0f3f8;">Running in Under a Minute</h2>
+      <h2 style="margin:0; font-size:34px; letter-spacing:-1px; font-weight:700; color:#f0f3f8;">Three Steps to a First Query</h2>
     </div>
     <div class="o3grid3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px;">
       <div style="padding:28px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#2dd4bf; margin-bottom:16px;">01</div>
         <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Download &amp; Open</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Grab the build for your platform below. Open source and lightweight.</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Download the final build for your platform below, and open it.</div>
       </div>
       <div style="padding:28px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#2dd4bf; margin-bottom:16px;">02</div>
         <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Connect</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Paste your OpenObserve URL and API token. o3 tests reachability and lists your streams.</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Enter your OpenObserve URL, then sign in through your browser or with a password or API token. o3 tests the connection and lists your streams.</div>
       </div>
       <div style="padding:28px; border-radius:16px; background:#0b0d12; border:1px solid rgba(255,255,255,.07);">
         <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#2dd4bf; margin-bottom:16px;">03</div>
         <div style="font-size:16.5px; font-weight:600; color:#eef2f8; margin-bottom:8px;">Query</div>
-        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Write SQL, hit run, and explore. Your tabs and history persist across launches.</div>
+        <div style="font-size:14px; line-height:1.6; color:#8b93a3;">Pick a stream, write SQL, and hit run. o3 remembers your connections and the stream you last had open.</div>
       </div>
     </div>
   </div>
@@ -240,8 +302,8 @@
   <div id="download" style="max-width:1080px; margin:0 auto; padding:70px 40px 40px; scroll-margin-top:24px;">
     <div style="border-radius:20px; padding:48px 40px; text-align:center; background:
         radial-gradient(80% 120% at 50% 0%, rgba(45,212,191,.14) 0%, transparent 60%), #0a0c11; border:1px solid rgba(45,212,191,.18);">
-      <h2 style="margin:0 0 10px; font-size:32px; letter-spacing:-.8px; font-weight:700; color:#f4f7fb;">Download o3</h2>
-      <p style="margin:0 0 32px; font-size:15px; color:#8b93a3;">Free, open source, and available for every desktop.</p>
+      <h2 style="margin:0 0 10px; font-size:32px; letter-spacing:-.8px; font-weight:700; color:#f4f7fb;">Download the Final Release</h2>
+      <p style="margin:0 auto 32px; max-width:560px; font-size:15px; line-height:1.6; color:#8b93a3;">v0.3.0 is the final release of o3. It still works and remains free and open source, but it won't receive fixes or updates.</p>
       <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
         <a data-o3dl="darwin" href="https://github.com/AngelMsger/o3/releases/download/v0.3.0/o3-0.3.0-universal.dmg" rel="noopener" class="o3dl o3btn" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:8px; width:180px; padding:22px 16px; border-radius:14px; background:#0b0d12; border:1px solid rgba(255,255,255,.09); transition:all .16s ease;">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="#e6eaf2"><path d="M16.36 12.6c-.03-2.72 2.22-4.02 2.32-4.09-1.26-1.85-3.23-2.1-3.93-2.13-1.68-.17-3.27 .99-4.12 .99-.84 0-2.15-.96-3.54-.94-1.82 .03-3.5 1.06-4.44 2.69-1.89 3.28-.48 8.14 1.36 10.8 .9 1.3 1.98 2.76 3.38 2.71 1.36-.06 1.87-.88 3.51-.88 1.64 0 2.1 .88 3.53 .85 1.46-.03 2.38-1.33 3.27-2.63 1.03-1.51 1.46-2.97 1.48-3.05-.03-.01-2.84-1.09-2.87-4.31zM13.7 4.7c.75-.9 1.25-2.17 1.11-3.43-1.08 .04-2.38 .72-3.15 1.62-.69 .8-1.29 2.08-1.13 3.31 1.2 .1 2.42-.61 3.17-1.5z"/></svg>
@@ -276,7 +338,7 @@
         </span>
         <div style="flex:1;">
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
-            <h2 style="margin:0; font-size:24px; letter-spacing:-.5px; font-weight:700; color:#f4f7fb;">First launch on macOS</h2>
+            <h2 style="margin:0; font-size:24px; letter-spacing:-.5px; font-weight:700; color:#f4f7fb;">First Launch on macOS</h2>
             <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.4px; text-transform:uppercase; color:#e6c07b; padding:4px 9px; border-radius:7px; background:rgba(229,199,123,.09); border:1px solid rgba(229,199,123,.2);">Read this first</span>
           </div>
           <p style="margin:0; font-size:14.5px; line-height:1.65; color:#9aa3b2; max-width:720px;">o3 isn't signed with a paid Apple Developer certificate, so on first open macOS Gatekeeper will say <b style="color:#cfd6e4; font-weight:600;">"o3 can't be opened because Apple cannot check it for malicious software."</b> That's expected — the app is open source and unmodified. Here's how to open it anyway.</p>
@@ -317,7 +379,7 @@
         <div style="padding:28px 34px;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#5df0dd; padding:3px 8px; border-radius:6px; background:rgba(45,212,191,.09); border:1px solid rgba(45,212,191,.2);">B</span>
-            <span style="font-size:15px; font-weight:700; color:#eef2f8;">One Terminal command</span>
+            <span style="font-size:15px; font-weight:700; color:#eef2f8;">One Terminal Command</span>
             <span style="font-size:11.5px; color:#6b7282;">fastest</span>
           </div>
           <p style="margin:0 0 16px; font-size:14px; line-height:1.55; color:#b7bfcc;">Prefer the terminal? After moving o3 to <b style="color:#e6eaf2; font-weight:600;">Applications</b>, strip the quarantine flag and open it directly:</p>
@@ -343,7 +405,7 @@
       <!-- reassurance footer -->
       <div style="display:flex; gap:11px; align-items:center; padding:16px 34px; border-top:1px solid rgba(255,255,255,.06); background:rgba(255,255,255,.015);">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8fe8dc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M12 2l7 4v6c0 4-3 7.5-7 9-4-1.5-7-5-7-9V6z"/></svg>
-        <span style="font-size:13px; line-height:1.5; color:#8b93a3;">Every release is built in public from the source on GitHub — you can verify or build it yourself. Once notarization is in place, these steps go away.</span>
+        <span style="font-size:13px; line-height:1.5; color:#8b93a3;">Every release was built in public from the source on GitHub — you can verify it or build it yourself.</span>
       </div>
 
     </div>
@@ -354,10 +416,11 @@
   <div style="border-top:1px solid rgba(255,255,255,.06); margin-top:20px;">
     <div style="max-width:1080px; margin:0 auto; padding:30px 40px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
       <span style="width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 30% 8%,#123039,#06121a);box-shadow:0 0 0 1px rgba(45,212,191,.22) inset;"><span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:11px;letter-spacing:-.8px;color:#5df0dd;">o3</span></span>
-      <span style="font-size:13px; color:#6b7282;">o3 — a native client for OpenObserve. Not affiliated with OpenObserve, Inc.</span>
+      <span style="font-size:13px; color:#6b7282;">o3 — a native client for OpenObserve, archived in October 2026. Not affiliated with OpenObserve, Inc.</span>
       <span style="flex:1;"></span>
       <a href="https://github.com/AngelMsger/o3" target="_blank" rel="noopener" class="o3link" style="font-size:13px; color:#8b93a3; text-decoration:none;">GitHub</a>
       <a href="https://github.com/AngelMsger/o3/releases" target="_blank" rel="noopener" class="o3link" style="font-size:13px; color:#8b93a3; text-decoration:none; margin-left:22px;">Releases</a>
+      <a href="https://github.com/AngelMsger/openobserve-cli" target="_blank" rel="noopener" class="o3link" style="font-size:13px; color:#8b93a3; text-decoration:none; margin-left:22px;">openobserve-cli</a>
       <a href="https://github.com/AngelMsger/o3/blob/main/LICENSE" target="_blank" rel="noopener" class="o3link" style="font-size:13px; color:#8b93a3; text-decoration:none; margin-left:22px;">License</a>
     </div>
   </div>
@@ -491,6 +554,9 @@
     requestAnimationFrame(tick);
   })();
 
+  // v0.3.0 is the final release, so the baked snapshot below and the API now
+  // always agree; the fetch is kept so the page stays right if that ever changes.
+  //
   // Point the Download buttons straight at the current GitHub release asset for
   // each platform, and show the asset size on the button. The buttons ship with
   // the FALLBACK snapshot below baked into the HTML, so they are direct download

@@ -1518,7 +1518,7 @@ class Component extends DCLogic {
     const nav = this.NAV.map(([name, d]) => {
       const soon = name !== 'Logs';
       return {
-        name, title: soon ? name + ' \u00b7 Coming Soon' : name,
+        name, title: soon ? name + ' \u00b7 Not in This Demo' : name,
         soon,
         style: `position:relative;width:36px;height:36px;border-radius:9px;border:none;display:flex;align-items:center;justify-content:center;${soon ? 'background:transparent;color:var(--tx-14);cursor:default' : (st.navActive===name ? 'background:'+this.hexA(accent,0.14)+';color:'+accent+';cursor:pointer' : 'background:transparent;color:var(--tx-10);cursor:pointer')}`,
         onPick: soon ? (() => {}) : (() => this.setState({ navActive: name })),
